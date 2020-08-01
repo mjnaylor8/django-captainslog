@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+
+{% load static %}
+
+<html>
+<head>
+    <link href="{% static 'sitemaps/style.css' %}" rel="stylesheet" type="text/css">
+    <script src='https://api.mapbox.com/mapbox-gl-js/v0.44.2/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v0.44.2/mapbox-gl.css' rel='stylesheet' />
+    <title>Captains Log - Sitemaps</title>
+    {% block head %}
+    {% endblock %}
+</head>
+<body>
+    {% block content %}
+    {% endblock %}
+    <footer>
+        <p>&copy; Michael Naylor <script type="text/javascript">document.write( new Date().getFullYear() );</script></p>
+    </footer>
+    {% block script %}
+    {% endblock %}
+</body>
+</html>

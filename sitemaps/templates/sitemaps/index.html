@@ -1,0 +1,34 @@
+{% extends "sitemaps/base.html" %}
+{% load leaflet_tags %}
+{% leaflet_js plugins="ALL" %}
+{% leaflet_css plugins="ALL" %}
+
+{%  block head %}
+    {% leaflet_js %}
+    {% leaflet_css %}
+{%  endblock %}
+
+{% block content %}
+    {% leaflet_map "map" callback="mapInit" %}
+{% endblock %}
+
+{% block script %}
+
+    <script type="text/javascript">
+
+        function mapInit(map, options) {
+            L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={{mapbox_access_token}}', {
+            attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
+            tileSize: 512,
+            maxZoom: 18,
+            zoomOffset: -1,
+            id: 'mapbox/streets-v11',
+            }).addTo(map);
+
+            map.setView([47.61264, -122.32109], 11);
+
+            map.locate({setView: true, maxZoom: 15});
+            };
+
+    </script>   
+{% endblock %}
