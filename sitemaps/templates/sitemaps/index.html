@@ -6,7 +6,9 @@
 {%  block head %}
     {% leaflet_js %}
     {% leaflet_css %}
-{%  endblock %}
+        <!-- added from tutorial here https://maptimeboston.github.io/leaflet-intro/ -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+{% endblock %}
 
 {% block content %}
     {% leaflet_map "map" callback="mapInit" %}
@@ -17,16 +19,38 @@
     <script type="text/javascript">
 
         function mapInit(map, options) {
+            
+            //Initialise the map
+            map.setView([51.505, -0.09], 13);
+            
+            //Load tile layer - do this AFTER initialisation so z xy are set and the html does not give an error
             L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={{mapbox_access_token}}', {
             attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
+            id: 'mapbox/streets-v11',
+            zoom: 13,
             tileSize: 512,
             maxZoom: 18,
             zoomOffset: -1,
-            id: 'mapbox/streets-v11',
+            }).addTo(map);
+            
+            // bike lanes
+            L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+            {
+                maxZoom: 17,
+                minZoom: 9
             }).addTo(map);
 
-            map.setView([47.61264, -122.32109], 11);
-
+            //CL Locations
+            //$.getJSON("CL_GeoJSON.geojson",function(data){
+            // add GeoJSON layer to the map once the file is loaded
+            //L.geoJson(data).addTo(map);
+            //}); 
+            var layer = L.geoJson();
+            map.addLayer(layer);
+            $.getJSON("/static/data/CL_GeoJSON.geojson", function (data) {
+            
+                layer.addData(data);  
+            })      
             map.locate({setView: true, maxZoom: 15});
             };
 

@@ -7,6 +7,10 @@
     height: 800px;
 }
 
+#map { 
+    height: 220px; 
+}
+
 /* Resize the "display_raw" textbox */
 .django-leaflet-raw-textarea {
     width: 100%;

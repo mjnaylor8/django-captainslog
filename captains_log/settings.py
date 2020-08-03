@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    'djgeojson',
     'leaflet',
     'bootstrap4',
     'sitemaps'
@@ -138,15 +139,17 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR
 
 LEAFLET_CONFIG = {
     # conf here
     #'SPATIAL_EXTENT': (5.0, 44.0, 7.5, 46),
-    #'DEFAULT_ZOOM': 16,
-    #'DEFAULT_CENTER': (6.0, 45.0),
-    #'MIN_ZOOM': 3,
-    #'MAX_ZOOM': 18,
-    #'DEFAULT_PRECISION': 6,
+    'DEFAULT_ZOOM': 16,
+    'DEFAULT_CENTER': (51.505, -0.09),
+    'MIN_ZOOM': 3,
+    'MAX_ZOOM': 18,
+    'DEFAULT_PRECISION': 6,
     #'TILES': [],
     #'OVERLAYS': [],
     #'ATTRIBUTION_PREFIX': 'Powered by django-leaflet',

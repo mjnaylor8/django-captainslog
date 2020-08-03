@@ -21,7 +21,7 @@ from django.conf import settings
 mapbox_access_token = settings.MAPBOX_ACCESS_TOKEN
 
 urlpatterns = [
-    path('maps/', include('sitemaps.urls')),
+    path('maps/', include('sitemaps.urls', namespace = "sitemaps")),
     path('admin/', admin.site.urls),
 ]
 
