@@ -1,6 +1,6 @@
 .leaflet-container {  /* all maps */
-    width:  600px;
-    height: 400px;
+    width:  800px;
+    height: 600px;
 }
 
 #specialbigmap {
@@ -8,7 +8,7 @@
 }
 
 #map { 
-    height: 220px; 
+    height: 400px; 
 }
 
 /* Resize the "display_raw" textbox */

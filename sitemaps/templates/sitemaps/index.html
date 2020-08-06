@@ -21,19 +21,19 @@
         function mapInit(map, options) {
             
             //Initialise the map
-            map.setView([51.505, -0.09], 13);
+            map.setView([51.182250, -0.827610], 10);
             
             //Load tile layer - do this AFTER initialisation so z xy are set and the html does not give an error
             L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={{mapbox_access_token}}', {
             attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>',
             id: 'mapbox/streets-v11',
-            zoom: 13,
+            zoom: 10,
             tileSize: 512,
             maxZoom: 18,
             zoomOffset: -1,
             }).addTo(map);
             
-            // bike lanes
+            // Bike Lanes
             L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
             {
                 maxZoom: 17,
@@ -41,16 +41,30 @@
             }).addTo(map);
 
             //CL Locations
-            //$.getJSON("CL_GeoJSON.geojson",function(data){
-            // add GeoJSON layer to the map once the file is loaded
-            //L.geoJson(data).addTo(map);
-            //}); 
-            var layer = L.geoJson();
-            map.addLayer(layer);
             $.getJSON("/static/data/CL_GeoJSON.geojson", function (data) {
+                var CLIcon = L.icon({
+                    iconUrl: "/static/media/certified-location-sign.png",
+                    iconSize: [25,20]
+                });
             
-                layer.addData(data);  
-            })      
+            //$.getJSON("/static/data/UK_Boundaries.geojson", function (hoodData) {
+            //    L.geoJson(hoodData).addTo(map);
+            //})    
+            
+             //   layer.addData(data, {
+            L.geoJson(data, {     
+                    pointToLayer: function(feature,latlng){
+                        var marker = L.marker(latlng,{icon: CLIcon});
+                            var strparts = feature.properties.field_3.split(/\]|\[/)
+                            var cmac_link = 'https://www.caravanclub.co.uk/site-search/?q="' + strparts[2] + '"'
+                            var sfs_number = strparts[0].split(/S/)
+                            var sfs_link = 'https://www.searchforsites.co.uk/markerMobile.php?id=' + sfs_number[1]
+                            marker.bindPopup(feature.properties.field_3+ "<br/>" + "<a href='"+ sfs_link + "' + target='_blank'>" + sfs_number[1] + "</a>" + "<br/>" + "<a href='"+ cmac_link + "' +  target='_blank'>" + strparts[2] + "</a>");
+                        return marker;
+                    }
+                }).addTo(map);  
+            })
+              
             map.locate({setView: true, maxZoom: 15});
             };
 
