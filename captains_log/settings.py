@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'djgeojson',
     'leaflet',
     'bootstrap4',
+    'floppyforms',
+    'triplog',
     'sitemaps'
 ]
 
@@ -77,6 +79,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.static',
             ],
         },
     },
@@ -139,20 +142,28 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")
+]
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder'
+)
 
 LEAFLET_CONFIG = {
     # conf here
     #'SPATIAL_EXTENT': (5.0, 44.0, 7.5, 46),
     'DEFAULT_ZOOM': 16,
-    'DEFAULT_CENTER': (51.505, -0.09),
+    'DEFAULT_CENTER': (51.182250, -0.827610),
     'MIN_ZOOM': 3,
     'MAX_ZOOM': 18,
     'DEFAULT_PRECISION': 6,
     #'TILES': [],
+    #'TILES': [('Streets','https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token={{mapbox_access_token}}', {'attribution': '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>'}),('Outdoors','https://api.mapbox.com/styles/v1/mapbox/outdoors-v11/tiles/{z}/{x}/{y}?access_token={{mapbox_access_token}}', {'attribution': '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <strong><a href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a></strong>'})],
     #'OVERLAYS': [],
     #'ATTRIBUTION_PREFIX': 'Powered by django-leaflet',
-    #'SCALE': 'both',
-    #'MINIMAP': True,
+    'SCALE': 'both',
+    'MINIMAP': True,
+    #'PLUGINS': [],
 }
