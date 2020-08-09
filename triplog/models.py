@@ -1,18 +1,17 @@
 from django.db import models
 from django.contrib.gis.db import models
+from mapbox_location_field.spatial.models import SpatialLocationField
+from mapbox_location_field.models import AddressAutoHiddenField
 
 # Create your models here.
 
 class Site_Information(models.Model):
     name = models.CharField(max_length=256)
-    address_line1 = models.CharField(max_length=256)
-    address_line2 = models.CharField(max_length=256)
-    address_line3 = models.CharField(max_length=256)
-    address_code = models.CharField(max_length=256)
-    location = models.PointField()
+    address = AddressAutoHiddenField(null=True)
     email = models.CharField(max_length=256)
     phone_number = models.CharField(max_length=256)
-    location = models.PointField(null=True)
+    location = SpatialLocationField(null=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
         return str(self.name)

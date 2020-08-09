@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+
+
+
+<html>
+<head>
+    {% load static %}
+    {% load bootstrap4%}
+    {% bootstrap_css %}
+    {% load mapbox_location_field_tags %}
+    {% location_field_includes %}
+    {% include_jquery %}
+   
+    <title>Captains Log - Triplog</title>
+    {% block head %}
+    {% endblock %}
+</head>
+<body>
+    {% block content %}
+    {% endblock %}
+    <footer>
+        <p>&copy; Michael Naylor <script type="text/javascript">document.write( new Date().getFullYear() );</script></p>
+    </footer>
+    {% block script %}
+    {% endblock %}
+</body>
+</html>

@@ -18,13 +18,15 @@ from django.urls import path, include
 from django.views.generic import TemplateView
 from django.conf import settings
 from django.conf.urls.static import static
+mapbox_access_token = settings.MAPBOX_KEY
 
-mapbox_access_token = settings.MAPBOX_ACCESS_TOKEN
+
 
 urlpatterns = [
     path('maps/', include('sitemaps.urls', namespace = "sitemaps")),
     path('admin/', admin.site.urls),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path("", include("triplog.urls"))
+]
 
 
 
