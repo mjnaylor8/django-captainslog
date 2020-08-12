@@ -7,11 +7,21 @@ from mapbox_location_field.spatial.admin import SpatialMapAdmin
 
 #class Site_InformationAdminForm(ModelForm):
 #    class Meta:
-#        fields = "__all__"
 #        model = Site_Information
 
-#class Site_InformationAdmin (MapAdmin):
+#        fields = "__all__"
+#class Site_InformationAdmin ():
 #    form = Site_InformationAdminForm
 
-admin.site.register(Site_Information, SpatialMapAdmin)
-admin.site.register(Journey_Details)
+
+@admin.register(Site_Information)
+class Site_informationAdmin(SpatialMapAdmin):
+    list_display = ("name", "address", "location", "created_at")
+    search_fields = ("name", "location",)
+
+#admin.site.register(Site_informationAdmin, SpatialMapAdmin)
+
+
+@admin.register(Journey_Details)
+class Journey_DetailsAdmin(admin.ModelAdmin):
+    list_display = ("start_date", "travel_from", "travel_to", "created_date")
