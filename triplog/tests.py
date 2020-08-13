@@ -178,7 +178,7 @@ class Site_FacilitiesFactory(factory.django.DjangoModelFactory):
             'toilets',
             'ambience',
             'security',
-            'wi_fi',
+            'wifi',
             'tv_signal',
             'phone_signal_3G_4G',
             'pets',
@@ -196,7 +196,7 @@ class Site_FacilitiesFactory(factory.django.DjangoModelFactory):
     toilets = "Clean"
     ambience = "Peaceful"
     security = "Good"
-    wi_fi = "True"
+    wifi = "True"
     tv_signal = "Good"
     phone_signal_3G_4G = "Good"
     pets = "True"
@@ -231,8 +231,8 @@ class Site_FacilitiesTest(TestCase):
         self.assertEquals(only_facility.hook_up, '10A')
         self.assertEquals(only_facility.waste, 'On Pitch')
         self.assertEquals(only_facility.toilets, 'Clean')
-        self.assertEquals(only_facility.ambience, 'Good')
-        self.assertEquals(only_facility.wi_fi, 'True')
+        self.assertEquals(only_facility.ambience, 'Peaceful')
+        self.assertEquals(only_facility.wifi, 'True')
         self.assertEquals(only_facility.phone_signal_3G_4G, 'Good')
         self.assertEquals(only_facility.tv_signal, 'Good')
         self.assertEquals(only_facility.pets, 'True')

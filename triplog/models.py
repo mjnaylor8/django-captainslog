@@ -64,7 +64,7 @@ class Site_Facilities(models.Model):
     toilets = models.CharField(max_length=256,blank = True)
     ambience = models.CharField(max_length=256,blank = True)
     security  = models.CharField(max_length=256,blank = True)
-    wi_fi = models.CharField(max_length=256,blank = True)
+    wifi = models.CharField(max_length=256,blank = True)
     tv_signal  = models.CharField(max_length=256,blank = True)
     phone_signal_3G_4G = models.CharField(max_length=256,blank = True)
     pets = models.CharField(max_length=256,blank = True)
