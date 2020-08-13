@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, LiveServerTestCase, Client
 from django.utils import timezone
 import datetime
 from django.contrib.gis.geos import Point
@@ -24,23 +24,20 @@ class Site_InformationFactory(factory.django.DjangoModelFactory):
         model = Site_Information
         django_get_or_create = (
             'name',
-            'address_line1',
-            'address_line2',
-            'address_line3',
-            'address_code',
+            'address',
             'location',
             'email',
-            'phone_number'
+            'phone_number',
+            'created_at',
         )
        
     name = 'test site name'
-    address_line1 ='address line 1'
-    address_line2 ='address line 2'
-    address_line3 ='address line 3'
+    address ='address'
     location = FuzzyPoint()
     email  = 'fred.com'
-    address_code = 'address code'
+    address = 'address'
     phone_number = '1274-234'
+    created_at = timezone.now()
 
 class Site_InformationTest(TestCase):
     def test_create_site_information(self):
@@ -55,16 +52,19 @@ class Site_InformationTest(TestCase):
 
         # Check attributes
         self.assertEquals(only_site.name, 'test site name')
-        self.assertEquals(only_site.address_line1, 'address line 1')
-        self.assertEquals(only_site.address_line2, 'address line 2')
-        self.assertEquals(only_site.address_line3, 'address line 3')
-        self.assertEquals(only_site.address_code, 'address code')
+        self.assertEquals(only_site.address, 'address')
         self.assertEquals(only_site.phone_number, '1274-234')
-
+        self.assertEquals(only_site.phone_number, '1274-234')
+        self.assertEquals(only_site.created_at.hour, only_site.created_at.hour)
+        self.assertEquals(only_site.created_at.minute, only_site.created_at.minute)
+        self.assertEquals(only_site.created_at.second, only_site.created_at.second)
+        self.assertEquals(only_site.created_at.day, only_site.created_at.day)
+        self.assertEquals(only_site.created_at.month, only_site.created_at.month)
+        self.assertEquals(only_site.created_at.year, only_site.created_at.year)
 
 class Journey_DetailsFactory(factory.django.DjangoModelFactory):
     class Meta:
-        # Create Site information
+        # Create Journey Information
         model = Journey_Details
         django_get_or_create = (
             'start_date',
@@ -84,7 +84,8 @@ class Journey_DetailsFactory(factory.django.DjangoModelFactory):
             'edited_date',
             'star_rating',
             'would_return',
-            'notes'
+            'notes',
+            'destination',
         )
     start_date = datetime.date(2020, 7, 2)
     end_date = datetime.date(2020, 7, 3)
@@ -105,11 +106,15 @@ class Journey_DetailsFactory(factory.django.DjangoModelFactory):
     would_return = True
     notes = 'Nice Site'
 
+
 class Journey_DetailsTest(TestCase):
+    
     def test_create_journey_details(self):
+        site = Site_InformationFactory()
         # Create the journey_details
-        journey_details = Journey_DetailsFactory()
-        #In test will have nnow been added to the database and now need to test we 
+        journey_details = Journey_DetailsFactory(destination = site)
+
+        #In test will have now been added to the database and now need to test we 
         #can save OK and retrieve it
 
         all_journeys = Journey_Details.objects.all()
@@ -153,3 +158,100 @@ class Journey_DetailsTest(TestCase):
         self.assertEquals(only_journey.star_rating, 'Three')
         self.assertEquals(only_journey.would_return, True)
         self.assertEquals(only_journey.notes, 'Nice Site')   
+        self.assertEquals(only_journey.destination, site) 
+        self.assertEquals(only_journey.destination.name, 'test site name')
+
+
+
+
+class Site_FacilitiesFactory(factory.django.DjangoModelFactory):
+    class Meta:
+    # Create Site Facilities
+        model = Site_Facilities
+        django_get_or_create = (
+            'name',
+            'greeting',
+            'pitch_type',
+            'pitch_level',
+            'hook_up',
+            'waste',
+            'toilets',
+            'ambience',
+            'security',
+            'wi_fi',
+            'tv_signal',
+            'phone_signal_3G_4G',
+            'pets',
+            'children',
+            'laundry',
+            'cost_charges',
+            'cost_extras',
+            'cost_currency',
+        )
+    greeting = "Good"
+    pitch_type = "Grass"
+    pitch_level = "Level"
+    hook_up = "10A"
+    waste = "On Pitch"
+    toilets = "Clean"
+    ambience = "Peaceful"
+    security = "Good"
+    wi_fi = "True"
+    tv_signal = "Good"
+    phone_signal_3G_4G = "Good"
+    pets = "True"
+    children = "True"
+    laundry = "True"
+    cost_charges = 10.02
+    cost_extras = 0.20
+    cost_currency = "£"
+    created_date = timezone.now()
+    edited_date = timezone.now()
+
+
+class Site_FacilitiesTest(TestCase):
+    
+    def test_create_site_facilities(self):
+        site = Site_InformationFactory()
+        # Create the journey_details
+        site_facilities = Site_FacilitiesFactory(name = site)
+
+        #In test will have nnow been added to the database and now need to test we 
+        #can save OK and retrieve it
+
+        all_facilities = Site_Facilities.objects.all()
+        self.assertEquals(len(all_facilities),1)
+        only_facility = all_facilities[0]
+        self.assertEquals(only_facility, site_facilities)
+
+        # Check attributes 
+        self.assertEquals(only_facility.greeting, 'Good')
+        self.assertEquals(only_facility.pitch_type, 'Grass')
+        self.assertEquals(only_facility.pitch_level, 'Level')
+        self.assertEquals(only_facility.hook_up, '10A')
+        self.assertEquals(only_facility.waste, 'On Pitch')
+        self.assertEquals(only_facility.toilets, 'Clean')
+        self.assertEquals(only_facility.ambience, 'Good')
+        self.assertEquals(only_facility.wi_fi, 'True')
+        self.assertEquals(only_facility.phone_signal_3G_4G, 'Good')
+        self.assertEquals(only_facility.tv_signal, 'Good')
+        self.assertEquals(only_facility.pets, 'True')
+        self.assertEquals(only_facility.children, 'True')
+        self.assertEquals(only_facility.laundry, 'True')
+        self.assertEquals(only_facility.cost_charges, 10.02)
+        self.assertEquals(only_facility.cost_extras, 0.20)
+        self.assertEquals(only_facility.cost_currency,  '£')
+        self.assertEquals(only_facility.name, site) 
+        self.assertEquals(only_facility.name.name, 'test site name')
+        self.assertEquals(only_facility.created_date.day, site_facilities.created_date.day)
+        self.assertEquals(only_facility.created_date.month, site_facilities.created_date.month)
+        self.assertEquals(only_facility.created_date.year, site_facilities.created_date.year)
+        self.assertEquals(only_facility.created_date.hour, site_facilities.created_date.hour)
+        self.assertEquals(only_facility.created_date.minute, site_facilities.created_date.minute)
+        self.assertEquals(only_facility.created_date.second, site_facilities.created_date.second)       
+        self.assertEquals(only_facility.edited_date.day, site_facilities.edited_date.day)
+        self.assertEquals(only_facility.edited_date.month, site_facilities.edited_date.month)
+        self.assertEquals(only_facility.edited_date.year, site_facilities.edited_date.year)
+        self.assertEquals(only_facility.edited_date.hour, site_facilities.edited_date.hour)
+        self.assertEquals(only_facility.edited_date.minute, site_facilities.edited_date.minute)
+        self.assertEquals(only_facility.edited_date.second, site_facilities.edited_date.second)
