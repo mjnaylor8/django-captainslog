@@ -196,12 +196,12 @@ class Site_FacilitiesFactory(factory.django.DjangoModelFactory):
     toilets = "Clean"
     ambience = "Peaceful"
     security = "Good"
-    wifi = "True"
+    wifi = True
     tv_signal = "Good"
     phone_signal_3G_4G = "Good"
-    pets = "True"
-    children = "True"
-    laundry = "True"
+    pets = True
+    children = True
+    laundry = True
     cost_charges = 10.02
     cost_extras = 0.20
     cost_currency = "£"
@@ -232,12 +232,12 @@ class Site_FacilitiesTest(TestCase):
         self.assertEquals(only_facility.waste, 'On Pitch')
         self.assertEquals(only_facility.toilets, 'Clean')
         self.assertEquals(only_facility.ambience, 'Peaceful')
-        self.assertEquals(only_facility.wifi, 'True')
+        self.assertEquals(only_facility.wifi, True)
         self.assertEquals(only_facility.phone_signal_3G_4G, 'Good')
         self.assertEquals(only_facility.tv_signal, 'Good')
-        self.assertEquals(only_facility.pets, 'True')
-        self.assertEquals(only_facility.children, 'True')
-        self.assertEquals(only_facility.laundry, 'True')
+        self.assertEquals(only_facility.pets, True)
+        self.assertEquals(only_facility.children, True)
+        self.assertEquals(only_facility.laundry, True)
         self.assertEquals(only_facility.cost_charges, 10.02)
         self.assertEquals(only_facility.cost_extras, 0.20)
         self.assertEquals(only_facility.cost_currency,  '£')
