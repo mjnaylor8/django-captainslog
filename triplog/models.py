@@ -18,6 +18,10 @@ class Site_Information(models.Model):
 
 
 class Journey_Details(models.Model):
+    true_false_choices = [
+        (True, "Yes"),
+        (False, "No")
+    ]
     ONESTAR = '*'
     TWOSTAR = '**'
     THREESTAR = '***'
@@ -46,7 +50,7 @@ class Journey_Details(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     edited_date = models.DateTimeField(auto_now_add=True)
     star_rating = models.CharField(choices = STAR_RATING_CHOICES, max_length=256)
-    would_return = models.BooleanField(blank = True)
+    would_return = models.BooleanField(blank = True, choices = true_false_choices)
     notes = models.CharField(max_length=1024,blank = True)
     destination = models.ForeignKey(Site_Information,models.SET_NULL,null=True)
 
@@ -67,7 +71,7 @@ class Site_Facilities(models.Model):
     six_amp = "6A"
     ten_amp = "10A"
     sixteen_amp = "16A"
-    on_pitch = "ON Pitch"
+    on_pitch = "On Pitch"
     close_by = "Close By"
     miles_away = "Miles Away"
     none = "None"
@@ -94,21 +98,64 @@ class Site_Facilities(models.Model):
         (steep_slope, "Steep Slope"),
         (impossible_slope, "Impossible Slope"),
     ]
+    hook_up_choices = [
+        (six_amp, "6A"),
+        (ten_amp, "10A"),
+        (sixteen_amp, "16A"),
+    ]
+
+    waste_choices = [
+        (on_pitch, "On Pitch"),
+        (close_by, "Close By"),
+        (miles_away, "Miles Away"),
+    ]
+
+    toilet_choices = [
+        (none, "None"),
+        (clean, "Clean"),
+        (dirty, "Dirty"),
+        (dont_go_there, "Don't Go There"),
+    ]
+
+    ambience_choices = [
+        (peaceful, "Peaceful"),
+        (okay, "OK"),
+        (loud_lively, "Loud / Lively"),
+    ]
+
+    security_choices = [
+        (good, "Good"),
+        (poor, "Poor"),
+    ]
+
+    tv_signal_choices = [
+        (good, "Good"),
+        (poor, "Poor"),
+    ]
+    phone_signal_3G_4G_choices = [
+        (good, "Good"),
+        (poor, "Poor"),
+    ]
+
+    true_false_choices = [
+        (True, "Yes"),
+        (False, "No")
+    ]
     name = models.ForeignKey(Site_Information, on_delete=models.CASCADE)
     greeting = models.CharField(max_length=256,blank = True, choices=greeting_choices)
     pitch_type = models.CharField(max_length=256,blank = True, choices=pitch_levels_choices)
     pitch_level = models.CharField(max_length=256,blank = True, choices = pitch_levels_choices)
-    hook_up = models.CharField(max_length=256,blank = True)
-    waste = models.CharField(max_length=256,blank = True)
-    toilets = models.CharField(max_length=256,blank = True)
-    ambience = models.CharField(max_length=256,blank = True)
-    security  = models.CharField(max_length=256,blank = True)
-    wifi = models.BooleanField(blank = True)
-    tv_signal  = models.CharField(max_length=256,blank = True)
-    phone_signal_3G_4G = models.CharField(max_length=256,blank = True)
-    pets = models.BooleanField(blank = True)
-    children = models.BooleanField(blank = True)
-    laundry = models.BooleanField(blank = True)
+    hook_up = models.CharField(max_length=256,blank = True, choices = hook_up_choices)
+    waste = models.CharField(max_length=256,blank = True, choices = waste_choices)
+    toilets = models.CharField(max_length=256,blank = True, choices = toilet_choices)
+    ambience = models.CharField(max_length=256,blank = True, choices = ambience_choices)
+    security  = models.CharField(max_length=256,blank = True, choices = security_choices)
+    wifi = models.BooleanField(blank = True, choices = true_false_choices)
+    tv_signal  = models.CharField(max_length=256,blank = True, choices = tv_signal_choices)
+    phone_signal_3G_4G = models.CharField(max_length=256,blank = True, choices = phone_signal_3G_4G_choices)
+    pets = models.BooleanField(blank = True, choices = true_false_choices)
+    children = models.BooleanField(blank = True, choices = true_false_choices)
+    laundry = models.BooleanField(blank = True, choices = true_false_choices)
     cost_charges = models.FloatField(blank = True)
     cost_extras = models.FloatField(blank = True)
     cost_currency = models.CharField(max_length=3,blank = True)

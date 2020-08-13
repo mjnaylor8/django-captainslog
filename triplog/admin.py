@@ -17,11 +17,18 @@ from mapbox_location_field.spatial.admin import SpatialMapAdmin
 @admin.register(Site_Information)
 class Site_informationAdmin(SpatialMapAdmin):
     list_display = ("name", "address", "location", "created_at")
-    search_fields = ("name", "location",)
+    ordering = ("name",)
+    search_fields = ("name",)
 
-#admin.site.register(Site_informationAdmin, SpatialMapAdmin)
 
 
 @admin.register(Journey_Details)
 class Journey_DetailsAdmin(admin.ModelAdmin):
     list_display = ("start_date", "travel_from", "travel_to", "created_date")
+    search_fields = ("start_date",)
+
+#@admin.register(Site_Facilities)
+class Site_FacilitiesAdmin(admin.ModelAdmin):
+    pass
+
+admin.site.register(Site_Facilities, Site_FacilitiesAdmin)

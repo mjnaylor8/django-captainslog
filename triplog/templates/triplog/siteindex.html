@@ -1,7 +1,7 @@
 {% extends "triplog/base.html" %}
 {% block content %}
-    <a class="btn btn-success text-ligt btn-lg btn-block" href="{% url 'add' %}">ADD NEW SITE</a>
-    <h2 class="display-5">Site_Informations:</h2>
+    <a class="btn btn-success text-ligt btn-lg btn-block" href="{% url 'addsite' %}">Add New Site</a>
+    <h2 class="display-5">Site_Information:</h2>
     {% for site_information in object_list %}
         <div class="row" style="margin:5px;">
             <div class="col"> {{ site_information.name}}</div>
@@ -9,7 +9,7 @@
             <div class="col"> {{ site_information.address}}</div>
             <div class="col"> {{ site_information.email}}</div>
             <div class="col"> {{ site_information.phone_number}}</div>
-            <div class="col"><a href="{% url "change" site_information.id %}" class="btn btn-secondary">CHANGE</a></div>
+            <div class="col"><a href="{% url "changesite" site_information.id %}" class="btn btn-secondary">CHANGE</a></div>
         </div>
     {% endfor %}
 {% endblock %}

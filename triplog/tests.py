@@ -8,6 +8,7 @@ import random
 from triplog.models import Journey_Details
 from triplog.models import Site_Information
 from triplog.models import Site_Facilities
+from triplog.views import Journey_DetailView
 from django.test import RequestFactory
 from django.urls import reverse
 
@@ -255,3 +256,16 @@ class Site_FacilitiesTest(TestCase):
         self.assertEquals(only_facility.edited_date.hour, site_facilities.edited_date.hour)
         self.assertEquals(only_facility.edited_date.minute, site_facilities.edited_date.minute)
         self.assertEquals(only_facility.edited_date.second, site_facilities.edited_date.second)
+
+class Journey_DetailViewTest(TestCase):
+    """
+    Test Journey_DetailView
+    """
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_get(self):
+        request = self.factory.get(reverse('journey'))
+        response = Journey_DetailView.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('triplog/journey.html')
