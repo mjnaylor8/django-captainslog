@@ -1,15 +1,20 @@
 {% extends "triplog/base.html" %}
+
+{% block title %}
+    List of sites
+{% endblock %}
+
 {% block content %}
     <a class="btn btn-success text-ligt btn-lg btn-block" href="{% url 'addsite' %}">Add New Site</a>
-    <h2 class="display-5">Site_Information:</h2>
-    {% for site_information in object_list %}
+    <h2 class="display-5">SITEINFORMATION:</h2>
+    {% for SITEINFORMATION in object_list %}
         <div class="row" style="margin:5px;">
-            <div class="col"> {{ site_information.name}}</div>
-            <div class="col"> {{ site_information.location}}</div>
-            <div class="col"> {{ site_information.address}}</div>
-            <div class="col"> {{ site_information.email}}</div>
-            <div class="col"> {{ site_information.phone_number}}</div>
-            <div class="col"><a href="{% url "changesite" site_information.id %}" class="btn btn-secondary">CHANGE</a></div>
+            <div class="col"> {{ SITEINFORMATION.name}}</div>
+            <div class="col"> {{ SITEINFORMATION.location}}</div>
+            <div class="col"> {{ SITEINFORMATION.address}}</div>
+            <div class="col"> {{ SITEINFORMATION.email}}</div>
+            <div class="col"> {{ SITEINFORMATION.phone_number}}</div>
+            <div class="col"><a href="{% url 'changesite' SITEINFORMATION.pk %}" class="btn btn-secondary">CHANGE</a></div>
         </div>
     {% endfor %}
 {% endblock %}

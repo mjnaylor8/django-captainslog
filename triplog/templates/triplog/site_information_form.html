@@ -1,10 +1,16 @@
 {% extends "triplog/base.html" %}
+
 {% load bootstrap4 %}
+
+{% block title %}
+    Enter the details of a new site
+{% endblock %}
+
 {% block content %}
     <form method="post">
         {% csrf_token %}
-        {% bootstrap_form form %}
+        {% bootstrap_form form%}
         <input class="btn btn-primary text-light btn-lg" type="submit" value="submit">
     </form>
-    {{ form.media }}
+    {{form.media}}
 {% endblock %}

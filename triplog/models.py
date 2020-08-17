@@ -1,23 +1,22 @@
-from django.db import models
 from django.contrib.gis.db import models
 from mapbox_location_field.spatial.models import SpatialLocationField
 from mapbox_location_field.models import AddressAutoHiddenField
 
 # Create your models here.
 
-class Site_Information(models.Model):
+class SITEINFORMATION(models.Model):
     name = models.CharField(max_length=256)
     address = AddressAutoHiddenField()
     email = models.CharField(max_length=256, blank=True)
     phone_number = models.CharField(max_length=256, blank=True)
-    location = SpatialLocationField(null=True, blank = True)
+    location = SpatialLocationField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return str(self.name)
 
 
-class Journey_Details(models.Model):
+class JOURNEYDETAILS(models.Model):
     true_false_choices = [
         (True, "Yes"),
         (False, "No")
@@ -35,29 +34,29 @@ class Journey_Details(models.Model):
         (FIVESTAR, "Five Star"),
     ]
     start_date = models.DateField()
-    end_date = models.DateField(blank=True)
+    end_date = models.DateField(blank=True, null=True)
     weather = models.CharField(max_length=256, blank=True)
     travel_from = models.CharField(max_length=256)
     travel_to = models.CharField(max_length=256, blank=True)
-    start_time = models.TimeField(blank = True)
-    end_time = models.TimeField(blank = True)
-    duration = models.TimeField(blank = True)
+    start_time = models.TimeField(blank=True, null=True)
+    end_time = models.TimeField(blank=True, null=True)
+    duration = models.TimeField(blank=True, null=True)
     mileage_start = models.FloatField()
-    mileage_end = models.FloatField(blank = True)
-    distance = models.FloatField(blank = True)
-    toll_charges = models.FloatField(blank = True)
-    toll_currency = models.CharField(max_length=3,blank = True)
-    created_date = models.DateTimeField(auto_now_add=True)
-    edited_date = models.DateTimeField(auto_now_add=True)
-    star_rating = models.CharField(choices = STAR_RATING_CHOICES, max_length=256)
-    would_return = models.BooleanField(blank = True, choices = true_false_choices)
-    notes = models.CharField(max_length=1024,blank = True)
-    destination = models.ForeignKey(Site_Information,models.SET_NULL,null=True)
+    mileage_end = models.FloatField(blank=True, null=True)
+    distance = models.FloatField(blank=True, null=True)
+    toll_charges = models.FloatField(blank=True, null=True)
+    toll_currency = models.CharField(max_length=3, blank=True)
+    created_date = models.DateTimeField(auto_now_add=True, null=True)
+    edited_date = models.DateTimeField(auto_now_add=True, null=True)
+    star_rating = models.CharField(choices=STAR_RATING_CHOICES, max_length=256)
+    would_return = models.BooleanField(blank=True, choices=true_false_choices, null=True)
+    notes = models.CharField(max_length=1024, blank=True, null=True)
+    destination = models.ForeignKey(SITEINFORMATION, models.SET_NULL, null=True)
 
     def __str__(self):
         return str('%s - %s - %s - %s' % (self.start_date, self.start_time, self.end_date, self.end_time))
 
-class Site_Facilities(models.Model):
+class SITEFACILITIES(models.Model):
     excellent = "Excellent"
     good = "Good"
     indifferent = "Indifferent"
@@ -141,24 +140,24 @@ class Site_Facilities(models.Model):
         (True, "Yes"),
         (False, "No")
     ]
-    name = models.ForeignKey(Site_Information, on_delete=models.CASCADE)
-    greeting = models.CharField(max_length=256,blank = True, choices=greeting_choices)
-    pitch_type = models.CharField(max_length=256,blank = True, choices=pitch_levels_choices)
-    pitch_level = models.CharField(max_length=256,blank = True, choices = pitch_levels_choices)
-    hook_up = models.CharField(max_length=256,blank = True, choices = hook_up_choices)
-    waste = models.CharField(max_length=256,blank = True, choices = waste_choices)
-    toilets = models.CharField(max_length=256,blank = True, choices = toilet_choices)
-    ambience = models.CharField(max_length=256,blank = True, choices = ambience_choices)
-    security  = models.CharField(max_length=256,blank = True, choices = security_choices)
-    wifi = models.BooleanField(blank = True, choices = true_false_choices)
-    tv_signal  = models.CharField(max_length=256,blank = True, choices = tv_signal_choices)
-    phone_signal_3G_4G = models.CharField(max_length=256,blank = True, choices = phone_signal_3G_4G_choices)
-    pets = models.BooleanField(blank = True, choices = true_false_choices)
-    children = models.BooleanField(blank = True, choices = true_false_choices)
-    laundry = models.BooleanField(blank = True, choices = true_false_choices)
-    cost_charges = models.FloatField(blank = True)
-    cost_extras = models.FloatField(blank = True)
-    cost_currency = models.CharField(max_length=3,blank = True)
+    name = models.ForeignKey(SITEINFORMATION, on_delete=models.CASCADE)
+    greeting = models.CharField(max_length=256, blank=True, choices=greeting_choices)
+    pitch_type = models.CharField(max_length=256, blank=True, choices=pitch_levels_choices)
+    pitch_level = models.CharField(max_length=256, blank=True, choices=pitch_levels_choices)
+    hook_up = models.CharField(max_length=256, blank=True, choices=hook_up_choices)
+    waste = models.CharField(max_length=256, blank=True, choices=waste_choices)
+    toilets = models.CharField(max_length=256, blank=True, choices=toilet_choices)
+    ambience = models.CharField(max_length=256, blank=True, choices=ambience_choices)
+    security = models.CharField(max_length=256, blank=True, choices=security_choices)
+    wifi = models.BooleanField(blank=True, choices=true_false_choices)
+    tv_signal = models.CharField(max_length=256, blank=True, choices=tv_signal_choices)
+    phone_signal_3G_4G = models.CharField(max_length=256, blank=True, choices=phone_signal_3G_4G_choices)
+    pets = models.BooleanField(blank=True, choices=true_false_choices)
+    children = models.BooleanField(blank=True, choices=true_false_choices)
+    laundry = models.BooleanField(blank=True, choices=true_false_choices)
+    cost_charges = models.FloatField(blank=True)
+    cost_extras = models.FloatField(blank=True)
+    cost_currency = models.CharField(max_length=3, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
     edited_date = models.DateTimeField(auto_now_add=True)
 

@@ -1,27 +1,47 @@
 <!DOCTYPE html>
 
-
-
-<html>
+<html lang="en">
 <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width-device-width, initial-scale=1, shrink-to-fit=no">
+
     {% load static %}
+    {% load crispy_forms_tags %}
     {% load bootstrap4%}
     {% bootstrap_css %}
     {% load mapbox_location_field_tags %}
     {% location_field_includes %}
     {% include_jquery %}
    
-    <title>Captains Log - Triplog</title>
     {% block head %}
+    <title>Captains Log - Triplog</title>
     {% endblock %}
 </head>
 <body>
-    {% block content %}
+    {% block bootstrap4_content %}
+        <div class="container-fluid p-3 my-3 bg-dark text-white">
+            <div class="row justify-content-centre"></div>
+                <div class="col-8">
+                    <h1 class="mt-2"> {% block title %}(no title){% endblock %}</h1>
+                    <p>
+                        <a href="{% url 'addjourney' %}">add journey</a>
+                        <a href="{% url 'addsite' %}">add site</a>
+                        <a href="{% url 'siteindex' %}">siteindex</a>
+                        <a href="{% url 'journeyindex' %}">journey index</a>
+                    </p>
+                </div>
+            </div>
+
+            {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
+            {% block content %}(no content)
+            {% endblock %}
+        </div>
     {% endblock %}
     <footer>
         <p>&copy; Michael Naylor <script type="text/javascript">document.write( new Date().getFullYear() );</script></p>
     </footer>
     {% block script %}
     {% endblock %}
+
 </body>
 </html>

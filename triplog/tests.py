@@ -5,10 +5,10 @@ from django.contrib.gis.geos import Point
 from factory.fuzzy import BaseFuzzyAttribute
 import factory.django
 import random
-from triplog.models import Journey_Details
-from triplog.models import Site_Information
-from triplog.models import Site_Facilities
-from triplog.views import Journey_DetailView
+from triplog.models import JOURNEYDETAILS
+from triplog.models import SITEINFORMATION
+from triplog.models import SITEFACILITIES
+from triplog.views import JOURNEYDETAILSView
 from django.test import RequestFactory
 from django.urls import reverse
 
@@ -19,10 +19,10 @@ class FuzzyPoint(BaseFuzzyAttribute):
         return Point(random.uniform(-180.0, 180.0),
                      random.uniform(-90.0,90.0))
 
-class Site_InformationFactory(factory.django.DjangoModelFactory):
+class SITEINFORMATIONFactory(factory.django.DjangoModelFactory):
     class Meta:
         # Create Site information
-        model = Site_Information
+        model = SITEINFORMATION
         django_get_or_create = (
             'name',
             'address',
@@ -40,13 +40,13 @@ class Site_InformationFactory(factory.django.DjangoModelFactory):
     phone_number = '1274-234'
     created_at = timezone.now()
 
-class Site_InformationTest(TestCase):
+class SITEINFORMATIONTest(TestCase):
     def test_create_site_information(self):
         #create the site
-        site_information = Site_InformationFactory()
+        site_information = SITEINFORMATIONFactory()
 
         # checks
-        all_sites = Site_Information.objects.all()
+        all_sites = SITEINFORMATION.objects.all()
         self.assertEquals(len(all_sites),1)
         only_site = all_sites[0]
         self.assertEquals(only_site, site_information)
@@ -63,10 +63,10 @@ class Site_InformationTest(TestCase):
         self.assertEquals(only_site.created_at.month, only_site.created_at.month)
         self.assertEquals(only_site.created_at.year, only_site.created_at.year)
 
-class Journey_DetailsFactory(factory.django.DjangoModelFactory):
+class JOURNEYDETAILSFactory(factory.django.DjangoModelFactory):
     class Meta:
         # Create Journey Information
-        model = Journey_Details
+        model = JOURNEYDETAILS
         django_get_or_create = (
             'start_date',
             'end_date',
@@ -108,17 +108,17 @@ class Journey_DetailsFactory(factory.django.DjangoModelFactory):
     notes = 'Nice Site'
 
 
-class Journey_DetailsTest(TestCase):
+class JOURNEYDETAILSTest(TestCase):
     
     def test_create_journey_details(self):
-        site = Site_InformationFactory()
+        site = SITEINFORMATIONFactory()
         # Create the journey_details
-        journey_details = Journey_DetailsFactory(destination = site)
+        journey_details = JOURNEYDETAILSFactory(destination = site)
 
         #In test will have now been added to the database and now need to test we 
         #can save OK and retrieve it
 
-        all_journeys = Journey_Details.objects.all()
+        all_journeys = JOURNEYDETAILS.objects.all()
         self.assertEquals(len(all_journeys),1)
         only_journey = all_journeys[0]
         self.assertEquals(only_journey, journey_details)
@@ -165,10 +165,10 @@ class Journey_DetailsTest(TestCase):
 
 
 
-class Site_FacilitiesFactory(factory.django.DjangoModelFactory):
+class SITEFACILITIESFactory(factory.django.DjangoModelFactory):
     class Meta:
     # Create Site Facilities
-        model = Site_Facilities
+        model = SITEFACILITIES
         django_get_or_create = (
             'name',
             'greeting',
@@ -210,17 +210,17 @@ class Site_FacilitiesFactory(factory.django.DjangoModelFactory):
     edited_date = timezone.now()
 
 
-class Site_FacilitiesTest(TestCase):
+class SITEFACILITIESTest(TestCase):
     
     def test_create_site_facilities(self):
-        site = Site_InformationFactory()
+        site = SITEINFORMATIONFactory()
         # Create the journey_details
-        site_facilities = Site_FacilitiesFactory(name = site)
+        site_facilities = SITEFACILITIESFactory(name = site)
 
         #In test will have nnow been added to the database and now need to test we 
         #can save OK and retrieve it
 
-        all_facilities = Site_Facilities.objects.all()
+        all_facilities = SITEFACILITIES.objects.all()
         self.assertEquals(len(all_facilities),1)
         only_facility = all_facilities[0]
         self.assertEquals(only_facility, site_facilities)
@@ -257,7 +257,7 @@ class Site_FacilitiesTest(TestCase):
         self.assertEquals(only_facility.edited_date.minute, site_facilities.edited_date.minute)
         self.assertEquals(only_facility.edited_date.second, site_facilities.edited_date.second)
 
-class Journey_DetailViewTest(TestCase):
+class JOURNEYDETAILSViewTest(TestCase):
     """
     Test Journey_DetailView
     """
@@ -265,7 +265,7 @@ class Journey_DetailViewTest(TestCase):
         self.factory = RequestFactory()
 
     def test_get(self):
-        request = self.factory.get(reverse('journey'))
-        response = Journey_DetailView.as_view()(request)
+        request = self.factory.get(reverse('journeyindex'))
+        response = JOURNEYDETAILSView.as_view()(request)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed('triplog/journey.html')
+        self.assertTemplateUsed('triplog/journey_index.html')

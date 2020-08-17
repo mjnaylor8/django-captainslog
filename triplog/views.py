@@ -1,44 +1,44 @@
-from django.shortcuts import render
+
 
 # Create your views here.
-from django.views.generic import  View, CreateView, UpdateView, ListView
+from django.views.generic import CreateView, UpdateView, ListView, FormView
 
-from .models import Site_Information, Journey_Details
+from .models import SITEINFORMATION, JOURNEYDETAILS
 
 
-class AddSite_InformationView(CreateView):
-    model = Site_Information
+class AddSITEINFORMATIONView(CreateView):
+    model = SITEINFORMATION
     template_name = "triplog/site_information_form.html"
     success_url = "/siteindex/"
-    fields = ("location", "address",)
+    fields = ("name", "location", "address",)
 
 
-class ChangeSite_InformationView(UpdateView):
-    model = Site_Information
+class ChangeSITEINFORMATIONView(UpdateView):
+    model = SITEINFORMATION
     template_name = "triplog/site_information_form.html"
     success_url = "/siteindex/"
-    fields = ("location", "address",)
+    fields = ("name", "location", "address",)
 
 
-class Site_InformationView(ListView):
-    model = Site_Information
+class SITEINFORMATIONView(ListView):
+    model = SITEINFORMATION
     template_name = "triplog/siteindex.html"
     ordering = ["-created_at", ]
 
-class Journey_DetailsView(ListView):
-    model = Journey_Details
+class JOURNEYDETAILSView(ListView):
+    model = JOURNEYDETAILS
     template_name = "triplog/journeyindex.html"
     success_url = "/journeyindex/"
     ordering = ["-start_date",]
 
-class AddJourney_DetailsView(CreateView):
-    model = Journey_Details
+class AddJOURNEYDETAILSView(CreateView):
+    model = JOURNEYDETAILS
     template_name = "triplog/journey_details_form.html"
     success_url = "/journeyindex/"
-    fields = "__all__" 
+    fields = "__all__"
 
-class ChangeJourney_DetailsView(UpdateView):
-    model = Journey_Details
+class ChangeJOURNEYDETAILSView(UpdateView):
+    model = JOURNEYDETAILS
     template_name = "triplog/journey_details_form.html"
     success_url = "/journeyindex/"
-    fields = "__all__"    
+    fields = "__all__"
