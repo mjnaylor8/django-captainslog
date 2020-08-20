@@ -3,12 +3,19 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width-device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" integrity="sha256-gvEnj2axkqIj4wbYhPjbWV7zttgpzBVEgHub9AAZQD4=" crossorigin="anonymous" />
 
     {% load static %}
     {% load crispy_forms_tags %}
-    {% load bootstrap4%}
+    
+    {# Load the tag library #}
+    {% load bootstrap4 %}
+
+    {# Load CSS and JavaScript #}
     {% bootstrap_css %}
+    {% bootstrap_javascript jquery='full' %}
+
     {% load mapbox_location_field_tags %}
     {% location_field_includes %}
     {% include_jquery %}
@@ -19,24 +26,36 @@
 </head>
 <body>
     {% block bootstrap4_content %}
-        <div class="container-fluid p-3 my-3 bg-dark text-white">
-            <div class="row justify-content-centre"></div>
-                <div class="col-8">
-                    <h1 class="mt-2"> {% block title %}(no title){% endblock %}</h1>
-                    <p>
-                        <a href="{% url 'addjourney' %}">add journey</a>
-                        <a href="{% url 'addsite' %}">add site</a>
-                        <a href="{% url 'siteindex' %}">siteindex</a>
-                        <a href="{% url 'journeyindex' %}">journey index</a>
-                    </p>
-                </div>
+        <div class="container-fluid p-2 my-2 bg-dark text-white">
+            <!--Use .container-fluid for a full width container, spanning the entire width of the viewport.-->
+            <!--padding (p) 2 and margins (m) 2  (y) top and bottom Dark background with white text -->
+            <div class="col-8">
+                <nav class="navbar navbar-expand-xl navbar-dark bg-dark">
+                    <!--<a class="navbar-brand" href="#">Captain's Log</a>-->
+                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                      </button>
+              
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav">
+                            <!-- mr-auto - margin right -->
+                            <li class="nav-item"><a class="nav-link" href="{% url 'journeyindex' %}">Journey Index <span class="sr-only">(current)</span></a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'addjourney' %}">Add Journey</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'addsite' %}">Add Site</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{% url 'siteindex' %}">Site Index</a></li>
+                      </ul>
+                    </div>
+                  </nav>
+                <div class=ml-4>  <h2>{% block title %}(no title){% endblock %}</h2> </div>
             </div>
-
-            {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
-            {% block content %}(no content)
-            {% endblock %}
         </div>
-    {% endblock %}
+        <div class="container-fluid">
+            <div class="col-8">
+                {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
+                {% block content %}(no content){% endblock %}
+            </div>
+        </div>
+    {% endblock bootstrap4_content%}
     <footer>
         <p>&copy; Michael Naylor <script type="text/javascript">document.write( new Date().getFullYear() );</script></p>
     </footer>

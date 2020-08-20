@@ -5,15 +5,15 @@
 {% endblock %}
 
 {% block content %}
-    <a class="btn btn-success text-ligt btn-lg btn-block" href="{% url 'addjourney' %}">Add New Journey</a>
-    <h2 class="display-5">JOURNEYDETAILS:</h2>
+    <a class="btn btn-success text-ligtt btn-lg btn-block" href="{% url 'addjourney' %}">Add New Journey</a>
+    <h3 class="display-5">Journey Details:</h3>
     {% for JOURNEYDETAILS in object_list %}
         <div class="row" style="margin:5px;">
             <div class="col"> {{ JOURNEYDETAILS.start_date}}</div>
             <div class="col"> {{ JOURNEYDETAILS.end_date}}</div>
             <div class="col"> {{ JOURNEYDETAILS.travel_from}}</div>
             <div class="col"> {{ JOURNEYDETAILS.travel_to}}</div>
-            <div class="col"><a href="{% url 'changejourney' JOURNEYDETAILS.pk %}" class="btn btn-secondary">Change</a></div>
+            <div class="col"><a href="{% url 'changejourney' JOURNEYDETAILS.pk %}" class="btn btn-secondary">Update</a></div>
         </div>
     {% endfor %}
 {% endblock %}

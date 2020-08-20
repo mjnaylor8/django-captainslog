@@ -1,17 +1,15 @@
 {% extends "triplog/base.html" %}
 
 {% load bootstrap4 %}
+{% load crispy_forms_tags %}
 
 {% block title %}
-    Enter the details of a new journey
+    {%if journey_details_title%}
+    {{journey_details_title}}
+    {%endif%}
 {% endblock %}
 
 
 {% block content %}
-
-    <form method="post">
-        {% csrf_token %}
-        {% bootstrap_form form %}
-        <input class="btn btn-primary text-light btn-lg" type="submit" value="submit">
-    </form>
+    {% crispy form %}
 {% endblock %}

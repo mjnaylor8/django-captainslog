@@ -52,3 +52,8 @@ input[name=message] {
     text-align: left;
     padding-right: 15px;
 }
+
+.form-group.required .control-label:after {
+    content:"*";
+    color:red;
+  }

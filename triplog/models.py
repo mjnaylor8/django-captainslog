@@ -27,6 +27,7 @@ class JOURNEYDETAILS(models.Model):
     FOURSTAR = '****'
     FIVESTAR = '*****'
     STAR_RATING_CHOICES = [
+        ('','Choose...'),
         (ONESTAR, "One Star"),
         (TWOSTAR, "Two Star"),
         (THREESTAR, "Three Star"),

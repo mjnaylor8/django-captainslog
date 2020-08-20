@@ -52,10 +52,9 @@ INSTALLED_APPS = [
     'sitemaps',
     'djgeojson',
     'leaflet',
+    'crispy_forms',
     'bootstrap4',
     'mapbox_location_field',
-    'crispy_forms',
-
 ]
 
 MIDDLEWARE = [
