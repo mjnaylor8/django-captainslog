@@ -3,7 +3,9 @@
 {% load bootstrap4 %}
 
 {% block title %}
-    Enter the details of a new site
+    {%if site_information_title%}
+        {{site_information_title}}
+    {%endif%}
 {% endblock %}
 
 {% block content %}

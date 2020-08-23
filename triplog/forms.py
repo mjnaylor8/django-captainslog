@@ -11,26 +11,26 @@ from crispy_forms.layout import Layout, Submit, Row, Column, Fieldset, Field
 
 
 
-from triplog.models import SITEINFORMATION, SITEFACILITIES, JOURNEYDETAILS
+from triplog.models import SiteInformation, SiteFacilities, JourneyDetails
 
 STANDARD_COLUMN_CLASS = 'form-group col-md-2 mb-0'
 STANDARD_COLUMN_CLASS_WIDER = 'form-group col-md-4 mb-0'
 STANDARD_COLUMN_CLASS_EVENWIDER = 'form-group col-md-8 mb-0'
-class SITEINFORMATIONForm(forms.ModelForm):
+class SiteInformationForm(forms.ModelForm):
     """
     define the site information
     """
     class Meta:
-        model = SITEINFORMATION
+        model = SiteInformation
         fields = "__all__"
 
-class SITEFACILITIESForm(forms.ModelForm):
+class SiteFacilitiesForm(forms.ModelForm):
     """ define the site facilities """
     class Meta:
-        model = SITEFACILITIES
+        model = SiteFacilities
         fields = "__all__"
 
-class JOURNEYDETAILSForm(forms.ModelForm):
+class JourneyDetailsForm(forms.ModelForm):
     """ define the journey details """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -70,7 +70,7 @@ class JOURNEYDETAILSForm(forms.ModelForm):
             ),
         )
     class Meta:
-        model = JOURNEYDETAILS
+        model = JourneyDetails
         fields = "__all__"
         labels = {
             'start_date': _("Start Date"),
@@ -94,7 +94,7 @@ class JOURNEYDETAILSForm(forms.ModelForm):
             'travel_to' : forms.TextInput(attrs={'placeholder': 'Destination'})
             }
 
-class JOURNEYDETAILS2Form(forms.ModelForm):
+class JourneyDetails2Form(forms.ModelForm):
     """ define the journey details """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -102,11 +102,17 @@ class JOURNEYDETAILS2Form(forms.ModelForm):
         self.fields['end_date'].initial = datetime.date.today
 
     class Meta:
-        model = JOURNEYDETAILS
+        model = JourneyDetails
         fields = "__all__"
         labels = {
             'start_date': _("Start Date"),
             'end_date': _("End Date"),
+            'travel_from': _('Travel From'),
+            'travel_to': _('Travel To'),
+            'mileage_start': _('Start Mileage'),
+            'mileage_end': _('End Mileage'),
+            'destination': _('Destination Site'),
+            'star_rating': _('Star Rating'),
             }
         help_texts = {
             'start_date': _('Enter a start date'),
@@ -115,12 +121,15 @@ class JOURNEYDETAILS2Form(forms.ModelForm):
             'travel_to': _('Enter destination name'),
             'mileage_start': _('Enter start mileage'),
             'mileage_end': _('Enter end mileage'),
-            'destination': _('Enter destination'),
-            'star_rating': _('Select the number of stars to give the destiantion'),
+            'destination': _('Select the site destination'),
+            'star_rating': _('Select the number of stars to give the destination'),
             }
         error_messages = {
+            'travel_from': {
+                'required': _('R Please enter starting location'), \
+                },
+        }
 
-            }
         widgets = {
             'start_date': forms.TextInput(attrs={'type':'date', \
                 'class': 'form-control'}),
@@ -129,30 +138,28 @@ class JOURNEYDETAILS2Form(forms.ModelForm):
             'notes': forms.Textarea(attrs={'placeholder': 'Enter Notes on the journey and site', \
                 'class': 'form-control'}),
             'travel_from' : forms.TextInput(attrs={'placeholder': 'Starting Point', \
-                'class': 'form-control'}),
+                'class': 'form-control', \
+                'oninvalid' : 'this.setCustomValidity("rubbish")',\
+                'oninput' : 'setCustomValidity("")'}),
             'travel_to' : forms.TextInput(attrs={'placeholder': 'Destination', \
                 'class': 'form-control'}),
-            }
+            'weather' : forms.TextInput(attrs={'placeholder': {}})
+        }
     # this function will be used for the validation
     def clean(self):
         # data from the form is fetched using super function
-        super(JOURNEYDETAILS2Form, self).clean()
+        super(JourneyDetails2Form, self).clean()
 
-        # extract the username and text field from the data
-        start_date = self.cleaned_data.get('start_date')
-        end_date = self.cleaned_data.get('end_date')
-        travel_from = self.cleaned_data.get('travel_from')
+        # extract the fields from the data
         mileage_start = self.cleaned_data.get('mileage_start')
         mileage_end = self.cleaned_data.get('mileage_end')
-        destination = self.cleaned_data.get('destination')
-        star_rating = self.cleaned_data.get('star_rating')
+
 
         # conditions to be met
         if mileage_start and mileage_end:
             if mileage_start >= mileage_end:
                 raise ValidationError \
                     ("The ending mileage must be greater than the starting mileage")
-        if not travel_from:
-            raise ValidationError("The starting point must be entered")
+
         # return any errors if found
         return self.cleaned_data

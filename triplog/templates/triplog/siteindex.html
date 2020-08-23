@@ -1,20 +1,35 @@
 {% extends "triplog/base.html" %}
 
 {% block title %}
-    List of sites
+    {%if site_information_title%}
+        {{site_information_title}}
+    {%endif%}
 {% endblock %}
 
 {% block content %}
-    <a class="btn btn-success text-ligt btn-lg btn-block" href="{% url 'addsite' %}">Add New Site</a>
-    <h2 class="display-5">SITEINFORMATION:</h2>
-    {% for SITEINFORMATION in object_list %}
-        <div class="row" style="margin:5px;">
-            <div class="col"> {{ SITEINFORMATION.name}}</div>
-            <div class="col"> {{ SITEINFORMATION.location}}</div>
-            <div class="col"> {{ SITEINFORMATION.address}}</div>
-            <div class="col"> {{ SITEINFORMATION.email}}</div>
-            <div class="col"> {{ SITEINFORMATION.phone_number}}</div>
-            <div class="col"><a href="{% url 'changesite' SITEINFORMATION.pk %}" class="btn btn-secondary">CHANGE</a></div>
-        </div>
-    {% endfor %}
+    <button type=button class="mx-3 btn btn-success" href="{% url 'addsite' %}">Add New Site</button>
+    <h4 class="ml-3">Site Information:</h4>
+    <div class="container-fluid">
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <th scope="col">Name</th>
+                <th scope="col">Address & Location</th>
+                <th scope="col">Email</th>
+                <th scope="col">Phone #</th>
+                <th></th>
+            </thead>       
+            <tbody>
+                {% for SiteInformation in object_list %}
+                <tr>
+                    <td>{{ SiteInformation.name}}</td>
+                    <td>{{ SiteInformation.address}} {{ SiteInformation.location}}</td>
+                    <td>{{ SiteInformation.email}}</td>
+                    <td>{{ SiteInformation.phone_number}}</td>
+                    <td><a href="{% url 'changesite' SiteInformation.pk %}" class="btn btn-secondary">CHANGE</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
 {% endblock %}

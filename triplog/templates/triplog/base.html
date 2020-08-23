@@ -50,14 +50,14 @@
             </div>
         </div>
         <div class="container-fluid">
-            <div class="col-8">
+            <div class="col-12">
                 {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
                 {% block content %}(no content){% endblock %}
             </div>
         </div>
     {% endblock bootstrap4_content%}
     <footer>
-        <p>&copy; Michael Naylor <script type="text/javascript">document.write( new Date().getFullYear() );</script></p>
+        <p class="small ml-4" >&copy; Michael Naylor <script type="text/javascript">document.write( new Date().getFullYear() );</script></p>
     </footer>
     {% block script %}
     {% endblock %}

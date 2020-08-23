@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='JOURNEYDETAILS',
+            name='JourneyDetails',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('start_date', models.DateField()),
@@ -36,7 +36,7 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='SITEFACILITIES',
+            name='SiteFacilities',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('greeting', models.CharField(blank=True, choices=[('Excellent', 'Excellent'), ('Good', 'Good'), ('Indifferent', 'Indifferent')], max_length=256)),
@@ -63,7 +63,7 @@ class Migration(migrations.Migration):
         ),
         migrations.RenameModel(
             old_name='Site_Information',
-            new_name='SITEINFORMATION',
+            new_name='SiteInformation',
         ),
         migrations.DeleteModel(
             name='Journey_Details',

@@ -1,10 +1,12 @@
+""" Define Models """
 from django.contrib.gis.db import models
 from mapbox_location_field.spatial.models import SpatialLocationField
 from mapbox_location_field.models import AddressAutoHiddenField
 
 # Create your models here.
 
-class SITEINFORMATION(models.Model):
+class SiteInformation(models.Model):
+    """ Define SiteInformation Model """
     name = models.CharField(max_length=256)
     address = AddressAutoHiddenField()
     email = models.CharField(max_length=256, blank=True)
@@ -16,7 +18,8 @@ class SITEINFORMATION(models.Model):
         return str(self.name)
 
 
-class JOURNEYDETAILS(models.Model):
+class JourneyDetails(models.Model):
+    """ Define JourneyDetails Model """
     true_false_choices = [
         (True, "Yes"),
         (False, "No")
@@ -27,7 +30,7 @@ class JOURNEYDETAILS(models.Model):
     FOURSTAR = '****'
     FIVESTAR = '*****'
     STAR_RATING_CHOICES = [
-        ('','Choose...'),
+        ('', 'Choose...'),
         (ONESTAR, "One Star"),
         (TWOSTAR, "Two Star"),
         (THREESTAR, "Three Star"),
@@ -52,12 +55,14 @@ class JOURNEYDETAILS(models.Model):
     star_rating = models.CharField(choices=STAR_RATING_CHOICES, max_length=256)
     would_return = models.BooleanField(blank=True, choices=true_false_choices, null=True)
     notes = models.CharField(max_length=1024, blank=True, null=True)
-    destination = models.ForeignKey(SITEINFORMATION, models.SET_NULL, null=True)
+    destination = models.ForeignKey(SiteInformation, models.SET_NULL, null=True)
 
     def __str__(self):
-        return str('%s - %s - %s - %s' % (self.start_date, self.start_time, self.end_date, self.end_time))
+        return str('%s - %s - %s - %s' % \
+            (self.start_date, self.start_time, self.end_date, self.end_time))
 
-class SITEFACILITIES(models.Model):
+class SiteFacilities(models.Model):
+    """ Define SiteFacilities Model """
     excellent = "Excellent"
     good = "Good"
     indifferent = "Indifferent"
@@ -141,7 +146,7 @@ class SITEFACILITIES(models.Model):
         (True, "Yes"),
         (False, "No")
     ]
-    name = models.ForeignKey(SITEINFORMATION, on_delete=models.CASCADE)
+    name = models.ForeignKey(SiteInformation, on_delete=models.CASCADE)
     greeting = models.CharField(max_length=256, blank=True, choices=greeting_choices)
     pitch_type = models.CharField(max_length=256, blank=True, choices=pitch_levels_choices)
     pitch_level = models.CharField(max_length=256, blank=True, choices=pitch_levels_choices)
@@ -152,7 +157,8 @@ class SITEFACILITIES(models.Model):
     security = models.CharField(max_length=256, blank=True, choices=security_choices)
     wifi = models.BooleanField(blank=True, choices=true_false_choices)
     tv_signal = models.CharField(max_length=256, blank=True, choices=tv_signal_choices)
-    phone_signal_3G_4G = models.CharField(max_length=256, blank=True, choices=phone_signal_3G_4G_choices)
+    phone_signal_3G_4G = models.CharField(max_length=256, blank=True, \
+        choices=phone_signal_3G_4G_choices)
     pets = models.BooleanField(blank=True, choices=true_false_choices)
     children = models.BooleanField(blank=True, choices=true_false_choices)
     laundry = models.BooleanField(blank=True, choices=true_false_choices)

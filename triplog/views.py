@@ -1,9 +1,8 @@
 """ Views defined """
 # Create your views here.
 from django.views.generic import CreateView, UpdateView, ListView
-from django.shortcuts import HttpResponse, render, redirect
-from .models import SITEINFORMATION, JOURNEYDETAILS
-from .forms import JOURNEYDETAILSForm, JOURNEYDETAILS2Form
+from .models import SiteInformation, JourneyDetails
+from .forms import JourneyDetailsForm, JourneyDetails2Form
 
 
 SITE_INFORMATION_FORM = "triplog/site_information_form.html"
@@ -11,39 +10,63 @@ JOURNEY_DETAILS_FORM = "triplog/journey_details_form.html"
 SUCCESS_SITEINDEX = "/siteindex/"
 SUCCESS_JOURNEYINDEX = "/journeyindex/"
 
-class AddSITEINFORMATIONView(CreateView):
+class AddSiteInformationView(CreateView):
     """ Add site inforamtion view """
-    model = SITEINFORMATION
+    model = SiteInformation
     template_name = SITE_INFORMATION_FORM
     success_url = SUCCESS_SITEINDEX
     fields = ("name", "location", "address",)
 
-class ChangeSITEINFORMATIONView(UpdateView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        site_title = 'Add Site Details'
+        context['site_infomation_title'] = site_title
+        return context
+
+class ChangeSiteInformationView(UpdateView):
     """ change site information view """
-    model = SITEINFORMATION
+    model = SiteInformation
     template_name = SITE_INFORMATION_FORM
     success_url = SUCCESS_SITEINDEX
     fields = ("name", "location", "address",)
 
-class SITEINFORMATIONView(ListView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        site_title = 'Change Site Details'
+        context['site_information_title'] = site_title
+        return context
+
+class SiteInformationView(ListView):
     """ list site inforamtion view """
-    model = SITEINFORMATION
+    model = SiteInformation
     template_name = "triplog/siteindex.html"
     ordering = ["-created_at", ]
+  
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        site_title = 'List Sites'
+        context['site_information_title'] = site_title
+        return context
 
-class JOURNEYDETAILSView(ListView):
+class JourneyDetailsView(ListView):
     """ List journey details view """
-    model = JOURNEYDETAILS
+    model = JourneyDetails
     template_name = "triplog/journeyindex.html"
     success_url = SUCCESS_JOURNEYINDEX
     ordering = ["-start_date",]
 
-class AddJOURNEYDETAILSView(CreateView):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        journey_title = 'List Journeys'
+        context['journey_details_title'] = journey_title
+        return context
+
+class AddJourneyDetailsView(CreateView):
     """ add journey details view """
-    model = JOURNEYDETAILS
+    model = JourneyDetails
     template_name = JOURNEY_DETAILS_FORM
     success_url = SUCCESS_JOURNEYINDEX
-    form_class = JOURNEYDETAILSForm
+    form_class = JourneyDetailsForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -51,12 +74,12 @@ class AddJOURNEYDETAILSView(CreateView):
         context['journey_details_title'] = journey_title
         return context
 
-class AddJOURNEYDETAILS2View(CreateView):
+class AddJourneyDetails2View(CreateView):
     """ add journey details view """
-    model = JOURNEYDETAILS
+    model = JourneyDetails
+    success_url = SUCCESS_JOURNEYINDEX
+    form_class = JourneyDetails2Form
     template_name = "triplog/journey_details2_form.html"
-    success_url = SUCCESS_JOURNEYINDEX
-    form_class = JOURNEYDETAILS2Form
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -64,55 +87,25 @@ class AddJOURNEYDETAILS2View(CreateView):
         context['journey_details_title'] = journey_title
         return context
 
-def home(request):
+    def get_initial(self, **kwargs):
+        initial = super().get_initial(**kwargs)
+        initial['weather'] = 'Sunny'
+        return initial
 
-    # check if the request is post
-    if request.method == 'POST':
+    def form_invalid(self, form):
+        response = super().form_invalid(form)
+        print(response)
+        return response
 
-        # Pass the form data to the form class
-        details = JOURNEYDETAILS2Form(request.POST)
-
-        # In the 'form' class the clean function
-        # is defined, if all the data is correct
-        # as per the clean function, it returns true
-        if details.is_valid():
-
-            # Temporarily make an object to be add some
-            # logic into the data if there is such a need
-            # before writing to the database
-            post = details.save(commit=False)
-
-            # Finally write the changes into database
-            post.save()
-
-            # redirect it to some another page indicating data
-            # was inserted successfully
-            return HttpResponseRedirect(SUCCESS_JOURNEYINDEX)
-
-        else:
-
-            # Redirect back to the same page if the data
-            # was invalid
-            return render(request, "triplog/journey_details2_form.html", {'form':details})
-    else:
-
-        # If the request is a GET request then,
-        # create an empty form object and
-        # render it into the page
-        form = JOURNEYDETAILS2Form(None)
-        return render(request, 'triplog/journey_details2_form.html', {'form':form})
-
-
-class ChangeJOURNEYDETAILSView(UpdateView):
+class ChangeJourneyDetailsView(UpdateView):
     """ change journey details view """
-    model = JOURNEYDETAILS
+    model = JourneyDetails
     template_name = JOURNEY_DETAILS_FORM
     success_url = SUCCESS_JOURNEYINDEX
-    form_class = JOURNEYDETAILSForm
+    form_class = JourneyDetailsForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         journey_title = 'Change Journey Details'
         context['journey_details_title'] = journey_title
         return context
-        

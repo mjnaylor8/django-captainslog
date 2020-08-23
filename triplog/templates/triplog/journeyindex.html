@@ -5,15 +5,28 @@
 {% endblock %}
 
 {% block content %}
-    <a class="btn btn-success text-ligtt btn-lg btn-block" href="{% url 'addjourney' %}">Add New Journey</a>
-    <h3 class="display-5">Journey Details:</h3>
-    {% for JOURNEYDETAILS in object_list %}
-        <div class="row" style="margin:5px;">
-            <div class="col"> {{ JOURNEYDETAILS.start_date}}</div>
-            <div class="col"> {{ JOURNEYDETAILS.end_date}}</div>
-            <div class="col"> {{ JOURNEYDETAILS.travel_from}}</div>
-            <div class="col"> {{ JOURNEYDETAILS.travel_to}}</div>
-            <div class="col"><a href="{% url 'changejourney' JOURNEYDETAILS.pk %}" class="btn btn-secondary">Update</a></div>
-        </div>
-    {% endfor %}
+    <button type=button class="mx-3 btn btn-success" href="{% url 'addjourney' %}">Add New Journey</button>
+    <h4 class="ml-3">Journey Details:</h4>
+    <div class="container-fluid">
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <th scope="col">Start Date</th>
+                <th scope="col">End Date</th>
+                <th scope="col">Travel From</th>
+                <th scope="col">Travel To</th>
+                <th></th>
+            </thead>       
+            <tbody>
+                {% for JourneyDetails in object_list %}
+                <tr>
+                    <td>{{ JourneyDetails.start_date}}</td>
+                    <td>{{ JourneyDetails.end_date}}</td>
+                    <td>{{ JourneyDetails.travel_from}}</td>
+                    <td>{{ JourneyDetails.travel_to}}</td>
+                    <td><a href="{% url 'changejourney' JourneyDetails.pk %}" class="btn btn-secondary">CHANGE</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}
