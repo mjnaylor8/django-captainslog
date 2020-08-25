@@ -40,8 +40,8 @@ class SiteInformationView(ListView):
     """ list site inforamtion view """
     model = SiteInformation
     template_name = "triplog/siteindex.html"
-    ordering = ["-created_at", ]
-  
+    ordering = ["-created_date", ]
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         site_title = 'List Sites'

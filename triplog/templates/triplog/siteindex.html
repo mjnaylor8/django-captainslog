@@ -22,7 +22,7 @@
                 {% for SiteInformation in object_list %}
                 <tr>
                     <td>{{ SiteInformation.name}}</td>
-                    <td>{{ SiteInformation.address}} {{ SiteInformation.location}}</td>
+                    <td>{{ SiteInformation.address}} <br> <span class="small"> {{ SiteInformation.location}} </span></td>
                     <td>{{ SiteInformation.email}}</td>
                     <td>{{ SiteInformation.phone_number}}</td>
                     <td><a href="{% url 'changesite' SiteInformation.pk %}" class="btn btn-secondary">CHANGE</a></td>

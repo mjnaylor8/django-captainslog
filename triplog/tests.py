@@ -13,7 +13,6 @@ import factory.django
 
 from triplog.models import JourneyDetails
 from triplog.models import SiteInformation
-from triplog.models import SiteFacilities
 from triplog.views import JourneyDetailsView
 
 # Create your tests here.
@@ -35,7 +34,24 @@ class SiteInformationFactory(factory.django.DjangoModelFactory):
             'location',
             'email',
             'phone_number',
-            'created_at',
+            'greeting',
+            'pitch_type',
+            'pitch_level',
+            'hook_up',
+            'waste',
+            'toilets',
+            'ambience',
+            'security',
+            'wifi',
+            'tv_signal',
+            'phone_signal_3G_4G',
+            'pets',
+            'children',
+            'laundry',
+            'cost_charges',
+            'cost_extras',
+            'cost_currency',
+            'created_date',
         )
 
     name = 'test site name'
@@ -44,7 +60,24 @@ class SiteInformationFactory(factory.django.DjangoModelFactory):
     email = 'fred.com'
     address = 'address'
     phone_number = '1274-234'
-    created_at = timezone.now()
+    greeting = "Good"
+    pitch_type = "Grass"
+    pitch_level = "Level"
+    hook_up = "10A"
+    waste = "On Pitch"
+    toilets = "Clean"
+    ambience = "Peaceful"
+    security = "Good"
+    wifi = True
+    tv_signal = "Good"
+    phone_signal_3G_4G = "Good"
+    pets = True
+    children = True
+    laundry = True
+    cost_charges = 10.02
+    cost_extras = 0.20
+    cost_currency = "£"
+    created_date = timezone.now()
 
 class SiteInformationTest(TestCase):
     """ Test SiteInformation """
@@ -63,13 +96,28 @@ class SiteInformationTest(TestCase):
         self.assertEqual(only_site.name, 'test site name')
         self.assertEqual(only_site.address, 'address')
         self.assertEqual(only_site.phone_number, '1274-234')
-        self.assertEqual(only_site.phone_number, '1274-234')
-        self.assertEqual(only_site.created_at.hour, only_site.created_at.hour)
-        self.assertEqual(only_site.created_at.minute, only_site.created_at.minute)
-        self.assertEqual(only_site.created_at.second, only_site.created_at.second)
-        self.assertEqual(only_site.created_at.day, only_site.created_at.day)
-        self.assertEqual(only_site.created_at.month, only_site.created_at.month)
-        self.assertEqual(only_site.created_at.year, only_site.created_at.year)
+        self.assertEqual(only_site.greeting, 'Good')
+        self.assertEqual(only_site.pitch_type, 'Grass')
+        self.assertEqual(only_site.pitch_level, 'Level')
+        self.assertEqual(only_site.hook_up, '10A')
+        self.assertEqual(only_site.waste, 'On Pitch')
+        self.assertEqual(only_site.toilets, 'Clean')
+        self.assertEqual(only_site.ambience, 'Peaceful')
+        self.assertEqual(only_site.wifi, True)
+        self.assertEqual(only_site.phone_signal_3G_4G, 'Good')
+        self.assertEqual(only_site.tv_signal, 'Good')
+        self.assertEqual(only_site.pets, True)
+        self.assertEqual(only_site.children, True)
+        self.assertEqual(only_site.laundry, True)
+        self.assertEqual(only_site.cost_charges, 10.02)
+        self.assertEqual(only_site.cost_extras, 0.20)
+        self.assertEqual(only_site.cost_currency, '£')
+        self.assertEqual(only_site.created_date.hour, only_site.created_date.hour)
+        self.assertEqual(only_site.created_date.minute, only_site.created_date.minute)
+        self.assertEqual(only_site.created_date.second, only_site.created_date.second)
+        self.assertEqual(only_site.created_date.day, only_site.created_date.day)
+        self.assertEqual(only_site.created_date.month, only_site.created_date.month)
+        self.assertEqual(only_site.created_date.year, only_site.created_date.year)
 
 class JourneyDetailsFactory(factory.django.DjangoModelFactory):
     """ Create JourneyDetails """
@@ -171,103 +219,6 @@ class JourneyDetailsTest(TestCase):
         self.assertEqual(only_journey.notes, 'Nice Site')
         self.assertEqual(only_journey.destination, site)
         self.assertEqual(only_journey.destination.name, 'test site name')
-
-
-
-
-class SiteFacilitiesFactory(factory.django.DjangoModelFactory):
-    """ Create SiteFacilities """
-    class Meta:
-    # Create Site Facilities
-        model = SiteFacilities
-        django_get_or_create = (
-            'name',
-            'greeting',
-            'pitch_type',
-            'pitch_level',
-            'hook_up',
-            'waste',
-            'toilets',
-            'ambience',
-            'security',
-            'wifi',
-            'tv_signal',
-            'phone_signal_3G_4G',
-            'pets',
-            'children',
-            'laundry',
-            'cost_charges',
-            'cost_extras',
-            'cost_currency',
-        )
-    greeting = "Good"
-    pitch_type = "Grass"
-    pitch_level = "Level"
-    hook_up = "10A"
-    waste = "On Pitch"
-    toilets = "Clean"
-    ambience = "Peaceful"
-    security = "Good"
-    wifi = True
-    tv_signal = "Good"
-    phone_signal_3G_4G = "Good"
-    pets = True
-    children = True
-    laundry = True
-    cost_charges = 10.02
-    cost_extras = 0.20
-    cost_currency = "£"
-    created_date = timezone.now()
-    edited_date = timezone.now()
-
-
-class SiteFacilitiesTest(TestCase):
-    """ Test SiteFacilities """
-    def test_create_site_facilities(self):
-        """ Test SiteFacilities """
-        site = SiteInformationFactory()
-        # Create the journey_details
-        site_facilities = SiteFacilitiesFactory(name=site)
-
-        #In test will have nnow been added to the database and now need to test we
-        #can save OK and retrieve it
-
-        all_facilities = SiteFacilities.objects.all()
-        self.assertEqual(len(all_facilities), 1)
-        only_facility = all_facilities[0]
-        self.assertEqual(only_facility, site_facilities)
-
-        # Check attributes
-        self.assertEqual(only_facility.greeting, 'Good')
-        self.assertEqual(only_facility.pitch_type, 'Grass')
-        self.assertEqual(only_facility.pitch_level, 'Level')
-        self.assertEqual(only_facility.hook_up, '10A')
-        self.assertEqual(only_facility.waste, 'On Pitch')
-        self.assertEqual(only_facility.toilets, 'Clean')
-        self.assertEqual(only_facility.ambience, 'Peaceful')
-        self.assertEqual(only_facility.wifi, True)
-        self.assertEqual(only_facility.phone_signal_3G_4G, 'Good')
-        self.assertEqual(only_facility.tv_signal, 'Good')
-        self.assertEqual(only_facility.pets, True)
-        self.assertEqual(only_facility.children, True)
-        self.assertEqual(only_facility.laundry, True)
-        self.assertEqual(only_facility.cost_charges, 10.02)
-        self.assertEqual(only_facility.cost_extras, 0.20)
-        self.assertEqual(only_facility.cost_currency, '£')
-        self.assertEqual(only_facility.name, site)
-        self.assertEqual(only_facility.name.name, 'test site name')
-        self.assertEqual(only_facility.created_date.day, site_facilities.created_date.day)
-        self.assertEqual(only_facility.created_date.month, site_facilities.created_date.month)
-        self.assertEqual(only_facility.created_date.year, site_facilities.created_date.year)
-        self.assertEqual(only_facility.created_date.hour, site_facilities.created_date.hour)
-        self.assertEqual(only_facility.created_date.minute, site_facilities.created_date.minute)
-        self.assertEqual(only_facility.created_date.second, site_facilities.created_date.second)
-        self.assertEqual(only_facility.edited_date.day, site_facilities.edited_date.day)
-        self.assertEqual(only_facility.edited_date.month, site_facilities.edited_date.month)
-        self.assertEqual(only_facility.edited_date.year, site_facilities.edited_date.year)
-        self.assertEqual(only_facility.edited_date.hour, site_facilities.edited_date.hour)
-        self.assertEqual(only_facility.edited_date.minute, site_facilities.edited_date.minute)
-        self.assertEqual(only_facility.edited_date.second, site_facilities.edited_date.second)
 
 class JourneyDetailsViewTest(TestCase):
     """ Test Journey_DetailView """

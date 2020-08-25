@@ -7,12 +7,121 @@ from mapbox_location_field.models import AddressAutoHiddenField
 
 class SiteInformation(models.Model):
     """ Define SiteInformation Model """
+    EXCELLENT = "Excellent"
+    GOOD = "Good"
+    INDIFFERENT = "Indifferent"
+    DIRT = "DIRT"
+    GRASS = "Grass"
+    HARDSTANDING = "Hardstanding"
+    LEVEL = "Level"
+    GENTLE_SLOPE = "Gentle Slope"
+    STEEP_SLOPE = "Steep Slope"
+    IMPOSSIBLE_SLOPE = "Impossible Slope"
+    SIX_AMP = "6A"
+    TEN_AMP = "10A"
+    SIXTEEN_AMP = "16A"
+    ON_PITCH = "On Pitch"
+    CLOSE_BY = "Close By"
+    MILES_AWAY = "Miles Away"
+    NONE = "None"
+    CLEAN = "Clean"
+    DIRTY = "Dirty"
+    DONT_GO_THERE = "Don't Go There"
+    PEACEFUL = "Peaceful"
+    OKAY = "OK"
+    LOUD_LIVELY = "Loud / Lively"
+    POOR = "Poor"
+
+    GREETING_CHOICES = [
+        (EXCELLENT, "Excellent"),
+        (GOOD, "Good"),
+        (INDIFFERENT, "Indifferent"),
+    ]
+
+    PITCH_TYPE_CHOICES = [
+        (DIRT, "Dirt"),
+        (GRASS, "Grass"),
+        (HARDSTANDING, "Hardstanding"),
+    ]
+
+    PITCH_LEVELS_CHOICES = [
+        (LEVEL, "Level"),
+        (GENTLE_SLOPE, "Gentle Slope"),
+        (STEEP_SLOPE, "Steep Slope"),
+        (IMPOSSIBLE_SLOPE, "Impossible Slope"),
+    ]
+
+    HOOK_UP_CHOICES = [
+        (SIX_AMP, "6A"),
+        (TEN_AMP, "10A"),
+        (SIXTEEN_AMP, "16A"),
+    ]
+
+    WASTE_CHOICES = [
+        (ON_PITCH, "On Pitch"),
+        (CLOSE_BY, "Close By"),
+        (MILES_AWAY, "Miles Away"),
+    ]
+
+    TOILET_CHOICES = [
+        (NONE, "None"),
+        (CLEAN, "Clean"),
+        (DIRTY, "Dirty"),
+        (DONT_GO_THERE, "Don't Go There"),
+    ]
+
+    AMBIENCE_CHOICES = [
+        (PEACEFUL, "Peaceful"),
+        (OKAY, "OK"),
+        (LOUD_LIVELY, "Loud / Lively"),
+    ]
+
+    SECURITY_CHOICES = [
+        (GOOD, "Good"),
+        (POOR, "Poor"),
+    ]
+
+    TV_SIGNAL_CHOICES = [
+        (GOOD, "Good"),
+        (POOR, "Poor"),
+    ]
+    PHONE_SIGNAL_3G_4G_CHOICES = [
+        (GOOD, "Good"),
+        (POOR, "Poor"),
+    ]
+    TRUE_FALSE_CHOICES = [
+        (True, "Yes"),
+        (False, "No")
+    ]
+
     name = models.CharField(max_length=256)
     address = AddressAutoHiddenField()
     email = models.CharField(max_length=256, blank=True)
     phone_number = models.CharField(max_length=256, blank=True)
-    location = SpatialLocationField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    location = SpatialLocationField(null=True, blank=True, map_attrs={
+        "center": [-0.827610, 51.182250],
+        "placeholder": "Pick a location on the map below",
+        })
+    greeting = models.CharField(max_length=256, blank=True, choices=GREETING_CHOICES)
+    pitch_type = models.CharField(max_length=256, blank=True, choices=PITCH_LEVELS_CHOICES)
+    pitch_level = models.CharField(max_length=256, blank=True, choices=PITCH_LEVELS_CHOICES)
+    hook_up = models.CharField(max_length=256, blank=True, choices=HOOK_UP_CHOICES)
+    waste = models.CharField(max_length=256, blank=True, choices=WASTE_CHOICES)
+    toilets = models.CharField(max_length=256, blank=True, choices=TOILET_CHOICES)
+    ambience = models.CharField(max_length=256, blank=True, choices=AMBIENCE_CHOICES)
+    security = models.CharField(max_length=256, blank=True, choices=SECURITY_CHOICES)
+    wifi = models.BooleanField(null=True,blank=True, choices=TRUE_FALSE_CHOICES)
+    tv_signal = models.CharField(max_length=256, blank=True, choices=TV_SIGNAL_CHOICES)
+    phone_signal_3G_4G = models.CharField(max_length=256, blank=True, \
+        choices=PHONE_SIGNAL_3G_4G_CHOICES)
+    pets = models.BooleanField(null=True,blank=True, choices=TRUE_FALSE_CHOICES)
+    children = models.BooleanField(null=True,blank=True, choices=TRUE_FALSE_CHOICES)
+    laundry = models.BooleanField(null=True,blank=True, choices=TRUE_FALSE_CHOICES)
+    cost_charges = models.FloatField(null=True,blank=True)
+    cost_extras = models.FloatField(null=True,blank=True)
+    cost_currency = models.CharField(max_length=3, blank=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    edited_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return str(self.name)
@@ -20,10 +129,7 @@ class SiteInformation(models.Model):
 
 class JourneyDetails(models.Model):
     """ Define JourneyDetails Model """
-    true_false_choices = [
-        (True, "Yes"),
-        (False, "No")
-    ]
+
     ONESTAR = '*'
     TWOSTAR = '**'
     THREESTAR = '***'
@@ -36,6 +142,10 @@ class JourneyDetails(models.Model):
         (THREESTAR, "Three Star"),
         (FOURSTAR, "Four Star"),
         (FIVESTAR, "Five Star"),
+    ]
+    TRUE_FALSE_CHOICES = [
+        (True, "Yes"),
+        (False, "No")
     ]
     start_date = models.DateField()
     end_date = models.DateField(blank=True, null=True)
@@ -53,120 +163,10 @@ class JourneyDetails(models.Model):
     created_date = models.DateTimeField(auto_now_add=True, null=True)
     edited_date = models.DateTimeField(auto_now_add=True, null=True)
     star_rating = models.CharField(choices=STAR_RATING_CHOICES, max_length=256)
-    would_return = models.BooleanField(blank=True, choices=true_false_choices, null=True)
+    would_return = models.BooleanField(blank=True, choices=TRUE_FALSE_CHOICES, null=True)
     notes = models.CharField(max_length=1024, blank=True, null=True)
     destination = models.ForeignKey(SiteInformation, models.SET_NULL, null=True)
 
     def __str__(self):
         return str('%s - %s - %s - %s' % \
             (self.start_date, self.start_time, self.end_date, self.end_time))
-
-class SiteFacilities(models.Model):
-    """ Define SiteFacilities Model """
-    excellent = "Excellent"
-    good = "Good"
-    indifferent = "Indifferent"
-    dirt = "dirt"
-    grass = "grass"
-    hardstanding = "Hardstanding"
-    level = "Level"
-    gentle_slope = "Gentle Slope"
-    steep_slope = "Steep Slope"
-    impossible_slope = "Impossible Slope"
-    six_amp = "6A"
-    ten_amp = "10A"
-    sixteen_amp = "16A"
-    on_pitch = "On Pitch"
-    close_by = "Close By"
-    miles_away = "Miles Away"
-    none = "None"
-    clean = "Clean"
-    dirty = "Dirty"
-    dont_go_there = "Don't Go There"
-    peaceful = "Peaceful"
-    okay = "OK"
-    loud_lively = "Loud / Lively"
-    poor = "Poor"
-    greeting_choices = [
-        (excellent, "Excellent"),
-        (good, "Good"),
-        (indifferent, "Indifferent"),
-    ]
-    pitch_type_choices = [
-        (dirt, "Dirt"),
-        (grass, "Grass"),
-        (hardstanding, "Hardstanding"),
-    ]
-    pitch_levels_choices = [
-        (level, "Level"),
-        (gentle_slope, "Gentle Slope"),
-        (steep_slope, "Steep Slope"),
-        (impossible_slope, "Impossible Slope"),
-    ]
-    hook_up_choices = [
-        (six_amp, "6A"),
-        (ten_amp, "10A"),
-        (sixteen_amp, "16A"),
-    ]
-
-    waste_choices = [
-        (on_pitch, "On Pitch"),
-        (close_by, "Close By"),
-        (miles_away, "Miles Away"),
-    ]
-
-    toilet_choices = [
-        (none, "None"),
-        (clean, "Clean"),
-        (dirty, "Dirty"),
-        (dont_go_there, "Don't Go There"),
-    ]
-
-    ambience_choices = [
-        (peaceful, "Peaceful"),
-        (okay, "OK"),
-        (loud_lively, "Loud / Lively"),
-    ]
-
-    security_choices = [
-        (good, "Good"),
-        (poor, "Poor"),
-    ]
-
-    tv_signal_choices = [
-        (good, "Good"),
-        (poor, "Poor"),
-    ]
-    phone_signal_3G_4G_choices = [
-        (good, "Good"),
-        (poor, "Poor"),
-    ]
-
-    true_false_choices = [
-        (True, "Yes"),
-        (False, "No")
-    ]
-    name = models.ForeignKey(SiteInformation, on_delete=models.CASCADE)
-    greeting = models.CharField(max_length=256, blank=True, choices=greeting_choices)
-    pitch_type = models.CharField(max_length=256, blank=True, choices=pitch_levels_choices)
-    pitch_level = models.CharField(max_length=256, blank=True, choices=pitch_levels_choices)
-    hook_up = models.CharField(max_length=256, blank=True, choices=hook_up_choices)
-    waste = models.CharField(max_length=256, blank=True, choices=waste_choices)
-    toilets = models.CharField(max_length=256, blank=True, choices=toilet_choices)
-    ambience = models.CharField(max_length=256, blank=True, choices=ambience_choices)
-    security = models.CharField(max_length=256, blank=True, choices=security_choices)
-    wifi = models.BooleanField(blank=True, choices=true_false_choices)
-    tv_signal = models.CharField(max_length=256, blank=True, choices=tv_signal_choices)
-    phone_signal_3G_4G = models.CharField(max_length=256, blank=True, \
-        choices=phone_signal_3G_4G_choices)
-    pets = models.BooleanField(blank=True, choices=true_false_choices)
-    children = models.BooleanField(blank=True, choices=true_false_choices)
-    laundry = models.BooleanField(blank=True, choices=true_false_choices)
-    cost_charges = models.FloatField(blank=True)
-    cost_extras = models.FloatField(blank=True)
-    cost_currency = models.CharField(max_length=3, blank=True)
-    created_date = models.DateTimeField(auto_now_add=True)
-    edited_date = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return str(self.name)

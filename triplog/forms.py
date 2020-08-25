@@ -11,7 +11,7 @@ from crispy_forms.layout import Layout, Submit, Row, Column, Fieldset, Field
 
 
 
-from triplog.models import SiteInformation, SiteFacilities, JourneyDetails
+from triplog.models import SiteInformation, JourneyDetails
 
 STANDARD_COLUMN_CLASS = 'form-group col-md-2 mb-0'
 STANDARD_COLUMN_CLASS_WIDER = 'form-group col-md-4 mb-0'
@@ -22,12 +22,6 @@ class SiteInformationForm(forms.ModelForm):
     """
     class Meta:
         model = SiteInformation
-        fields = "__all__"
-
-class SiteFacilitiesForm(forms.ModelForm):
-    """ define the site facilities """
-    class Meta:
-        model = SiteFacilities
         fields = "__all__"
 
 class JourneyDetailsForm(forms.ModelForm):
