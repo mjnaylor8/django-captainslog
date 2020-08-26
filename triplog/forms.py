@@ -8,8 +8,7 @@ from django.core.exceptions import ValidationError
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column, Fieldset, Field
 from crispy_forms.bootstrap import TabHolder, Tab
-from bootstrap_datepicker_plus import DatePickerInput, TimePickerInput
-
+from tempus_dominus.widgets import DatePicker, TimePicker
 
 
 
@@ -39,10 +38,6 @@ class JourneyDetailsForm(forms.ModelForm):
         self.helper.add_input(Submit('submit', 'Save Journey', css_class='btn-primary'))
         self.fields['start_date'].initial = datetime.date.today
         self.fields['end_date'].initial = datetime.date.today
-        self.fields['start_date'].widget = DatePickerInput(options={'format':'DD/MM/YYYY',})
-        self.fields['end_date'].widget = DatePickerInput(options={'format':'DD/MM/YYYY',})
-        self.fields['start_time'].widget = TimePickerInput(options={'format':'hh:mm',})
-        self.fields['end_time'].widget = TimePickerInput(options={'format':'hh:mm',})
 
         self.helper.layout = Layout(
             TabHolder(
@@ -134,10 +129,24 @@ class JourneyDetailsForm(forms.ModelForm):
                 },
             }
         widgets = {
-            'start_date': forms.TextInput(attrs={'type':'date', \
-                'class': 'form-control'}),
-            'end_date': forms.TextInput(attrs={'type':'date', \
-                'class': 'form-control'}),
+            'start_date': DatePicker(
+                attrs={
+                    'class': 'form-control datetimepicker-input',
+                    'append': 'fa fa-calendar',
+                    'icon_toggle': True,
+                    'type':'text',
+                    'class': 'form-control'},
+                options={
+                    'format': 'L',},),
+            'end_date': DatePicker(
+                attrs={
+                    'class': 'form-control datetimepicker-input',
+                    'append': 'fa fa-calendar',
+                    'icon_toggle': True,
+                    'type':'text',
+                    'class': 'form-control'},
+                options={
+                    'format': 'L',},),
             'notes': forms.Textarea(attrs={'placeholder': 'Enter Notes on the journey and site', \
                 'class': 'form-control'}),
             'travel_from' : forms.TextInput(attrs={'placeholder': 'Starting Point', \
@@ -149,8 +158,20 @@ class JourneyDetailsForm(forms.ModelForm):
                 'class': 'form-control'}),
             'weather' : forms.TextInput(attrs={'placeholder': 'What was the weather like?', \
                 'class': 'form-control'}),
-            'start_time': forms.TextInput(attrs={'type':'time', 'class': 'form-control'}),
-            'end_time': forms.TextInput(attrs={'type':'time', 'class': 'form-control'})
+            'start_time': TimePicker(
+                attrs={
+                    'class': 'form-control datetimepicker-input',
+                    'append': 'fa fa-clock-o',
+                    'icon_toggle': True,},
+                options={
+                    'format': 'HH:mm',},),
+            'end_time': TimePicker(
+                attrs={
+                    'class': 'form-control datetimepicker-input',
+                    'append': 'fa fa-clock-o',
+                    'icon_toggle': True,},
+                options={
+                    'format': 'HH:mm',},)
             }
     # this function will be used for the validation
     def clean(self):

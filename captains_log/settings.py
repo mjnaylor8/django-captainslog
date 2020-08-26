@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     'leaflet',
     'crispy_forms',
     'bootstrap4',
-    'bootstrap_datepicker_plus',
+    'tempus_dominus',
     'mapbox_location_field',
     'widget_tweaks',
 ]
@@ -169,3 +169,6 @@ LEAFLET_CONFIG = {
     'MINIMAP': True,
     #'PLUGINS': [],
 }
+
+TEMPUS_DOMINUS_LOCALIZE = False
+TEMPUS_DOMINUS_INCLUDE_ASSETS = True

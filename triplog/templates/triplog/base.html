@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" integrity="sha256-gvEnj2axkqIj4wbYhPjbWV7zttgpzBVEgHub9AAZQD4=" crossorigin="anonymous" />
     <link href="{% static 'triplog/style.css' %}" rel="stylesheet" type="text/css">
+    {# Include FontAwesome; required for icon display on date picker#}
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.css">
+
 
 
     {% load crispy_forms_tags %}
@@ -17,10 +20,11 @@
     {# Load CSS and JavaScript #}
     {% bootstrap_css %}
 
+
     {% load mapbox_location_field_tags %}
     {% location_field_includes %}
-    {% include_jquery %}
-   
+
+
     {% block head %}
 
     <title>Captains Log - Triplog</title>
@@ -55,6 +59,7 @@
             <div class="col-12">
                 {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
                 {% block content %}(no content){% endblock %}
+                {% include_jquery %}
                 {% bootstrap_javascript jquery='full' %}
                 {{ form.media }}
             </div>
