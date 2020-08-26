@@ -2,7 +2,7 @@
 # Create your views here.
 from django.views.generic import CreateView, UpdateView, ListView
 from .models import SiteInformation, JourneyDetails
-from .forms import JourneyDetailsForm, JourneyDetails2Form
+from .forms import JourneyDetailsForm
 
 
 SITE_INFORMATION_FORM = "triplog/site_information_form.html"
@@ -74,22 +74,9 @@ class AddJourneyDetailsView(CreateView):
         context['journey_details_title'] = journey_title
         return context
 
-class AddJourneyDetails2View(CreateView):
-    """ add journey details view """
-    model = JourneyDetails
-    success_url = SUCCESS_JOURNEYINDEX
-    form_class = JourneyDetails2Form
-    template_name = "triplog/journey_details2_form.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        journey_title = 'Add new Journey Details'
-        context['journey_details_title'] = journey_title
-        return context
-
     def get_initial(self, **kwargs):
         initial = super().get_initial(**kwargs)
-        initial['weather'] = 'Sunny'
+       # initial['weather'] = 'Sunny'
         return initial
 
     def form_invalid(self, form):

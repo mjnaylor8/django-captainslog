@@ -54,7 +54,9 @@ INSTALLED_APPS = [
     'leaflet',
     'crispy_forms',
     'bootstrap4',
+    'bootstrap_datepicker_plus',
     'mapbox_location_field',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [

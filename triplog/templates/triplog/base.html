@@ -1,26 +1,28 @@
 <!DOCTYPE html>
-
+    {% load static %}
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" integrity="sha256-gvEnj2axkqIj4wbYhPjbWV7zttgpzBVEgHub9AAZQD4=" crossorigin="anonymous" />
+    <link href="{% static 'triplog/style.css' %}" rel="stylesheet" type="text/css">
 
-    {% load static %}
+
     {% load crispy_forms_tags %}
+    {% load widget_tweaks %}
     
     {# Load the tag library #}
     {% load bootstrap4 %}
 
     {# Load CSS and JavaScript #}
     {% bootstrap_css %}
-    {% bootstrap_javascript jquery='full' %}
 
     {% load mapbox_location_field_tags %}
     {% location_field_includes %}
     {% include_jquery %}
    
     {% block head %}
+
     <title>Captains Log - Triplog</title>
     {% endblock %}
 </head>
@@ -53,14 +55,15 @@
             <div class="col-12">
                 {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
                 {% block content %}(no content){% endblock %}
+                {% bootstrap_javascript jquery='full' %}
+                {{ form.media }}
             </div>
+
         </div>
     {% endblock bootstrap4_content%}
     <footer>
         <p class="small ml-4" >&copy; Michael Naylor <script type="text/javascript">document.write( new Date().getFullYear() );</script></p>
     </footer>
-    {% block script %}
-    {% endblock %}
 
 </body>
 </html>

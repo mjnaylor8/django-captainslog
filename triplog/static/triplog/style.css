@@ -57,3 +57,7 @@ input[name=message] {
     content:"*";
     color:red;
   }
+.asteriskField {
+    content:"*";
+    color:red;
+}
