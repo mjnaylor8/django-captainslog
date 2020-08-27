@@ -54,7 +54,7 @@ INSTALLED_APPS = [
     'leaflet',
     'crispy_forms',
     'bootstrap4',
-    'tempus_dominus',
+    'bootstrap_datepicker_plus',
     'mapbox_location_field',
     'widget_tweaks',
 ]
@@ -170,5 +170,9 @@ LEAFLET_CONFIG = {
     #'PLUGINS': [],
 }
 
-TEMPUS_DOMINUS_LOCALIZE = False
-TEMPUS_DOMINUS_INCLUDE_ASSETS = True
+BOOTSTRAP4 = {
+    'include_jquery': True,
+}
+
+#TEMPUS_DOMINUS_LOCALIZE = False
+#TEMPUS_DOMINUS_INCLUDE_ASSETS = True

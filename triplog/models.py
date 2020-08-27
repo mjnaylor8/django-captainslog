@@ -152,7 +152,7 @@ class JourneyDetails(models.Model):
     weather = models.CharField(max_length=256, blank=True)
     travel_from = models.CharField(max_length=256)
     travel_to = models.CharField(max_length=256, blank=True)
-    start_time = models.TimeField(blank=True, null=True)
+    start_time = models.TimeField(blank=True, null=True,)
     end_time = models.TimeField(blank=True, null=True)
     duration = models.TimeField(blank=True, null=True)
     mileage_start = models.FloatField()
