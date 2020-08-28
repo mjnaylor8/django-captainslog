@@ -12,11 +12,6 @@ from crispy_forms.bootstrap import TabHolder, Tab
 from bootstrap_datepicker_plus import DatePickerInput, TimePickerInput
 from triplog.models import SiteInformation, JourneyDetails
 
-
-
-
-
-
 STANDARD_COLUMN_CLASS = 'form-group col-md-2 mb-0'
 STANDARD_COLUMN_CLASS_WIDER = 'form-group col-md-4 mb-0'
 STANDARD_COLUMN_CLASS_EVENWIDER = 'form-group col-md-8 mb-0'
@@ -201,13 +196,13 @@ class JourneyDetailsForm(forms.ModelForm):
                 raise ValidationError \
                     ("The ending mileage must be greater than the starting mileage")
 
-        if len(travel_from) < 2:
+        if travel_from and len(travel_from) < 2:
             raise ValidationError \
                 ("The starting point must have more than 1 character!")
 
         if end_date and end_date < start_date:
             raise ValidationError \
-                ("The end date must be the same or later than the start date")    
+                ("The end date must be the same or later than the start date")
 
         # return any errors if found
         return self.cleaned_data
