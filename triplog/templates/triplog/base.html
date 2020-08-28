@@ -33,7 +33,7 @@
     <!-- Tempus Dominus Bootstrap 4 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css" integrity="sha256-XPTBwC3SBoWHSmKasAk01c08M6sIA5gF5+sRxqak2Qs=" crossorigin="anonymous" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/js/tempusdominus-bootstrap-4.min.js" integrity="sha256-z0oKYg6xiLq3yJGsp/LsY9XykbweQlHl42jHv2XTBz4=" crossorigin="anonymous"></script>
-
+    <script type="text/javascript" src="{% static 'bootstrap-tab.js' %}">  </script>
     {% block head %}
 
     <title>Captains Log - Triplog</title>
@@ -68,7 +68,6 @@
             <div class="col-12">
                 {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
                 {% block content %}(no content){% endblock %}
-
                 {{ form.media }}
             </div>
 

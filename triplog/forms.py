@@ -3,6 +3,7 @@ defines the forms for triplog
 """
 import datetime
 from django import forms
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from crispy_forms.helper import FormHelper
@@ -40,6 +41,8 @@ class JourneyDetailsForm(forms.ModelForm):
         self.helper.add_input(Submit('submit', 'Save Journey', css_class='btn-primary'))
         self.fields['start_date'].initial = datetime.date.today
         self.fields['end_date'].initial = datetime.date.today
+        self.fields['start_date'].input_formats = settings.DATE_INPUT_FORMATS
+        self.fields['end_date'].input_formats = settings.DATE_INPUT_FORMATS
 
         self.helper.layout = Layout(
             TabHolder(
@@ -132,6 +135,7 @@ class JourneyDetailsForm(forms.ModelForm):
             }
         widgets = {
             'start_date': DatePickerInput(
+                format='%d-%m-%Y',
                 attrs={
                     'class': 'form-control',
                     'append': 'fa fa-calendar',
@@ -139,12 +143,12 @@ class JourneyDetailsForm(forms.ModelForm):
                     'type': 'text',
                     },
                 options={
-                    "format": "DD/MM/YYYY",
                     "showClose": True,
                     "showClear": True,
                     "showTodayButton": True,
                 }),
             'end_date': DatePickerInput(
+                format='%d-%m-%Y',
                 attrs={
                     'class': 'form-control',
                     'append': 'fa fa-calendar',
@@ -152,7 +156,6 @@ class JourneyDetailsForm(forms.ModelForm):
                     'type':'text',
                     },
                 options={
-                    "format": "DD/MM/YYYY",
                     "showClose": True,
                     "showClear": True,
                     "showTodayButton": True,
@@ -187,12 +190,24 @@ class JourneyDetailsForm(forms.ModelForm):
         # extract the fields from the data
         mileage_start = self.cleaned_data.get('mileage_start')
         mileage_end = self.cleaned_data.get('mileage_end')
+        travel_from = self.cleaned_data.get('travel_from')
+        start_date = self.cleaned_data.get('start_date')
+        end_date = self.cleaned_data.get('end_date')
+
 
         # conditions to be met
         if mileage_start and mileage_end:
             if mileage_start >= mileage_end:
                 raise ValidationError \
                     ("The ending mileage must be greater than the starting mileage")
+
+        if len(travel_from) < 2:
+            raise ValidationError \
+                ("The starting point must have more than 1 character!")
+
+        if end_date and end_date < start_date:
+            raise ValidationError \
+                ("The end date must be the same or later than the start date")    
 
         # return any errors if found
         return self.cleaned_data
