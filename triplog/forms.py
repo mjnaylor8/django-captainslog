@@ -6,9 +6,10 @@ from django import forms
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
+from django.contrib.auth.forms import AuthenticationForm
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column, Fieldset, Field
-from crispy_forms.bootstrap import TabHolder, Tab
+from crispy_forms.bootstrap import TabHolder, Tab, FormActions
 from bootstrap_datepicker_plus import DatePickerInput, TimePickerInput
 from triplog.models import SiteInformation, JourneyDetails
 
@@ -206,3 +207,13 @@ class JourneyDetailsForm(forms.ModelForm):
 
         # return any errors if found
         return self.cleaned_data
+
+class LoginWithPlaceholder(AuthenticationForm):
+
+    def __init__(self, *args, **kwargs):
+        super(LoginWithPlaceholder, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_show_labels = False
+        self.helper.layout = Layout(Div(Field('username', placeholder='username'), css_class="form-group"),
+                                    Div(Field('password', placeholder='password'), css_class="form-group"),
+                                    Div(Submit('submit', 'Log in')))

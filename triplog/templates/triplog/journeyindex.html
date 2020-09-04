@@ -1,7 +1,14 @@
 {% extends "triplog/base.html" %}
 
+{% block navigation %}
+    {% include 'triplog/navigation.html' %}
+{% endblock %}
+
+
 {% block title %}
-    List of Journeys
+    {%if journey_details_title%}
+        {{journey_details_title}}
+    {%endif%}
 {% endblock %}
 
 {% block content %}

@@ -1,5 +1,9 @@
 {% extends "triplog/base.html" %}
 
+{% block navigation %}
+    {% include 'triplog/navigation.html' %}
+{% endblock %}
+
 {% block title %}
     {%if site_information_title%}
         {{site_information_title}}

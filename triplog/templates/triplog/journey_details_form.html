@@ -3,6 +3,11 @@
 {% load bootstrap4 %}
 {% load crispy_forms_tags %}
 
+{% block navigation %}
+    {% include 'triplog/navigation.html' %}
+{% endblock %}
+
+
 {% block title %}
     {%if journey_details_title%}
         {{journey_details_title}}

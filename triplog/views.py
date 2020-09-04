@@ -1,8 +1,15 @@
 """ Views defined """
 # Create your views here.
-from django.views.generic import CreateView, UpdateView, ListView
-from .models import SiteInformation, JourneyDetails
-from .forms import JourneyDetailsForm
+from django.shortcuts import render
+from django.views.generic import CreateView, UpdateView, ListView, FormView
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import authenticate, login
+from django.urls import reverse_lazy
+from braces import views
+from triplog.models import SiteInformation, JourneyDetails
+from triplog.forms import JourneyDetailsForm
+
 
 
 SITE_INFORMATION_FORM = "triplog/site_information_form.html"
@@ -10,8 +17,10 @@ JOURNEY_DETAILS_FORM = "triplog/journey_details_form.html"
 SUCCESS_SITEINDEX = "/siteindex/"
 SUCCESS_JOURNEYINDEX = "/journeyindex/"
 
-class AddSiteInformationView(CreateView):
+class AddSiteInformationView(LoginRequiredMixin, CreateView):
     """ Add site inforamtion view """
+    login_url = '/accounts/login/'
+    redirect_field_name = 'redirect_to'
     model = SiteInformation
     template_name = SITE_INFORMATION_FORM
     success_url = SUCCESS_SITEINDEX
@@ -20,11 +29,14 @@ class AddSiteInformationView(CreateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         site_title = 'Add Site Details'
-        context['site_infomation_title'] = site_title
+        context['site_information_title'] = site_title
         return context
 
-class ChangeSiteInformationView(UpdateView):
+
+class ChangeSiteInformationView(LoginRequiredMixin, UpdateView):
     """ change site information view """
+    login_url = '/accounts/login/'
+    redirect_field_name = 'redirect_to'
     model = SiteInformation
     template_name = SITE_INFORMATION_FORM
     success_url = SUCCESS_SITEINDEX
@@ -36,11 +48,14 @@ class ChangeSiteInformationView(UpdateView):
         context['site_information_title'] = site_title
         return context
 
-class SiteInformationView(ListView):
-    """ list site inforamtion view """
+class SiteInformationView(LoginRequiredMixin, ListView):
+    """ list site information view """
+    login_url = '/accounts/login/'
+    redirect_field_name = 'redirect_to'
     model = SiteInformation
     template_name = "triplog/siteindex.html"
     ordering = ["-created_date", ]
+    paginate_by = 10
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -48,12 +63,16 @@ class SiteInformationView(ListView):
         context['site_information_title'] = site_title
         return context
 
-class JourneyDetailsView(ListView):
+
+class JourneyDetailsView(LoginRequiredMixin, ListView):
     """ List journey details view """
+    login_url = '/accounts/login/'
+    redirect_field_name = 'redirect_to'
     model = JourneyDetails
     template_name = "triplog/journeyindex.html"
     success_url = SUCCESS_JOURNEYINDEX
     ordering = ["-start_date",]
+    paginate_by = 10
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -61,8 +80,11 @@ class JourneyDetailsView(ListView):
         context['journey_details_title'] = journey_title
         return context
 
-class AddJourneyDetailsView(CreateView):
+
+class AddJourneyDetailsView(LoginRequiredMixin, CreateView):
     """ add journey details view """
+    login_url = '/accounts/login/'
+    redirect_field_name = 'redirect_to'
     model = JourneyDetails
     template_name = JOURNEY_DETAILS_FORM
     success_url = SUCCESS_JOURNEYINDEX
@@ -70,7 +92,7 @@ class AddJourneyDetailsView(CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        journey_title = 'Add new Journey Details'
+        journey_title = 'Add a new Journey'
         context['journey_details_title'] = journey_title
         return context
 
@@ -84,8 +106,11 @@ class AddJourneyDetailsView(CreateView):
         print(response)
         return response
 
-class ChangeJourneyDetailsView(UpdateView):
+
+class ChangeJourneyDetailsView(LoginRequiredMixin, UpdateView):
     """ change journey details view """
+    login_url = '/accounts/login/'
+    redirect_field_name = 'redirect_to'
     model = JourneyDetails
     template_name = JOURNEY_DETAILS_FORM
     success_url = SUCCESS_JOURNEYINDEX
@@ -96,3 +121,27 @@ class ChangeJourneyDetailsView(UpdateView):
         journey_title = 'Change Journey Details'
         context['journey_details_title'] = journey_title
         return context
+
+@login_required(login_url='/accounts/login/')
+def index(request):
+    """View function for home page of site."""
+
+    # Generate counts of some of the main objects
+    num_sites = SiteInformation.objects.all().count()
+    num_journeys = JourneyDetails.objects.all().count()
+
+    # Number of visits to this view, as counted in the session variable.
+    num_visits = request.session.get('num_visits', 0)
+    request.session['num_visits'] = num_visits + 1
+    home_page_title = 'Home'
+
+    context = {
+        'num_sites': num_sites,
+        'num_journeys': num_journeys,
+        'num_visits': num_visits,
+        'home_page_title': home_page_title,
+    }
+
+    # Render the HTML template index.html with the data in the context variable
+    return render(request, 'triplog/index.html', context=context)
+

@@ -200,3 +200,7 @@ BOOTSTRAP4 = {
 
 #TEMPUS_DOMINUS_LOCALIZE = False
 #TEMPUS_DOMINUS_INCLUDE_ASSETS = True
+
+# Redirect to home URL after login (Default redirects to /accounts/profile/)
+LOGIN_REDIRECT_URL = '/triplog/'
+LOGIN_URL = 'accounts/login'

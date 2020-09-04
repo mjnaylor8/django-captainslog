@@ -9,8 +9,6 @@
     {# Include FontAwesome; required for icon display on date picker#}
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.css">
 
-
-
     {% load crispy_forms_tags %}
     {% load widget_tweaks %}
     
@@ -25,8 +23,6 @@
     {% bootstrap_css %}
     {% bootstrap_javascript jquery='full' %}
 
-
-
     <!-- Moment.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.23.0/moment.min.js" integrity="sha256-VBLiveTKyUZMEzJd6z2mhfxIqz3ZATCuVMawPZGzIfA=" crossorigin="anonymous"></script>
 
@@ -35,8 +31,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/js/tempusdominus-bootstrap-4.min.js" integrity="sha256-z0oKYg6xiLq3yJGsp/LsY9XykbweQlHl42jHv2XTBz4=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="{% static 'bootstrap-tab.js' %}">  </script>
     {% block head %}
-
-    <title>Captains Log - Triplog</title>
+        <title>Captains Log - Triplog</title>
     {% endblock %}
 </head>
 <body>
@@ -45,23 +40,11 @@
             <!--Use .container-fluid for a full width container, spanning the entire width of the viewport.-->
             <!--padding (p) 2 and margins (m) 2  (y) top and bottom Dark background with white text -->
             <div class="col-8">
-                <nav class="navbar navbar-expand-xl navbar-dark bg-dark">
-                    <!--<a class="navbar-brand" href="#">Captain's Log</a>-->
-                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                      </button>
-              
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav">
-                            <!-- mr-auto - margin right -->
-                            <li class="nav-item"><a class="nav-link" href="{% url 'journeyindex' %}">Journey Index <span class="sr-only">(current)</span></a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'addjourney' %}">Add Journey</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'addsite' %}">Add Site</a></li>
-                            <li class="nav-item"><a class="nav-link" href="{% url 'siteindex' %}">Site Index</a></li>
-                      </ul>
-                    </div>
-                  </nav>
-                <div class=ml-4>  <h2>{% block title %}(no title){% endblock %}</h2> </div>
+                {% block navigation %}
+                {% endblock navigation %}
+                <div class=ml-4>  
+                    <h2>{% block title %}(no title){% endblock %}</h2> 
+                </div>
             </div>
         </div>
         <div class="container-fluid">
@@ -70,9 +53,8 @@
                 {% block content %}(no content){% endblock %}
                 {{ form.media }}
             </div>
-
         </div>
-    {% endblock bootstrap4_content%}
+    {% endblock bootstrap4_content %}
     <footer>
         <p class="small ml-4" >&copy; Michael Naylor <script type="text/javascript">document.write( new Date().getFullYear() );</script></p>
     </footer>
