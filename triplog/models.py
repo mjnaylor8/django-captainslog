@@ -1,7 +1,9 @@
 """ Define Models """
 from django.contrib.gis.db import models
+from django.contrib.auth.models import User
 from mapbox_location_field.spatial.models import SpatialLocationField
 from mapbox_location_field.models import AddressAutoHiddenField
+
 
 # Create your models here.
 
@@ -121,10 +123,15 @@ class SiteInformation(models.Model):
     cost_extras = models.FloatField(null=True, blank=True)
     cost_currency = models.CharField(max_length=3, blank=True)
     created_date = models.DateTimeField(auto_now_add=True)
-    edited_date = models.DateTimeField(auto_now_add=True)
+    edited_date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return str(self.name)
+    
+    def date_created(self):
+        return self.created_date.strftime('%B %d %Y')
+    def date_edited(self):
+        return self.edited_date.strftime('%B %d %Y')
 
 
 class JourneyDetails(models.Model):
@@ -170,3 +177,8 @@ class JourneyDetails(models.Model):
     def __str__(self):
         return str('%s - %s - %s - %s' % \
             (self.start_date, self.start_time, self.end_date, self.end_time))
+
+    def date_created(self):
+        return self.created_date.strftime('%B %d %Y')
+    def date_edited(self):
+        return self.edited_date.strftime('%B %d %Y')

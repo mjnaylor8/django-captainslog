@@ -1,6 +1,7 @@
 {% extends "triplog/base.html" %}
 
 {% load bootstrap4 %}
+{% load crispy_forms_tags %}
 
 {% block navigation %}
     {% include 'triplog/navigation.html' %}
@@ -13,10 +14,8 @@
 {% endblock %}
 
 {% block content %}
-    <form method="post">
-        {% csrf_token %}
-        {% bootstrap_form form%}
-        <input class="btn btn-primary text-light btn-lg" type="submit" value="submit">
+    <form action="" method="post" novalidate>
+        {% crispy form %}
     </form>
     {{form.media}}
 {% endblock %}

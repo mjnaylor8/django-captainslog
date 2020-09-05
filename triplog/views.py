@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate, login
 from django.urls import reverse_lazy
 from braces import views
 from triplog.models import SiteInformation, JourneyDetails
-from triplog.forms import JourneyDetailsForm
+from triplog.forms import JourneyDetailsForm, SiteInformationForm
 
 
 
@@ -24,7 +24,8 @@ class AddSiteInformationView(LoginRequiredMixin, CreateView):
     model = SiteInformation
     template_name = SITE_INFORMATION_FORM
     success_url = SUCCESS_SITEINDEX
-    fields = ("name", "location", "address",)
+    form_class = SiteInformationForm
+#    fields = ("name", "location", "address",)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -40,7 +41,8 @@ class ChangeSiteInformationView(LoginRequiredMixin, UpdateView):
     model = SiteInformation
     template_name = SITE_INFORMATION_FORM
     success_url = SUCCESS_SITEINDEX
-    fields = ("name", "location", "address",)
+    form_class = SiteInformationForm
+#    fields = ("name", "location", "address",)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

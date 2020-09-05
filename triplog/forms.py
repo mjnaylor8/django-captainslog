@@ -19,10 +19,69 @@ STANDARD_COLUMN_CLASS_EVENWIDER = 'form-group col-md-8 mb-0'
 STANDARD_COLUMN_CLASS_FULLWIDTH = 'form-group col-md-12 mb-0'
 CSS_CLASS_FORMROW = 'form-row'
 ENTER_STARTING_LOCATION = 'Please enter the starting location'
+
 class SiteInformationForm(forms.ModelForm):
-    """
-    define the site information
-    """
+    """ define the site information """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper(self)
+        self.helper.form_id = 'id-sitedetailsForm'
+        self.helper.form_method = 'post' # get or post
+        self.helper.add_input(Submit('submit', 'Save Site', css_class='btn-primary btn-sm ml-2'))
+        self.helper.layout = Layout(
+            TabHolder(
+                Tab("Site Location",
+                    Row(
+                        Column('name', css_class=STANDARD_COLUMN_CLASS),
+                        css_class=CSS_CLASS_FORMROW
+                    ),
+                    Row(
+                        Column('location', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH),
+                        Column('address', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH),
+                        css_class=CSS_CLASS_FORMROW
+                    )
+                ),
+                Tab("Further Details",
+                    Row(
+                        Column('email', css_class=STANDARD_COLUMN_CLASS),
+                        Column('phone_number', css_class=STANDARD_COLUMN_CLASS),
+                        Column('cost_charges', css_class=STANDARD_COLUMN_CLASS),
+                        Column('cost_extras', css_class=STANDARD_COLUMN_CLASS),
+                        Column('cost_currency', css_class=STANDARD_COLUMN_CLASS),
+                        css_class=CSS_CLASS_FORMROW
+                    ),
+                    Row(
+                        Column('greeting', css_class=STANDARD_COLUMN_CLASS),
+                        Column('ambience', css_class=STANDARD_COLUMN_CLASS),
+                        Column('security', css_class=STANDARD_COLUMN_CLASS),
+                        css_class=CSS_CLASS_FORMROW
+                    ),
+                    Row(
+                        Column('pitch_type', css_class=STANDARD_COLUMN_CLASS),
+                        Column('pitch_level', css_class=STANDARD_COLUMN_CLASS),
+                        Column('hook_up', css_class=STANDARD_COLUMN_CLASS),
+                        css_class=CSS_CLASS_FORMROW
+                    ),
+                    Row(
+                        Column('wifi', css_class=STANDARD_COLUMN_CLASS),
+                        Column('tv_signal', css_class=STANDARD_COLUMN_CLASS),                     
+                        Column('phone_signal_3G_4G', css_class=STANDARD_COLUMN_CLASS),
+                        css_class=CSS_CLASS_FORMROW
+                    ),
+                    Row(
+                        Column('pets', css_class=STANDARD_COLUMN_CLASS),
+                        Column('children', css_class=STANDARD_COLUMN_CLASS),                     
+                        Column('laundry', css_class=STANDARD_COLUMN_CLASS),
+                        css_class=CSS_CLASS_FORMROW
+                    ),
+                    Row(
+                        Column('date_edited', css_class=STANDARD_COLUMN_CLASS),
+                        Column('date_created', css_class=STANDARD_COLUMN_CLASS),             
+                        css_class=CSS_CLASS_FORMROW
+                    ),
+                ),
+            ),
+        )
     class Meta:
         model = SiteInformation
         fields = "__all__"
@@ -96,6 +155,11 @@ class JourneyDetailsForm(forms.ModelForm):
                             css_class=CSS_CLASS_FORMROW
                             ),
                         ),
+                    Row(
+                        Column('date_edited', css_class=STANDARD_COLUMN_CLASS),
+                        Column('date_created', css_class=STANDARD_COLUMN_CLASS),
+                        css_class=CSS_CLASS_FORMROW
+                    ),
                     )
                 )
             )
