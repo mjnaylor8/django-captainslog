@@ -35,7 +35,8 @@ MAPBOX_KEY = env.str('MAPBOX_ACCESS_TOKEN')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', default=False)
 
-ALLOWED_HOSTS = ["192.168.1.250"]
+ALLOWED_HOSTS = ["192.168.1.250",
+                "captainslog.thenaylors.co.uk",]
 
 
 # Application definition
@@ -148,8 +149,9 @@ DATE_INPUT_FORMATS = ['%Y-%m-%d', '%m/%d/%Y', '%m/%d/%y', '%d-%m-%Y']
 
 STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+STATICFILES_DIRS = []
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder'
@@ -204,3 +206,5 @@ BOOTSTRAP4 = {
 # Redirect to home URL after login (Default redirects to /accounts/profile/)
 LOGIN_REDIRECT_URL = '/triplog/'
 LOGIN_URL = 'accounts/login'
+
+

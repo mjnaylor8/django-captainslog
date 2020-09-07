@@ -14,8 +14,8 @@ from triplog.forms import JourneyDetailsForm, SiteInformationForm
 
 SITE_INFORMATION_FORM = "triplog/site_information_form.html"
 JOURNEY_DETAILS_FORM = "triplog/journey_details_form.html"
-SUCCESS_SITEINDEX = "/siteindex/"
-SUCCESS_JOURNEYINDEX = "/journeyindex/"
+SUCCESS_SITEINDEX = "/triplog/siteindex/"
+SUCCESS_JOURNEYINDEX = "/triplog/journeyindex/"
 
 class AddSiteInformationView(LoginRequiredMixin, CreateView):
     """ Add site inforamtion view """

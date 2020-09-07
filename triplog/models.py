@@ -127,9 +127,10 @@ class SiteInformation(models.Model):
 
     def __str__(self):
         return str(self.name)
-    
+    @property
     def date_created(self):
         return self.created_date.strftime('%B %d %Y')
+    @property
     def date_edited(self):
         return self.edited_date.strftime('%B %d %Y')
 
@@ -169,7 +170,7 @@ class JourneyDetails(models.Model):
     toll_currency = models.CharField(max_length=3, blank=True)
     created_date = models.DateTimeField(auto_now_add=True, null=True)
     edited_date = models.DateTimeField(auto_now_add=True, null=True)
-    star_rating = models.CharField(choices=STAR_RATING_CHOICES, max_length=256)
+    star_rating = models.CharField(blank=True, choices=STAR_RATING_CHOICES, max_length=256, null=True)
     would_return = models.BooleanField(blank=True, choices=TRUE_FALSE_CHOICES, null=True)
     notes = models.CharField(max_length=1024, blank=True, null=True)
     destination = models.ForeignKey(SiteInformation, models.SET_NULL, null=True)
