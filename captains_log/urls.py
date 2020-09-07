@@ -15,16 +15,23 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.views.generic import TemplateView
 from django.conf import settings
-from django.conf.urls.static import static
+from django.views.generic import RedirectView
+mapbox_access_token = settings.MAPBOX_KEY
 
-mapbox_access_token = settings.MAPBOX_ACCESS_TOKEN
+
 
 urlpatterns = [
-    path('maps/', include('sitemaps.urls', namespace = "sitemaps")),
+    path('maps/', include('sitemaps.urls', namespace='sitemaps')),
     path('admin/', admin.site.urls),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('triplog/', include('triplog.urls')),
+]
+
+urlpatterns += [
+    path('accounts/', include('django.contrib.auth.urls')),
+]
 
 
-
+urlpatterns += [
+    path('', RedirectView.as_view(url='/accounts/login/', permanent=True)),
+]

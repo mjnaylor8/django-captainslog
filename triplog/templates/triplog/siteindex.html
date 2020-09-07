@@ -1,0 +1,39 @@
+{% extends "triplog/base.html" %}
+
+{% block navigation %}
+    {% include 'triplog/navigation.html' %}
+{% endblock %}
+
+{% block title %}
+    {%if site_information_title%}
+        {{site_information_title}}
+    {%endif%}
+{% endblock %}
+
+{% block content %}
+    <button type=button class="mx-3 btn btn-success" href="{% url 'addsite' %}">Add New Site</button>
+    <h4 class="ml-3">Site Information:</h4>
+    <div class="container-fluid">
+        <table class="table table-striped">
+            <thead class="thead-dark">
+                <th scope="col">Name</th>
+                <th scope="col">Address & Location</th>
+                <th scope="col">Email</th>
+                <th scope="col">Phone #</th>
+                <th></th>
+            </thead>       
+            <tbody>
+                {% for SiteInformation in object_list %}
+                <tr>
+                    <td>{{ SiteInformation.name}}</td>
+                    <td>{{ SiteInformation.address}} <br> <span class="small"> {{ SiteInformation.location}} </span></td>
+                    <td>{{ SiteInformation.email}}</td>
+                    <td>{{ SiteInformation.phone_number}}</td>
+                    <td><a href="{% url 'changesite' SiteInformation.pk %}" class="btn btn-secondary">CHANGE</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock %}

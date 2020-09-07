@@ -1,0 +1,22 @@
+{% extends "triplog/base.html" %}
+
+{% load bootstrap4 %}
+{% load crispy_forms_tags %}
+
+{% block navigation %}
+    {% include 'triplog/navigation.html' %}
+{% endblock %}
+
+
+{% block title %}
+    {%if journey_details_title%}
+        {{journey_details_title}}
+    {%endif%}
+{% endblock %}
+
+
+{% block content %}
+<form action="" method="post" novalidate>
+    {% crispy form %}
+</form>
+{% endblock %}

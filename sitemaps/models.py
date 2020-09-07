@@ -1,5 +1,6 @@
 from django.contrib.gis.db import models
 from djgeojson.fields import PointField
+from mapbox_location_field.spatial.models import SpatialLocationField
 
 # Create your models here.
 

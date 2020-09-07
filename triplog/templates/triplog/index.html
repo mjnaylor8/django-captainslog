@@ -1,0 +1,30 @@
+{% extends "triplog/base.html" %}
+
+{% load bootstrap4 %}
+{% load crispy_forms_tags %}
+
+{% block navigation %}
+    {% include 'triplog/navigation.html' %}
+{% endblock %}
+
+{% block title %}
+    {%if home_page_title%}
+        {{home_page_title}}
+    {%endif%}
+{% endblock %}
+
+{% block content %}
+    {% csrf_token %}
+    <h2>Captain's Log</h2>
+        <p>Welcome to Captain's Log, a website developed by <em>Michael Naylor</em>!</p>
+        <p>This site allows logging of journeys made and sites visited in a Motorhome!</p>
+    <h2>Contents</h2>
+        <p>The site has the following:</p>
+    <ul>
+        <li><strong><a href="{% url 'siteindex' %}">Sites:</strong></a> {{ num_sites }}</li>
+        <li><strong><a href="{% url 'journeyindex' %}">Journeys:</strong></a> {{ num_journeys }}</li>
+        <li><strong><a href="{% url 'addsite' %}">Add a new Site</strong></a></li>
+        <li><strong><a href="{% url 'addjourney' %}">Add a new Journey</strong></a></li>
+    </ul>
+    <p>You have visited this page {{ num_visits }}{% if num_visits == 1 %} time{% else %} times{% endif %}.</p>
+{% endblock %}

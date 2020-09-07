@@ -1,71 +1,129 @@
+""" Tests """
+import random
+import datetime
 from django.test import TestCase
 from django.utils import timezone
-import datetime
-from django.contrib.gis.geos import Point
-from factory.fuzzy import BaseFuzzyAttribute
-import factory.django
-import random
-from triplog.models import Journey_Details
-from triplog.models import Site_Information
-from triplog.models import Site_Facilities
 from django.test import RequestFactory
 from django.urls import reverse
+from django.contrib.gis.geos import Point
+
+from factory.fuzzy import BaseFuzzyAttribute
+import factory.django
+
+
+from triplog.models import JourneyDetails
+from triplog.models import SiteInformation
+from triplog.views import JourneyDetailsView
 
 # Create your tests here.
 
 class FuzzyPoint(BaseFuzzyAttribute):
+    """ Fuzzy Point for testing maps """
     def fuzz(self):
         return Point(random.uniform(-180.0, 180.0),
-                     random.uniform(-90.0,90.0))
+                     random.uniform(-90.0, 90.0))
 
-class Site_InformationFactory(factory.django.DjangoModelFactory):
+class SiteInformationFactory(factory.django.DjangoModelFactory):
+    """ Create SiteInformation """
     class Meta:
         # Create Site information
-        model = Site_Information
+        model = SiteInformation
         django_get_or_create = (
             'name',
-            'address_line1',
-            'address_line2',
-            'address_line3',
-            'address_code',
+            'address',
             'location',
             'email',
-            'phone_number'
+            'phone_number',
+            'greeting',
+            'pitch_type',
+            'pitch_level',
+            'hook_up',
+            'waste',
+            'toilets',
+            'ambience',
+            'security',
+            'wifi',
+            'tv_signal',
+            'phone_signal_3G_4G',
+            'pets',
+            'children',
+            'laundry',
+            'cost_charges',
+            'cost_extras',
+            'cost_currency',
+            'created_date',
         )
-       
-    name = 'test site name'
-    address_line1 ='address line 1'
-    address_line2 ='address line 2'
-    address_line3 ='address line 3'
-    location = FuzzyPoint()
-    email  = 'fred.com'
-    address_code = 'address code'
-    phone_number = '1274-234'
 
-class Site_InformationTest(TestCase):
+    name = 'test site name'
+    address = 'address'
+    location = FuzzyPoint()
+    email = 'fred.com'
+    address = 'address'
+    phone_number = '1274-234'
+    greeting = "Good"
+    pitch_type = "Grass"
+    pitch_level = "Level"
+    hook_up = "10A"
+    waste = "On Pitch"
+    toilets = "Clean"
+    ambience = "Peaceful"
+    security = "Good"
+    wifi = True
+    tv_signal = "Good"
+    phone_signal_3G_4G = "Good"
+    pets = True
+    children = True
+    laundry = True
+    cost_charges = 10.02
+    cost_extras = 0.20
+    cost_currency = "£"
+    created_date = timezone.now()
+
+class SiteInformationTest(TestCase):
+    """ Test SiteInformation """
     def test_create_site_information(self):
+        """ Test SiteInformation """
         #create the site
-        site_information = Site_InformationFactory()
+        site_information = SiteInformationFactory()
 
         # checks
-        all_sites = Site_Information.objects.all()
-        self.assertEquals(len(all_sites),1)
+        all_sites = SiteInformation.objects.all()
+        self.assertEqual(len(all_sites), 1)
         only_site = all_sites[0]
-        self.assertEquals(only_site, site_information)
+        self.assertEqual(only_site, site_information)
 
         # Check attributes
-        self.assertEquals(only_site.name, 'test site name')
-        self.assertEquals(only_site.address_line1, 'address line 1')
-        self.assertEquals(only_site.address_line2, 'address line 2')
-        self.assertEquals(only_site.address_line3, 'address line 3')
-        self.assertEquals(only_site.address_code, 'address code')
-        self.assertEquals(only_site.phone_number, '1274-234')
+        self.assertEqual(only_site.name, 'test site name')
+        self.assertEqual(only_site.address, 'address')
+        self.assertEqual(only_site.phone_number, '1274-234')
+        self.assertEqual(only_site.greeting, 'Good')
+        self.assertEqual(only_site.pitch_type, 'Grass')
+        self.assertEqual(only_site.pitch_level, 'Level')
+        self.assertEqual(only_site.hook_up, '10A')
+        self.assertEqual(only_site.waste, 'On Pitch')
+        self.assertEqual(only_site.toilets, 'Clean')
+        self.assertEqual(only_site.ambience, 'Peaceful')
+        self.assertEqual(only_site.wifi, True)
+        self.assertEqual(only_site.phone_signal_3G_4G, 'Good')
+        self.assertEqual(only_site.tv_signal, 'Good')
+        self.assertEqual(only_site.pets, True)
+        self.assertEqual(only_site.children, True)
+        self.assertEqual(only_site.laundry, True)
+        self.assertEqual(only_site.cost_charges, 10.02)
+        self.assertEqual(only_site.cost_extras, 0.20)
+        self.assertEqual(only_site.cost_currency, '£')
+        self.assertEqual(only_site.created_date.hour, only_site.created_date.hour)
+        self.assertEqual(only_site.created_date.minute, only_site.created_date.minute)
+        self.assertEqual(only_site.created_date.second, only_site.created_date.second)
+        self.assertEqual(only_site.created_date.day, only_site.created_date.day)
+        self.assertEqual(only_site.created_date.month, only_site.created_date.month)
+        self.assertEqual(only_site.created_date.year, only_site.created_date.year)
 
-
-class Journey_DetailsFactory(factory.django.DjangoModelFactory):
+class JourneyDetailsFactory(factory.django.DjangoModelFactory):
+    """ Create JourneyDetails """
     class Meta:
-        # Create Site information
-        model = Journey_Details
+        # Create Journey Information
+        model = JourneyDetails
         django_get_or_create = (
             'start_date',
             'end_date',
@@ -84,7 +142,8 @@ class Journey_DetailsFactory(factory.django.DjangoModelFactory):
             'edited_date',
             'star_rating',
             'would_return',
-            'notes'
+            'notes',
+            'destination',
         )
     start_date = datetime.date(2020, 7, 2)
     end_date = datetime.date(2020, 7, 3)
@@ -105,51 +164,71 @@ class Journey_DetailsFactory(factory.django.DjangoModelFactory):
     would_return = True
     notes = 'Nice Site'
 
-class Journey_DetailsTest(TestCase):
+
+class JourneyDetailsTest(TestCase):
+    """ Test JourneyDetails """
     def test_create_journey_details(self):
+        """ Test JourneyDetails """
+        site = SiteInformationFactory()
         # Create the journey_details
-        journey_details = Journey_DetailsFactory()
-        #In test will have nnow been added to the database and now need to test we 
+        journey_details = JourneyDetailsFactory(destination=site)
+
+        #In test will have now been added to the database and now need to test we
         #can save OK and retrieve it
 
-        all_journeys = Journey_Details.objects.all()
-        self.assertEquals(len(all_journeys),1)
+        all_journeys = JourneyDetails.objects.all()
+        self.assertEqual(len(all_journeys), 1)
         only_journey = all_journeys[0]
-        self.assertEquals(only_journey, journey_details)
+        self.assertEqual(only_journey, journey_details)
 
         # Check attributes
-        self.assertEquals(only_journey.start_date.day, journey_details.start_date.day)
-        self.assertEquals(only_journey.start_date.month, journey_details.start_date.month)
-        self.assertEquals(only_journey.start_date.year, journey_details.start_date.year)
-        self.assertEquals(only_journey.end_date.day, journey_details.end_date.day)
-        self.assertEquals(only_journey.end_date.month, journey_details.end_date.month)
-        self.assertEquals(only_journey.end_date.year, journey_details.end_date.year)    
-        self.assertEquals(only_journey.weather, 'Sunny')
-        self.assertEquals(only_journey.travel_from, 'London')
-        self.assertEquals(only_journey.travel_to, 'Rowledge')
-        self.assertEquals(only_journey.start_time.hour, journey_details.start_time.hour)
-        self.assertEquals(only_journey.start_time.minute, journey_details.start_time.minute)
-        self.assertEquals(only_journey.start_time.second, journey_details.start_time.second)
-        self.assertEquals(only_journey.end_time.hour, journey_details.end_time.hour)
-        self.assertEquals(only_journey.end_time.minute, journey_details.end_time.minute)
-        self.assertEquals(only_journey.end_time.second, journey_details.end_time.second)
-        self.assertEquals(only_journey.mileage_start,2312.0)
-        self.assertEquals(only_journey.mileage_end,2420.0)
-        self.assertEquals(only_journey.distance,108.0)
-        self.assertEquals(only_journey.toll_charges, 32.12)
-        self.assertEquals(only_journey.toll_currency, '£')
-        self.assertEquals(only_journey.created_date.day, journey_details.created_date.day)
-        self.assertEquals(only_journey.created_date.month, journey_details.created_date.month)
-        self.assertEquals(only_journey.created_date.year, journey_details.created_date.year)
-        self.assertEquals(only_journey.created_date.hour, journey_details.created_date.hour)
-        self.assertEquals(only_journey.created_date.minute, journey_details.created_date.minute)
-        self.assertEquals(only_journey.created_date.second, journey_details.created_date.second)       
-        self.assertEquals(only_journey.edited_date.day, journey_details.edited_date.day)
-        self.assertEquals(only_journey.edited_date.month, journey_details.edited_date.month)
-        self.assertEquals(only_journey.edited_date.year, journey_details.edited_date.year)
-        self.assertEquals(only_journey.edited_date.hour, journey_details.edited_date.hour)
-        self.assertEquals(only_journey.edited_date.minute, journey_details.edited_date.minute)
-        self.assertEquals(only_journey.edited_date.second, journey_details.edited_date.second)
-        self.assertEquals(only_journey.star_rating, 'Three')
-        self.assertEquals(only_journey.would_return, True)
-        self.assertEquals(only_journey.notes, 'Nice Site')   
+        self.assertEqual(only_journey.start_date.day, journey_details.start_date.day)
+        self.assertEqual(only_journey.start_date.month, journey_details.start_date.month)
+        self.assertEqual(only_journey.start_date.year, journey_details.start_date.year)
+        self.assertEqual(only_journey.end_date.day, journey_details.end_date.day)
+        self.assertEqual(only_journey.end_date.month, journey_details.end_date.month)
+        self.assertEqual(only_journey.end_date.year, journey_details.end_date.year)
+        self.assertEqual(only_journey.weather, 'Sunny')
+        self.assertEqual(only_journey.travel_from, 'London')
+        self.assertEqual(only_journey.travel_to, 'Rowledge')
+        self.assertEqual(only_journey.start_time.hour, journey_details.start_time.hour)
+        self.assertEqual(only_journey.start_time.minute, journey_details.start_time.minute)
+        self.assertEqual(only_journey.start_time.second, journey_details.start_time.second)
+        self.assertEqual(only_journey.end_time.hour, journey_details.end_time.hour)
+        self.assertEqual(only_journey.end_time.minute, journey_details.end_time.minute)
+        self.assertEqual(only_journey.end_time.second, journey_details.end_time.second)
+        self.assertEqual(only_journey.mileage_start, 2312.0)
+        self.assertEqual(only_journey.mileage_end, 2420.0)
+        self.assertEqual(only_journey.distance, 108.0)
+        self.assertEqual(only_journey.toll_charges, 32.12)
+        self.assertEqual(only_journey.toll_currency, '£')
+        self.assertEqual(only_journey.created_date.day, journey_details.created_date.day)
+        self.assertEqual(only_journey.created_date.month, journey_details.created_date.month)
+        self.assertEqual(only_journey.created_date.year, journey_details.created_date.year)
+        self.assertEqual(only_journey.created_date.hour, journey_details.created_date.hour)
+        self.assertEqual(only_journey.created_date.minute, journey_details.created_date.minute)
+        self.assertEqual(only_journey.created_date.second, journey_details.created_date.second)
+        self.assertEqual(only_journey.edited_date.day, journey_details.edited_date.day)
+        self.assertEqual(only_journey.edited_date.month, journey_details.edited_date.month)
+        self.assertEqual(only_journey.edited_date.year, journey_details.edited_date.year)
+        self.assertEqual(only_journey.edited_date.hour, journey_details.edited_date.hour)
+        self.assertEqual(only_journey.edited_date.minute, journey_details.edited_date.minute)
+        self.assertEqual(only_journey.edited_date.second, journey_details.edited_date.second)
+        self.assertEqual(only_journey.star_rating, 'Three')
+        self.assertEqual(only_journey.would_return, True)
+        self.assertEqual(only_journey.notes, 'Nice Site')
+        self.assertEqual(only_journey.destination, site)
+        self.assertEqual(only_journey.destination.name, 'test site name')
+
+class JourneyDetailsViewTest(TestCase):
+    """ Test Journey_DetailView """
+    def setUp(self):
+        """ Test Journey_DetailView """
+        self.factory = RequestFactory()
+
+    def test_get(self):
+        """ Test Journey_DetailView """
+        request = self.factory.get(reverse('journeyindex'))
+        response = JourneyDetailsView.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed('triplog/journey_index.html')

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+    {% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" integrity="sha256-gvEnj2axkqIj4wbYhPjbWV7zttgpzBVEgHub9AAZQD4=" crossorigin="anonymous" />
+    <link href="{% static 'triplog/style.css' %}" rel="stylesheet" type="text/css">
+    {# Include FontAwesome; required for icon display on date picker#}
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.css">
+
+    {% load crispy_forms_tags %}
+    {% load widget_tweaks %}
+    
+    {% load mapbox_location_field_tags %}
+    {% location_field_includes %}
+    {% include_jquery %}
+    
+    {# Load the tag library #}
+    {% load bootstrap4 %}
+
+    {# Load CSS and JavaScript #}
+    {% bootstrap_css %}
+    {% bootstrap_javascript jquery='full' %}
+
+    <!-- Moment.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.23.0/moment.min.js" integrity="sha256-VBLiveTKyUZMEzJd6z2mhfxIqz3ZATCuVMawPZGzIfA=" crossorigin="anonymous"></script>
+
+    <!-- Tempus Dominus Bootstrap 4 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css" integrity="sha256-XPTBwC3SBoWHSmKasAk01c08M6sIA5gF5+sRxqak2Qs=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/js/tempusdominus-bootstrap-4.min.js" integrity="sha256-z0oKYg6xiLq3yJGsp/LsY9XykbweQlHl42jHv2XTBz4=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="{% static 'bootstrap-tab.js' %}">  </script>
+    {% block head %}
+        <title>Captains Log - Triplog</title>
+    {% endblock %}
+</head>
+<body>
+    {% block bootstrap4_content %}
+        <div class="container-fluid p-2 my-2 bg-dark text-white">
+            <!--Use .container-fluid for a full width container, spanning the entire width of the viewport.-->
+            <!--padding (p) 2 and margins (m) 2  (y) top and bottom Dark background with white text -->
+            <div class="col-8">
+                {% block navigation %}
+                {% endblock navigation %}
+                <div class=ml-4>  
+                    <h2>{% block title %}(no title){% endblock %}</h2> 
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+            <div class="col-12">
+                {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
+                {% block content %}(no content){% endblock %}
+                {{ form.media }}
+            </div>
+        </div>
+    {% endblock bootstrap4_content %}
+    <footer>
+        <p class="small ml-4" >&copy; Michael Naylor <script type="text/javascript">document.write( new Date().getFullYear() );</script></p>
+    </footer>
+
+</body>
+</html>

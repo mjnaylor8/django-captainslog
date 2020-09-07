@@ -1,34 +1,22 @@
-from django.contrib import admin
-import floppyforms as forms
-from triplog.models import Site_Information, Site_Facilities, Journey_Details
-from floppyforms.gis import PointWidget, BaseOsmWidget
-from django.forms import ModelForm
+""" Admin defined """
+from django.contrib.gis import admin
+from mapbox_location_field.spatial.admin import SpatialMapAdmin
+from triplog.models import SiteInformation, JourneyDetails
 
-# Register your models here.
 
-class CustomPointWidget(PointWidget, BaseOsmWidget):
-    class Media:
-        js = ('/static/floppyforms/js/MapWidget.js',)
+# Register models.
 
-class Site_InformationAdminForm(ModelForm):
-    class Meta:
-            model = Site_Information
-            fields = [
-                'name',
-                'address_line1',
-                'address_line2',
-                'address_line3',
-                'address_code',
-                'location',
-                'email',
-                'phone_number'
-            ]
-            widgets = {
-                'location': CustomPointWidget
-            }
-class Site_InformationAdmin (admin.ModelAdmin):
-    form = Site_InformationAdminForm
+@admin.register(SiteInformation)
+class SiteInformationAdmin(SpatialMapAdmin):
+    """ Admin for SiteInformation defined """
+    list_display = ("name", "address", "location")
+    ordering = ("name",)
+    search_fields = ("name",)
+    readonly_fields = ("created_date", "edited_date")
 
-admin.site.register(Site_Information, Site_InformationAdmin)
-admin.site.register(Site_Facilities)
-admin.site.register(Journey_Details)
+@admin.register(JourneyDetails)
+class JourneyDetailsAdmin(admin.ModelAdmin):
+    """ Admin for JourneyDetails defined """
+    list_display = ("start_date", "travel_from", "travel_to")
+    search_fields = ("start_date",)
+    readonly_fields = ("created_date", "edited_date")
