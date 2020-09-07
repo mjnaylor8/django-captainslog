@@ -169,7 +169,7 @@ class JourneyDetails(models.Model):
     toll_charges = models.FloatField(blank=True, null=True)
     toll_currency = models.CharField(max_length=3, blank=True)
     created_date = models.DateTimeField(auto_now_add=True, null=True)
-    edited_date = models.DateTimeField(auto_now_add=True, null=True)
+    edited_date = models.DateTimeField(auto_now=True, null=True)
     star_rating = models.CharField(blank=True, choices=STAR_RATING_CHOICES, max_length=256, null=True)
     would_return = models.BooleanField(blank=True, choices=TRUE_FALSE_CHOICES, null=True)
     notes = models.CharField(max_length=1024, blank=True, null=True)
