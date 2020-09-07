@@ -39,7 +39,12 @@ class SiteInformationForm(forms.ModelForm):
                         Column('location', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH),
                         Column('address', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH),
                         css_class=CSS_CLASS_FORMROW
-                    )
+                    ),
+                    Row(
+                        Column('star_rating', css_class=STANDARD_COLUMN_CLASS),
+                        Column('would_return', css_class=STANDARD_COLUMN_CLASS),
+                        css_class=CSS_CLASS_FORMROW
+                    ),
                 ),
                 Tab("Further Details",
                     Row(
@@ -75,6 +80,10 @@ class SiteInformationForm(forms.ModelForm):
                         css_class=CSS_CLASS_FORMROW
                     ),
                     Row(
+                        Column('notes', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH),
+                        css_class=CSS_CLASS_FORMROW
+                    ),
+                    Row(
                         Column('date_edited', css_class=STANDARD_COLUMN_CLASS),
                         Column('date_created', css_class=STANDARD_COLUMN_CLASS),             
                         css_class=CSS_CLASS_FORMROW
@@ -85,6 +94,13 @@ class SiteInformationForm(forms.ModelForm):
     class Meta:
         model = SiteInformation
         fields = "__all__"
+        help_texts = {
+            'star_rating': _('Select the number of stars to give the destination'),
+        }
+        widgets = {
+            'notes': forms.Textarea(attrs={'placeholder': 'Enter Notes on the site', \
+                'class': 'form-control'}),
+        }
 
 class JourneyDetailsForm(forms.ModelForm):
     """ define the journey details """
@@ -127,10 +143,6 @@ class JourneyDetailsForm(forms.ModelForm):
                     Fieldset(
                         'Destination',
                         Field('destination', css_class=STANDARD_COLUMN_CLASS_WIDER),
-                        Row(
-                            Column('star_rating', css_class=STANDARD_COLUMN_CLASS),
-                            Column('would_return', css_class=STANDARD_COLUMN_CLASS)
-                        ),
                         Field('notes', css_class=STANDARD_COLUMN_CLASS_EVENWIDER),
                         ),
                     ),
@@ -186,7 +198,6 @@ class JourneyDetailsForm(forms.ModelForm):
             'mileage_start': _('Enter start mileage'),
             'mileage_end': _('Enter end mileage'),
             'destination': _('Select the site destination'),
-            'star_rating': _('Select the number of stars to give the destination'),
             }
         error_messages = {
             'travel_from': {
@@ -220,7 +231,7 @@ class JourneyDetailsForm(forms.ModelForm):
                     "showClear": True,
                     "showTodayButton": True,
                 }),
-            'notes': forms.Textarea(attrs={'placeholder': 'Enter Notes on the journey and site', \
+            'notes': forms.Textarea(attrs={'placeholder': 'Enter Notes on the journey', \
                 'class': 'form-control'}),
             'travel_from' : forms.TextInput(attrs={'placeholder': 'Starting Point', \
                 'class': 'form-control', \

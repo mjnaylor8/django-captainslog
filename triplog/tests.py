@@ -32,6 +32,8 @@ class SiteInformationFactory(factory.django.DjangoModelFactory):
             'name',
             'address',
             'location',
+            'star_rating',
+            'would_return',
             'email',
             'phone_number',
             'greeting',
@@ -57,6 +59,8 @@ class SiteInformationFactory(factory.django.DjangoModelFactory):
     name = 'test site name'
     address = 'address'
     location = FuzzyPoint()
+    star_rating = 'Three'
+    would_return = True
     email = 'fred.com'
     address = 'address'
     phone_number = '1274-234'
@@ -96,6 +100,8 @@ class SiteInformationTest(TestCase):
         self.assertEqual(only_site.name, 'test site name')
         self.assertEqual(only_site.address, 'address')
         self.assertEqual(only_site.phone_number, '1274-234')
+        self.assertEqual(only_site.star_rating, 'Three')
+        self.assertEqual(only_site.would_return, True)
         self.assertEqual(only_site.greeting, 'Good')
         self.assertEqual(only_site.pitch_type, 'Grass')
         self.assertEqual(only_site.pitch_level, 'Level')
@@ -140,8 +146,6 @@ class JourneyDetailsFactory(factory.django.DjangoModelFactory):
             'toll_currency',
             'created_date',
             'edited_date',
-            'star_rating',
-            'would_return',
             'notes',
             'destination',
         )
@@ -160,8 +164,6 @@ class JourneyDetailsFactory(factory.django.DjangoModelFactory):
     toll_currency = '£'
     created_date = timezone.now()
     edited_date = timezone.now()
-    star_rating = 'Three'
-    would_return = True
     notes = 'Nice Site'
 
 
@@ -214,8 +216,6 @@ class JourneyDetailsTest(TestCase):
         self.assertEqual(only_journey.edited_date.hour, journey_details.edited_date.hour)
         self.assertEqual(only_journey.edited_date.minute, journey_details.edited_date.minute)
         self.assertEqual(only_journey.edited_date.second, journey_details.edited_date.second)
-        self.assertEqual(only_journey.star_rating, 'Three')
-        self.assertEqual(only_journey.would_return, True)
         self.assertEqual(only_journey.notes, 'Nice Site')
         self.assertEqual(only_journey.destination, site)
         self.assertEqual(only_journey.destination.name, 'test site name')
