@@ -9,6 +9,20 @@ from mapbox_location_field.models import AddressAutoHiddenField
 
 class SiteInformation(models.Model):
     """ Define SiteInformation Model """
+    ONESTAR = '*'
+    TWOSTAR = '**'
+    THREESTAR = '***'
+    FOURSTAR = '****'
+    FIVESTAR = '*****'
+    STAR_RATING_CHOICES = [
+        ('', 'Choose...'),
+        (ONESTAR, "One Star"),
+        (TWOSTAR, "Two Star"),
+        (THREESTAR, "Three Star"),
+        (FOURSTAR, "Four Star"),
+        (FIVESTAR, "Five Star"),
+    ]
+
     EXCELLENT = "Excellent"
     GOOD = "Good"
     INDIFFERENT = "Indifferent"
@@ -104,6 +118,8 @@ class SiteInformation(models.Model):
         "center": [-0.827610, 51.182250],
         "placeholder": "Pick a location on the map below",
         })
+    star_rating = models.CharField(blank=True, choices=STAR_RATING_CHOICES, max_length=256, null=True)
+    would_return = models.BooleanField(blank=True, choices=TRUE_FALSE_CHOICES, null=True)
     greeting = models.CharField(max_length=256, blank=True, choices=GREETING_CHOICES)
     pitch_type = models.CharField(max_length=256, blank=True, choices=PITCH_LEVELS_CHOICES)
     pitch_level = models.CharField(max_length=256, blank=True, choices=PITCH_LEVELS_CHOICES)
@@ -122,6 +138,7 @@ class SiteInformation(models.Model):
     cost_charges = models.FloatField(null=True, blank=True)
     cost_extras = models.FloatField(null=True, blank=True)
     cost_currency = models.CharField(max_length=3, blank=True)
+    notes = models.CharField(max_length=1024, blank=True, null=True)
     created_date = models.DateTimeField(auto_now_add=True)
     edited_date = models.DateTimeField(auto_now=True)
 
@@ -138,19 +155,7 @@ class SiteInformation(models.Model):
 class JourneyDetails(models.Model):
     """ Define JourneyDetails Model """
 
-    ONESTAR = '*'
-    TWOSTAR = '**'
-    THREESTAR = '***'
-    FOURSTAR = '****'
-    FIVESTAR = '*****'
-    STAR_RATING_CHOICES = [
-        ('', 'Choose...'),
-        (ONESTAR, "One Star"),
-        (TWOSTAR, "Two Star"),
-        (THREESTAR, "Three Star"),
-        (FOURSTAR, "Four Star"),
-        (FIVESTAR, "Five Star"),
-    ]
+    
     TRUE_FALSE_CHOICES = [
         (True, "Yes"),
         (False, "No")
@@ -170,8 +175,6 @@ class JourneyDetails(models.Model):
     toll_currency = models.CharField(max_length=3, blank=True)
     created_date = models.DateTimeField(auto_now_add=True, null=True)
     edited_date = models.DateTimeField(auto_now=True, null=True)
-    star_rating = models.CharField(blank=True, choices=STAR_RATING_CHOICES, max_length=256, null=True)
-    would_return = models.BooleanField(blank=True, choices=TRUE_FALSE_CHOICES, null=True)
     notes = models.CharField(max_length=1024, blank=True, null=True)
     destination = models.ForeignKey(SiteInformation, models.SET_NULL, null=True)
 
