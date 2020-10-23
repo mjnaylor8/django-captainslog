@@ -1,0 +1,14 @@
+{%if object.created_date %}
+    <div class="timestamp_include row">
+        <div class="small ml-4 col-xs-3 col-xs-offset-2"><span>Created: </span>{{ object.created_date }}
+        {% if object.created_by %}
+            <span>by: </span>{{ object.created_by }}
+        {% endif %}
+        </div>
+        <div class="small ml-4 col-xs-3"><span>  Edited: </span>{{ object.edited_date }}
+        {% if object.edited_by %}
+            <span>by: </span>{{ object.edited_by }}
+        {% endif %}
+        </div>
+    </div>
+{% endif %}
