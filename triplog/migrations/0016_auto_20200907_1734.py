@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='siteinformation',
             name='star_rating',
-            field=models.CharField(blank=True, choices=[('', 'Choose...'), ('*', 'One Star'), ('**', 'Two Star'), ('***', 'Three Star'), ('****', 'Four Star'), ('*****', 'Five Star')], max_length=256, null=True),
+            field=models.CharField(blank=True, max_length=256, null=True),
         ),
         migrations.AddField(
             model_name='siteinformation',

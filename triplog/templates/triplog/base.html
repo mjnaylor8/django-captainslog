@@ -4,12 +4,15 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="shortcut icon" type="image/png" href="{% static 'triplog/favicon.ico' %}"/>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" integrity="sha256-gvEnj2axkqIj4wbYhPjbWV7zttgpzBVEgHub9AAZQD4=" crossorigin="anonymous" />
-    <link href="{% static 'triplog/style.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'triplog/css/style.css' %}" rel="stylesheet" type="text/css">
     {# Include FontAwesome; required for icon display on date picker#}
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.css">
-
-    {% load crispy_forms_tags %}
+    <link href="{% static '/triplog/bootstrap4-glyphicons/css/bootstrap-glyphicons.min.css' %}" rel="stylesheet" type="text/css">
+    
+    {% load crispy_forms_tags %}  
     {% load widget_tweaks %}
     
     {% load mapbox_location_field_tags %}
@@ -22,7 +25,7 @@
     {# Load CSS and JavaScript #}
     {% bootstrap_css %}
     {% bootstrap_javascript jquery='full' %}
-
+    {% block css %}{% endblock css %}
     <!-- Moment.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.23.0/moment.min.js" integrity="sha256-VBLiveTKyUZMEzJd6z2mhfxIqz3ZATCuVMawPZGzIfA=" crossorigin="anonymous"></script>
 
@@ -30,6 +33,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css" integrity="sha256-XPTBwC3SBoWHSmKasAk01c08M6sIA5gF5+sRxqak2Qs=" crossorigin="anonymous" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/js/tempusdominus-bootstrap-4.min.js" integrity="sha256-z0oKYg6xiLq3yJGsp/LsY9XykbweQlHl42jHv2XTBz4=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="{% static 'bootstrap-tab.js' %}">  </script>
+
+   
     {% block head %}
         <title>Captains Log - Triplog</title>
     {% endblock %}
@@ -56,8 +61,11 @@
         </div>
     {% endblock bootstrap4_content %}
     <footer>
-        <p class="small ml-4" >&copy; Michael Naylor <script type="text/javascript">document.write( new Date().getFullYear() );</script></p>
+        <p class="small ml-4">&copy; Michael Naylor <script type="text/javascript">document.write( new Date().getFullYear() );</script></p>
     </footer>
+    {% block js %}
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
 
+    {% endblock js %}
 </body>
 </html>

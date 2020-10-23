@@ -8,13 +8,14 @@ from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import AuthenticationForm
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Row, Column, Fieldset, Field
+from crispy_forms.layout import Layout, Submit, Row, Column, Fieldset, Field, Div, HTML
 from crispy_forms.bootstrap import TabHolder, Tab, FormActions
 from bootstrap_datepicker_plus import DatePickerInput, TimePickerInput
 from triplog.models import SiteInformation, JourneyDetails
 
 STANDARD_COLUMN_CLASS = 'form-group col-md-2 mb-0'
 STANDARD_COLUMN_CLASS_WIDER = 'form-group col-md-4 mb-0'
+STANDARD_COLUMN_CLASS_ABITWIDER = 'form-group col-md-6 mb-0'
 STANDARD_COLUMN_CLASS_EVENWIDER = 'form-group col-md-8 mb-0'
 STANDARD_COLUMN_CLASS_FULLWIDTH = 'form-group col-md-12 mb-0'
 CSS_CLASS_FORMROW = 'form-row'
@@ -27,23 +28,23 @@ class SiteInformationForm(forms.ModelForm):
         self.helper = FormHelper(self)
         self.helper.form_id = 'id-sitedetailsForm'
         self.helper.form_method = 'post' # get or post
-        self.helper.add_input(Submit('submit', 'Save Site', css_class='btn-primary btn-sm ml-2'))
+        self.helper.add_input(Submit('submit', 'Save Site', css_class='btn-primary btn-sm ml-4'))
+        self.fields['star_rating'].initial = 0
         self.helper.layout = Layout(
             TabHolder(
                 Tab("Site Location",
                     Row(
                         Column('name', css_class=STANDARD_COLUMN_CLASS),
-                        css_class=CSS_CLASS_FORMROW
+                        Column('star_rating', css_class=STANDARD_COLUMN_CLASS_WIDER),
+                        Column('would_return', css_class=STANDARD_COLUMN_CLASS),
+                        css_class="row justify-content-between"
+                    ),
+                    Row(
+                        Column('notes', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH)
                     ),
                     Row(
                         Column('location', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH),
-                        Column('address', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH),
-                        css_class=CSS_CLASS_FORMROW
-                    ),
-                    Row(
-                        Column('star_rating', css_class=STANDARD_COLUMN_CLASS),
-                        Column('would_return', css_class=STANDARD_COLUMN_CLASS),
-                        css_class=CSS_CLASS_FORMROW
+                        Column('address', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH)
                     ),
                 ),
                 Tab("Further Details",
@@ -52,41 +53,27 @@ class SiteInformationForm(forms.ModelForm):
                         Column('phone_number', css_class=STANDARD_COLUMN_CLASS),
                         Column('cost_charges', css_class=STANDARD_COLUMN_CLASS),
                         Column('cost_extras', css_class=STANDARD_COLUMN_CLASS),
-                        Column('cost_currency', css_class=STANDARD_COLUMN_CLASS),
-                        css_class=CSS_CLASS_FORMROW
+                        Column('cost_currency', css_class=STANDARD_COLUMN_CLASS)
                     ),
                     Row(
                         Column('greeting', css_class=STANDARD_COLUMN_CLASS),
                         Column('ambience', css_class=STANDARD_COLUMN_CLASS),
-                        Column('security', css_class=STANDARD_COLUMN_CLASS),
-                        css_class=CSS_CLASS_FORMROW
+                        Column('security', css_class=STANDARD_COLUMN_CLASS)
                     ),
                     Row(
                         Column('pitch_type', css_class=STANDARD_COLUMN_CLASS),
                         Column('pitch_level', css_class=STANDARD_COLUMN_CLASS),
-                        Column('hook_up', css_class=STANDARD_COLUMN_CLASS),
-                        css_class=CSS_CLASS_FORMROW
+                        Column('hook_up', css_class=STANDARD_COLUMN_CLASS)
                     ),
                     Row(
                         Column('wifi', css_class=STANDARD_COLUMN_CLASS),
                         Column('tv_signal', css_class=STANDARD_COLUMN_CLASS),                     
-                        Column('phone_signal_3G_4G', css_class=STANDARD_COLUMN_CLASS),
-                        css_class=CSS_CLASS_FORMROW
+                        Column('phone_signal_3G_4G', css_class=STANDARD_COLUMN_CLASS)
                     ),
                     Row(
                         Column('pets', css_class=STANDARD_COLUMN_CLASS),
                         Column('children', css_class=STANDARD_COLUMN_CLASS),                     
-                        Column('laundry', css_class=STANDARD_COLUMN_CLASS),
-                        css_class=CSS_CLASS_FORMROW
-                    ),
-                    Row(
-                        Column('notes', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH),
-                        css_class=CSS_CLASS_FORMROW
-                    ),
-                    Row(
-                        Column('date_edited', css_class=STANDARD_COLUMN_CLASS),
-                        Column('date_created', css_class=STANDARD_COLUMN_CLASS),             
-                        css_class=CSS_CLASS_FORMROW
+                        Column('laundry', css_class=STANDARD_COLUMN_CLASS)
                     ),
                 ),
             ),
@@ -100,16 +87,19 @@ class SiteInformationForm(forms.ModelForm):
         widgets = {
             'notes': forms.Textarea(attrs={'placeholder': 'Enter Notes on the site', \
                 'class': 'form-control'}),
+            'star_rating': forms.NumberInput(attrs={'class': 'rating rating-loading krajee-fas', 'step': 0.5, 'data-size': 'sm', 'dir': 'ltr' }),
         }
 
 class JourneyDetailsForm(forms.ModelForm):
     """ define the journey details """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['travel_from'].queryset = SiteInformation.objects.order_by('name')
+        self.fields['travel_to'].queryset = SiteInformation.objects.order_by('name')
         self.helper = FormHelper(self)
         self.helper.form_id = 'id-journeydetailsForm'
         self.helper.form_method = 'post' # get or post
-        self.helper.add_input(Submit('submit', 'Save Journey', css_class='btn-primary'))
+        self.helper.add_input(Submit('submit', 'Save Journey', css_class='btn-primary btn-sm ml-4'))
         self.fields['start_date'].initial = datetime.date.today
         self.fields['end_date'].initial = datetime.date.today
         self.fields['start_date'].input_formats = settings.DATE_INPUT_FORMATS
@@ -122,8 +112,7 @@ class JourneyDetailsForm(forms.ModelForm):
                         'Dates',
                         Row(
                             Column('start_date', css_class=STANDARD_COLUMN_CLASS),
-                            Column('end_date', css_class=STANDARD_COLUMN_CLASS),
-                            css_class=CSS_CLASS_FORMROW
+                            Column('end_date', css_class=STANDARD_COLUMN_CLASS)
                             ),
                         ),
                     Fieldset(
@@ -131,19 +120,15 @@ class JourneyDetailsForm(forms.ModelForm):
                         Row(
                             Column('travel_from', css_class=STANDARD_COLUMN_CLASS_WIDER),
                             Column('travel_to', css_class=STANDARD_COLUMN_CLASS_WIDER),
-                            css_class=CSS_CLASS_FORMROW
-                            ),
+                        ),
                         Row(
                             Column('mileage_start', css_class=STANDARD_COLUMN_CLASS),
                             Column('mileage_end', css_class=STANDARD_COLUMN_CLASS),
-                            Column('distance', css_class=STANDARD_COLUMN_CLASS),
-                            css_class=CSS_CLASS_FORMROW
+                            Column('distance', css_class=STANDARD_COLUMN_CLASS)
                             ),
+                        Row(
+                            Column('notes', css_class=STANDARD_COLUMN_CLASS_EVENWIDER),
                         ),
-                    Fieldset(
-                        'Destination',
-                        Field('destination', css_class=STANDARD_COLUMN_CLASS_WIDER),
-                        Field('notes', css_class=STANDARD_COLUMN_CLASS_EVENWIDER),
                         ),
                     ),
                 Tab("Further Details",
@@ -155,23 +140,16 @@ class JourneyDetailsForm(forms.ModelForm):
                         Row(
                             Column('start_time', css_class=STANDARD_COLUMN_CLASS),
                             Column('end_time', css_class=STANDARD_COLUMN_CLASS),
-                            Column('duration', css_class=STANDARD_COLUMN_CLASS),
-                            css_class=CSS_CLASS_FORMROW
+                            Column('duration', css_class=STANDARD_COLUMN_CLASS)
                             ),
                         ),
                     Fieldset(
                         'Costs',
                         Row(
                             Column('toll_currency', css_class=STANDARD_COLUMN_CLASS),
-                            Column('toll_charges', css_class=STANDARD_COLUMN_CLASS),
-                            css_class=CSS_CLASS_FORMROW
+                            Column('toll_charges', css_class=STANDARD_COLUMN_CLASS)
                             ),
                         ),
-                    Row(
-                        Column('date_edited', css_class=STANDARD_COLUMN_CLASS),
-                        Column('date_created', css_class=STANDARD_COLUMN_CLASS),
-                        css_class=CSS_CLASS_FORMROW
-                    ),
                     )
                 )
             )
@@ -233,13 +211,6 @@ class JourneyDetailsForm(forms.ModelForm):
                 }),
             'notes': forms.Textarea(attrs={'placeholder': 'Enter Notes on the journey', \
                 'class': 'form-control'}),
-            'travel_from' : forms.TextInput(attrs={'placeholder': 'Starting Point', \
-                'class': 'form-control', \
-                'oninvalid' : str('%s%s%s') % \
-                    ('this.setCustomValidity("', ENTER_STARTING_LOCATION, '")'),\
-                'oninput' : 'setCustomValidity("")'}),
-            'travel_to' : forms.TextInput(attrs={'placeholder': 'Destination', \
-                'class': 'form-control'}),
             'weather' : forms.TextInput(attrs={'placeholder': 'What was the weather like?', \
                 'class': 'form-control'}),
             'start_time': TimePickerInput(
@@ -251,7 +222,7 @@ class JourneyDetailsForm(forms.ModelForm):
                 attrs={
                     'class': 'form-control',
                     'append': 'fa fa-clock-o',
-                    'icon_toggle': True,},)
+                    'icon_toggle': True,},),   
             }
     # this function will be used for the validation
     def clean(self):

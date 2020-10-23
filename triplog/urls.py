@@ -1,5 +1,5 @@
 """ site urls """
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 from .views import SiteInformationView, AddSiteInformationView, ChangeSiteInformationView
 from .views import JourneyDetailsView, AddJourneyDetailsView, \

@@ -1,27 +1,21 @@
 """ Define Models """
 from django.contrib.gis.db import models
 from django.contrib.auth.models import User
+from django.utils import timezone
 from mapbox_location_field.spatial.models import SpatialLocationField
 from mapbox_location_field.models import AddressAutoHiddenField
 
-
 # Create your models here.
+
+
+class AutoDateTimeField(models.DateTimeField):
+    def pre_save(self, model_instance, add):
+        return timezone.now()
+
 
 class SiteInformation(models.Model):
     """ Define SiteInformation Model """
-    ONESTAR = '*'
-    TWOSTAR = '**'
-    THREESTAR = '***'
-    FOURSTAR = '****'
-    FIVESTAR = '*****'
-    STAR_RATING_CHOICES = [
-        ('', 'Choose...'),
-        (ONESTAR, "One Star"),
-        (TWOSTAR, "Two Star"),
-        (THREESTAR, "Three Star"),
-        (FOURSTAR, "Four Star"),
-        (FIVESTAR, "Five Star"),
-    ]
+
 
     EXCELLENT = "Excellent"
     GOOD = "Good"
@@ -118,7 +112,8 @@ class SiteInformation(models.Model):
         "center": [-0.827610, 51.182250],
         "placeholder": "Pick a location on the map below",
         })
-    star_rating = models.CharField(blank=True, choices=STAR_RATING_CHOICES, max_length=256, null=True)
+    #star_rating = models.CharField(blank=True, choices=STAR_RATING_CHOICES, max_length=256, null=True)
+    star_rating = models.DecimalField(max_digits=3, decimal_places=1, blank=True, default=0, null=True)
     would_return = models.BooleanField(blank=True, choices=TRUE_FALSE_CHOICES, null=True)
     greeting = models.CharField(max_length=256, blank=True, choices=GREETING_CHOICES)
     pitch_type = models.CharField(max_length=256, blank=True, choices=PITCH_TYPE_CHOICES)
@@ -141,16 +136,18 @@ class SiteInformation(models.Model):
     notes = models.CharField(max_length=1024, blank=True, null=True)
     created_date = models.DateTimeField(auto_now_add=True)
     edited_date = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True, related_name='site_created_by')
+    edited_by = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True, related_name='site_edited_by')
+
 
     def __str__(self):
         return str(self.name)
-    @property
-    def date_created(self):
-        return self.created_date.strftime('%B %d %Y')
-    @property
-    def date_edited(self):
-        return self.edited_date.strftime('%B %d %Y')
-
+    
+    #def created_date(self):
+    #    return self.created_date.strftime('%B %d %Y')
+    
+    #def edited_date(self):
+    #    return self.edited_date.strftime('%B %d %Y')
 
 class JourneyDetails(models.Model):
     """ Define JourneyDetails Model """
@@ -163,8 +160,8 @@ class JourneyDetails(models.Model):
     start_date = models.DateField()
     end_date = models.DateField(blank=True, null=True)
     weather = models.CharField(max_length=256, blank=True)
-    travel_from = models.CharField(max_length=256)
-    travel_to = models.CharField(max_length=256, blank=True)
+    travel_from = models.ForeignKey(SiteInformation, models.SET_NULL, null=True, related_name='journey_travel_from')
+    travel_to = models.ForeignKey(SiteInformation, models.SET_NULL, null=True, blank=True, related_name='journey_travel_to')
     start_time = models.TimeField(blank=True, null=True,)
     end_time = models.TimeField(blank=True, null=True)
     duration = models.TimeField(blank=True, null=True)
@@ -173,16 +170,19 @@ class JourneyDetails(models.Model):
     distance = models.FloatField(blank=True, null=True)
     toll_charges = models.FloatField(blank=True, null=True)
     toll_currency = models.CharField(max_length=3, blank=True)
-    created_date = models.DateTimeField(auto_now_add=True, null=True)
-    edited_date = models.DateTimeField(auto_now=True, null=True)
     notes = models.CharField(max_length=1024, blank=True, null=True)
-    destination = models.ForeignKey(SiteInformation, models.SET_NULL, null=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    edited_date = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True, related_name='journey_created_by')
+    edited_by = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True, related_name='journey_edited_by')
+
 
     def __str__(self):
         return str('%s - %s - %s - %s' % \
             (self.start_date, self.start_time, self.end_date, self.end_time))
 
-    def date_created(self):
-        return self.created_date.strftime('%B %d %Y')
-    def date_edited(self):
-        return self.edited_date.strftime('%B %d %Y')
+    #def created_date(self):
+    #    return self.created_date.strftime('%B %d %Y')
+
+    #def edited_date(self):
+    #    return self.edited_date.strftime('%B %d %Y')

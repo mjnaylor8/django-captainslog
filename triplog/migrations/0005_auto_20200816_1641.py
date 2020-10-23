@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 ('toll_currency', models.CharField(blank=True, max_length=3)),
                 ('created_date', models.DateTimeField(auto_now_add=True)),
                 ('edited_date', models.DateTimeField(auto_now_add=True)),
-                ('star_rating', models.CharField(choices=[('*', 'One Star'), ('**', 'Two Star'), ('***', 'Three Star'), ('****', 'Four Star'), ('*****', 'Five Star')], max_length=256)),
+                ('star_rating', models.CharField(max_length=256)),
                 ('would_return', models.BooleanField(blank=True, choices=[(True, 'Yes'), (False, 'No')])),
                 ('notes', models.CharField(blank=True, max_length=1024)),
             ],

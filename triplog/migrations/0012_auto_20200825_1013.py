@@ -110,7 +110,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='journeydetails',
             name='star_rating',
-            field=models.CharField(choices=[('', 'Choose...'), ('*', 'One Star'), ('**', 'Two Star'), ('***', 'Three Star'), ('****', 'Four Star'), ('*****', 'Five Star')], max_length=256),
+            field=models.CharField(max_length=256),
         ),
         migrations.DeleteModel(
             name='SiteFacilities',

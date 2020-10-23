@@ -10,8 +10,6 @@ from braces import views
 from triplog.models import SiteInformation, JourneyDetails
 from triplog.forms import JourneyDetailsForm, SiteInformationForm
 
-
-
 SITE_INFORMATION_FORM = "triplog/site_information_form.html"
 JOURNEY_DETAILS_FORM = "triplog/journey_details_form.html"
 SUCCESS_SITEINDEX = "/triplog/siteindex/"
@@ -32,6 +30,17 @@ class AddSiteInformationView(LoginRequiredMixin, CreateView):
         site_title = 'Add Site Details'
         context['site_information_title'] = site_title
         return context
+    
+    def get_initial(self, **kwargs):
+        initial = super().get_initial(**kwargs)
+        initial['star_rating'] = 0
+        return initial
+
+    def form_valid(self, form):
+        if form.instance.created_by is None:
+            form.instance.created_by = self.request.user
+        form.instance.edited_by = self.request.user
+        return super().form_valid(form)
 
 
 class ChangeSiteInformationView(LoginRequiredMixin, UpdateView):
@@ -50,6 +59,13 @@ class ChangeSiteInformationView(LoginRequiredMixin, UpdateView):
         context['site_information_title'] = site_title
         return context
 
+    def form_valid(self, form):
+        if form.instance.created_by is None:
+            form.instance.created_by = self.request.user
+        form.instance.edited_by = self.request.user
+        return super().form_valid(form)
+
+
 class SiteInformationView(LoginRequiredMixin, ListView):
     """ list site information view """
     login_url = '/accounts/login/'
@@ -64,7 +80,12 @@ class SiteInformationView(LoginRequiredMixin, ListView):
         site_title = 'List Sites'
         context['site_information_title'] = site_title
         return context
-
+    
+    def form_valid(self, form):
+        if form.instance.created_by is None:
+            form.instance.created_by = self.request.user
+        form.instance.edited_by = self.request.user
+        return super().form_valid(form)
 
 class JourneyDetailsView(LoginRequiredMixin, ListView):
     """ List journey details view """
@@ -82,6 +103,11 @@ class JourneyDetailsView(LoginRequiredMixin, ListView):
         context['journey_details_title'] = journey_title
         return context
 
+    def form_valid(self, form):
+        if form.instance.created_by is None:
+            form.instance.created_by = self.request.user
+        form.instance.edited_by = self.request.user
+        return super().form_valid(form)
 
 class AddJourneyDetailsView(LoginRequiredMixin, CreateView):
     """ add journey details view """
@@ -107,7 +133,12 @@ class AddJourneyDetailsView(LoginRequiredMixin, CreateView):
         response = super().form_invalid(form)
         print(response)
         return response
-
+    
+    def form_valid(self, form):
+        if form.instance.created_by is None:
+            form.instance.created_by = self.request.user
+        form.instance.edited_by = self.request.user
+        return super().form_valid(form)
 
 class ChangeJourneyDetailsView(LoginRequiredMixin, UpdateView):
     """ change journey details view """
@@ -123,6 +154,12 @@ class ChangeJourneyDetailsView(LoginRequiredMixin, UpdateView):
         journey_title = 'Change Journey Details'
         context['journey_details_title'] = journey_title
         return context
+
+    def form_valid(self, form):
+        if form.instance.created_by is None:
+            form.instance.created_by = self.request.user
+        form.instance.edited_by = self.request.user
+        return super().form_valid(form)
 
 @login_required(login_url='/accounts/login/')
 def index(request):

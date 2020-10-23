@@ -35,3 +35,8 @@ urlpatterns += [
 urlpatterns += [
     path('', RedirectView.as_view(url='/accounts/login/', permanent=True)),
 ]
+
+#if 'rosetta' in settings.INSTALLED_APPS:
+urlpatterns += [
+    path('rosetta/', include('rosetta.urls'))
+]

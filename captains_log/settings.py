@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'bootstrap_datepicker_plus',
     'mapbox_location_field',
     'widget_tweaks',
+    'rosetta',
 ]
 
 MIDDLEWARE = [

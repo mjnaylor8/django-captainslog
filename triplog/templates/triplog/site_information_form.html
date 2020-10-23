@@ -1,6 +1,11 @@
 {% extends "triplog/base.html" %}
-
+{% load static %}
 {% load bootstrap4 %}
+{% block css %}
+<link href="{% static 'triplog/css/star-rating.min.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'triplog/themes/krajee-fas/theme.min.css' %}" rel="stylesheet" type="text/css">
+{% endblock css %}
+{% load site_tags %}
 {% load crispy_forms_tags %}
 
 {% block navigation %}
@@ -16,6 +21,13 @@
 {% block content %}
     <form action="" method="post" novalidate>
         {% crispy form %}
-    </form>
+    </form> 
     {{form.media}}
+    {% include 'triplog/timestamp.html' %}
 {% endblock %}
+
+{% block js %}
+<script src="{% static 'triplog/themes/krajee-fas/makethemework.js' %}" type="text/javascript"></script>
+<script src="{% static 'triplog/js/star-rating.min.js' %}" type="text/javascript"></script>
+<script src="{% static 'triplog/themes/krajee-fas/theme.min.js' %}" type="text/javascript"></script>
+{% endblock js %}
