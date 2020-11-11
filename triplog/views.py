@@ -6,9 +6,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate, login
 from django.urls import reverse_lazy
+from django_tables2 import SingleTableView
 from braces import views
 from triplog.models import SiteInformation, JourneyDetails
 from triplog.forms import JourneyDetailsForm, SiteInformationForm
+from triplog.tables import SiteInformationTable, JourneyDetailsTable
 
 SITE_INFORMATION_FORM = "triplog/site_information_form.html"
 JOURNEY_DETAILS_FORM = "triplog/journey_details_form.html"
@@ -87,6 +89,28 @@ class SiteInformationView(LoginRequiredMixin, ListView):
         form.instance.edited_by = self.request.user
         return super().form_valid(form)
 
+class Site2InformationView(LoginRequiredMixin, SingleTableView):
+    """ list site information view """
+    login_url = '/accounts/login/'
+    redirect_field_name = 'redirect_to'
+    model = SiteInformation
+    table_class = SiteInformationTable
+    template_name = "triplog/site2index.html"
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        site_title = 'List Sites'
+        context['site_information_title'] = site_title
+        return context
+    
+    def form_valid(self, form):
+        if form.instance.created_by is None:
+            form.instance.created_by = self.request.user
+        form.instance.edited_by = self.request.user
+        return super().form_valid(form)
+
+
 class JourneyDetailsView(LoginRequiredMixin, ListView):
     """ List journey details view """
     login_url = '/accounts/login/'
@@ -95,6 +119,27 @@ class JourneyDetailsView(LoginRequiredMixin, ListView):
     template_name = "triplog/journeyindex.html"
     success_url = SUCCESS_JOURNEYINDEX
     ordering = ["-start_date",]
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        journey_title = 'List Journeys'
+        context['journey_details_title'] = journey_title
+        return context
+
+    def form_valid(self, form):
+        if form.instance.created_by is None:
+            form.instance.created_by = self.request.user
+        form.instance.edited_by = self.request.user
+        return super().form_valid(form)
+
+class Journey2DetailsView(LoginRequiredMixin, SingleTableView):
+    """ List journey details view """
+    login_url = '/accounts/login/'
+    redirect_field_name = 'redirect_to'
+    model = JourneyDetails
+    table_class = JourneyDetailsTable
+    template_name = "triplog/journey2index.html"
     paginate_by = 10
 
     def get_context_data(self, **kwargs):
@@ -183,4 +228,4 @@ def index(request):
 
     # Render the HTML template index.html with the data in the context variable
     return render(request, 'triplog/index.html', context=context)
-
+    

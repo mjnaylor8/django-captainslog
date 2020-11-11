@@ -2,22 +2,24 @@
 defines the forms for triplog
 """
 import datetime
+import locale
 from django import forms
 from django.conf import settings
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import AuthenticationForm
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column, Fieldset, Field, Div, HTML
-from crispy_forms.bootstrap import TabHolder, Tab, FormActions
-from bootstrap_datepicker_plus import DatePickerInput, TimePickerInput
+from crispy_forms.bootstrap import TabHolder, Tab, FormActions, InlineRadios, PrependedText
 from triplog.models import SiteInformation, JourneyDetails
+from triplog.widgets import CheckBoxBootstrapSwitch
 
-STANDARD_COLUMN_CLASS = 'form-group col-md-2 mb-0'
-STANDARD_COLUMN_CLASS_WIDER = 'form-group col-md-4 mb-0'
-STANDARD_COLUMN_CLASS_ABITWIDER = 'form-group col-md-6 mb-0'
-STANDARD_COLUMN_CLASS_EVENWIDER = 'form-group col-md-8 mb-0'
-STANDARD_COLUMN_CLASS_FULLWIDTH = 'form-group col-md-12 mb-0'
+STANDARD_COLUMN_CLASS = 'col-md-2 mb-0'
+STANDARD_COLUMN_CLASS_WIDER = 'col-md-4 mb-0'
+STANDARD_COLUMN_CLASS_ABITWIDER = 'col-md-6 mb-0'
+STANDARD_COLUMN_CLASS_EVENWIDER = 'col-md-8 mb-0'
+STANDARD_COLUMN_CLASS_FULLWIDTH = 'col-md-12 mb-0'
 CSS_CLASS_FORMROW = 'form-row'
 ENTER_STARTING_LOCATION = 'Please enter the starting location'
 
@@ -30,14 +32,21 @@ class SiteInformationForm(forms.ModelForm):
         self.helper.form_method = 'post' # get or post
         self.helper.add_input(Submit('submit', 'Save Site', css_class='btn-primary btn-sm ml-4'))
         self.fields['star_rating'].initial = 0
+        self.fields['would_return'].initial = True
+        self.fields['ambience'].empty_label = "n/a"
         self.helper.layout = Layout(
             TabHolder(
                 Tab("Site Location",
                     Row(
-                        Column('name', css_class=STANDARD_COLUMN_CLASS),
-                        Column('star_rating', css_class=STANDARD_COLUMN_CLASS_WIDER),
-                        Column('would_return', css_class=STANDARD_COLUMN_CLASS),
-                        css_class="row justify-content-between"
+                        Column('name', css_class=STANDARD_COLUMN_CLASS_WIDER),
+                        Column('star_rating', css_class='col-md-3 mb-0')
+#                        css_class="row justify-content-between"
+                    ),
+                    Row(
+                        Column('siteowner', css_class=STANDARD_COLUMN_CLASS),
+                        Column('days_stayed', css_class='col-md-1 mb-0'),
+                        Column(PrependedText('cost_charges', mark_safe('<i class="fas fa-pound-sign"></i>')), css_class=STANDARD_COLUMN_CLASS),
+                        InlineRadios('would_return', css_class='col-md-2 mb-0' )
                     ),
                     Row(
                         Column('notes', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH)
@@ -49,31 +58,32 @@ class SiteInformationForm(forms.ModelForm):
                 ),
                 Tab("Further Details",
                     Row(
-                        Column('email', css_class=STANDARD_COLUMN_CLASS),
-                        Column('phone_number', css_class=STANDARD_COLUMN_CLASS),
-                        Column('cost_charges', css_class=STANDARD_COLUMN_CLASS),
-                        Column('cost_extras', css_class=STANDARD_COLUMN_CLASS),
-                        Column('cost_currency', css_class=STANDARD_COLUMN_CLASS)
+                        Column(PrependedText('email', mark_safe('<i class="fas fa-at"></i>'), active=True), css_class=STANDARD_COLUMN_CLASS_WIDER),
+                        Column(PrependedText('phone_number', mark_safe('<i class="fas fa-phone"></i>'), active=True), css_class=STANDARD_COLUMN_CLASS),
+                        Column(PrependedText('cost_extras', mark_safe('<i class="fas fa-pound-sign"></i>')), css_class=STANDARD_COLUMN_CLASS),
+                        Column(PrependedText('cost_currency', mark_safe('<i class="fas fa-money"></i>'), active=True), css_class=STANDARD_COLUMN_CLASS),
                     ),
                     Row(
-                        Column('greeting', css_class=STANDARD_COLUMN_CLASS),
-                        Column('ambience', css_class=STANDARD_COLUMN_CLASS),
-                        Column('security', css_class=STANDARD_COLUMN_CLASS)
+                        Column(PrependedText('greeting', mark_safe('<i class="far fa-handshake"></i>'), active=True), css_class=STANDARD_COLUMN_CLASS),
+                        Column(PrependedText('ambience', mark_safe('<i class="fas fa-volume-down"></i>'), active=True), css_class=STANDARD_COLUMN_CLASS),
+                        Column(PrependedText('security',  mark_safe('<i class="fas fa-lock"></i>'), active=True), css_class=STANDARD_COLUMN_CLASS)
                     ),
                     Row(
                         Column('pitch_type', css_class=STANDARD_COLUMN_CLASS),
                         Column('pitch_level', css_class=STANDARD_COLUMN_CLASS),
-                        Column('hook_up', css_class=STANDARD_COLUMN_CLASS)
+                        Column(PrependedText('hook_up', mark_safe('<i class="fas fa-plug"></i>'), active=True), css_class=STANDARD_COLUMN_CLASS),
+                        Column(PrependedText('toilets',  mark_safe('<i class="fas fa-toilet"></i>'), active=True),css_class=STANDARD_COLUMN_CLASS),
+                        Column(PrependedText('waste', mark_safe('<i class="fas fa-dumpster"></i>'), active=True), css_class=STANDARD_COLUMN_CLASS)
                     ),
                     Row(
-                        Column('wifi', css_class=STANDARD_COLUMN_CLASS),
-                        Column('tv_signal', css_class=STANDARD_COLUMN_CLASS),                     
-                        Column('phone_signal_3G_4G', css_class=STANDARD_COLUMN_CLASS)
+                        Column(PrependedText('wifi',  mark_safe('<i class="fas fa-wifi"></i>'), active=True), css_class=STANDARD_COLUMN_CLASS),
+                        Column(PrependedText('tv_signal',   mark_safe('<i class="fas fa-satellite-dish"></i>'), active=True), css_class=STANDARD_COLUMN_CLASS),                     
+                        Column(PrependedText('phone_signal_3G_4G',  mark_safe('<i class="fas fa-signal"></i>'), active=True),css_class=STANDARD_COLUMN_CLASS)
                     ),
                     Row(
-                        Column('pets', css_class=STANDARD_COLUMN_CLASS),
-                        Column('children', css_class=STANDARD_COLUMN_CLASS),                     
-                        Column('laundry', css_class=STANDARD_COLUMN_CLASS)
+                        Column(PrependedText('pets',  mark_safe('<i class="fas fa-paw"></i>'), active=True), css_class=STANDARD_COLUMN_CLASS),
+                        Column(PrependedText('children',  mark_safe('<i class="fas fa-child"></i>'), active=True),  css_class=STANDARD_COLUMN_CLASS),                     
+                        Column(PrependedText('laundry', mark_safe('<i class="mdi mdi-local-laundry-service mdi-lg"></i>'), active=True), css_class=STANDARD_COLUMN_CLASS)
                     ),
                 ),
             ),
@@ -81,14 +91,22 @@ class SiteInformationForm(forms.ModelForm):
     class Meta:
         model = SiteInformation
         fields = "__all__"
+        labels = {
+            'tv_signal': _('TV Signal'),
+            'wifi': _('Wi-Fi'),
+            'phone_signal_3G_4G': _('Phone Signal'),
+        }
         help_texts = {
             'star_rating': _('Select the number of stars to give the destination'),
         }
         widgets = {
             'notes': forms.Textarea(attrs={'placeholder': 'Enter Notes on the site', \
-                'class': 'form-control'}),
+                'class': 'form-control', 'rows': 4}),
             'star_rating': forms.NumberInput(attrs={'class': 'rating rating-loading krajee-fas', 'step': 0.5, 'data-size': 'sm', 'dir': 'ltr' }),
-        }
+            'would_return': forms.RadioSelect(attrs={'class': 'form-check-inline'}),
+            'cost_currency': forms.Select(attrs={'onchange': 'getCurrency();'})
+            }
+        
 
 class JourneyDetailsForm(forms.ModelForm):
     """ define the journey details """
@@ -104,53 +122,39 @@ class JourneyDetailsForm(forms.ModelForm):
         self.fields['end_date'].initial = datetime.date.today
         self.fields['start_date'].input_formats = settings.DATE_INPUT_FORMATS
         self.fields['end_date'].input_formats = settings.DATE_INPUT_FORMATS
-
+        self.fields['start_time'].initial = datetime.datetime.now
+        self.fields['end_time'].initial = datetime.datetime.now
+        self.fields['duration'].initial = "00:00"
+        self.fields['start_time'].input_formats = settings.TIME_INPUT_FORMATS
+        self.fields['end_time'].input_formats = settings.TIME_INPUT_FORMATS
         self.helper.layout = Layout(
-            TabHolder(
-                Tab("Journey Details",
-                    Fieldset(
-                        'Dates',
-                        Row(
-                            Column('start_date', css_class=STANDARD_COLUMN_CLASS),
-                            Column('end_date', css_class=STANDARD_COLUMN_CLASS)
-                            ),
-                        ),
-                    Fieldset(
-                        'Journey',
-                        Row(
-                            Column('travel_from', css_class=STANDARD_COLUMN_CLASS_WIDER),
-                            Column('travel_to', css_class=STANDARD_COLUMN_CLASS_WIDER),
-                        ),
-                        Row(
-                            Column('mileage_start', css_class=STANDARD_COLUMN_CLASS),
-                            Column('mileage_end', css_class=STANDARD_COLUMN_CLASS),
-                            Column('distance', css_class=STANDARD_COLUMN_CLASS)
-                            ),
-                        Row(
-                            Column('notes', css_class=STANDARD_COLUMN_CLASS_EVENWIDER),
-                        ),
-                        ),
+
+            Tab("Journey Details",
+                Row(
+                    Column('travel_from', css_class='col-md-3 mb-0'),
+                    Column('travel_to', css_class='col-md-3 mb-0'),
                     ),
-                Tab("Further Details",
-                    Row(
-                        Column('weather', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH)
+                Row(
+                    Column('start_date', css_class=STANDARD_COLUMN_CLASS),
+                    Column('start_time', css_class='col-md-1 mb-0'),
+                ),
+                Row(
+                    Column('end_date', css_class=STANDARD_COLUMN_CLASS),                      
+                    Column('end_time', css_class='col-md-1 mb-0'),
+                    Column('duration', css_class='col-md-1 mb-0'),
                     ),
-                    Fieldset(
-                        'Times',
-                        Row(
-                            Column('start_time', css_class=STANDARD_COLUMN_CLASS),
-                            Column('end_time', css_class=STANDARD_COLUMN_CLASS),
-                            Column('duration', css_class=STANDARD_COLUMN_CLASS)
-                            ),
-                        ),
-                    Fieldset(
-                        'Costs',
-                        Row(
-                            Column('toll_currency', css_class=STANDARD_COLUMN_CLASS),
-                            Column('toll_charges', css_class=STANDARD_COLUMN_CLASS)
-                            ),
-                        ),
-                    )
+                Row(
+                    Column('mileage_start', css_class='col-md-1 mb-0'),
+                    Column('mileage_end', css_class='col-md-1 mb-0'),
+                    Column('distance', css_class='col-md-1 mb-0'),
+                    ),
+                Row(
+                    Column('notes', css_class=STANDARD_COLUMN_CLASS_ABITWIDER),
+                ),
+                Row(
+                    Column(PrependedText('toll_currency', mark_safe('<i class="fas fa-money"></i>'), active=True), css_class=STANDARD_COLUMN_CLASS),
+                    Column(PrependedText('toll_charges', mark_safe('<i class="fas fa-pound-sign"></i>')), css_class=STANDARD_COLUMN_CLASS),
+                    ),
                 )
             )
     class Meta:
@@ -183,48 +187,77 @@ class JourneyDetailsForm(forms.ModelForm):
                 },
             }
         widgets = {
-            'start_date': DatePickerInput(
-                format='%d-%m-%Y',
+            'start_date': forms.DateInput(
                 attrs={
-                    'class': 'form-control',
-                    'append': 'fa fa-calendar',
-                    'icon_toggle': True,
-                    'type': 'text',
-                    },
-                options={
-                    "showClose": True,
-                    "showClear": True,
-                    "showTodayButton": True,
+                    'data-role': 'datebox',
+                    'data-options': '{"mode":"calbox","overrideDateFormat":"%d/%m/%Y","closeCallback":"datelinker","closeCallbackArgs":["id_end_date"]}',
+                    'rows': 1,
+                    'readonly': 'readonly'
                 }),
-            'end_date': DatePickerInput(
-                format='%d-%m-%Y',
+            'end_date': forms.DateInput(
                 attrs={
-                    'class': 'form-control',
-                    'append': 'fa fa-calendar',
-                    'icon_toggle': True,
-                    'type':'text',
-                    },
-                options={
-                    "showClose": True,
-                    "showClear": True,
-                    "showTodayButton": True,
+                    'data-role': 'datebox',
+                    'data-options': '{"mode":"calbox","overrideDateFormat":"%d/%m/%Y"}',
+                    'rows': 1,
+                    'readonly': 'readonly'
+                }),
+            'start_time': forms.TimeInput(
+                attrs={
+                    'data-role': 'datebox',
+                    'data-options': '{"mode":"timebox","overrideDateFormat":"%H:%M","closeCallback":"timelinker","closeCallbackArgs":["id_end_time"]}',
+                    'rows': 1,
+                    'readonly': 'readonly',
+                    'onchange': 'setDuration();',
+                }),
+            'end_time': forms.TimeInput(
+                attrs={
+                    'data-role': 'datebox',
+                    'data-options': '{"mode":"timebox","overrideDateFormat":"%H:%M","closeCallback":"setDuration","closeCallbackArgs":["id_start_time","id_end_time"]}',
+                    'rows': 1,
+                    'readonly': 'readonly',
+                    'onchange': 'setDuration();',
+                }),
+            'duration': forms.TextInput(
+                attrs={
+                    'data-role': 'datebox',
+                    'data-options': '{"mode":"durationbox","useButton": false, "hideinput": true, "overrideDurationFormat":"%Dl:%DM", "beforeOpenCallback":"setDuration","beforeOpenCallbackArgs":["id_start_time","id_end_time"]}',
+                    'rows': 1,
+                    'readonly': 'readonly',
+                    'class': 'text-sm-right',
+                }
+                ),
+            'mileage_start': forms.NumberInput(
+                attrs={
+                'onchange': 'setDistance();',
+                }),
+            'mileage_end': forms.NumberInput(
+                attrs={
+                'onchange': 'setDistance();',
+                }),
+            'distance': forms.TextInput(
+                attrs={
+                    'readonly': 'readonly',
+                    'class': 'text-sm-right',
                 }),
             'notes': forms.Textarea(attrs={'placeholder': 'Enter Notes on the journey', \
-                'class': 'form-control'}),
+                'class': 'form-control',
+                'onchange': 'checkTime();'}),
             'weather' : forms.TextInput(attrs={'placeholder': 'What was the weather like?', \
                 'class': 'form-control'}),
-            'start_time': TimePickerInput(
-                attrs={
-                    'class': 'form-control',
-                    'append': 'fa fa-clock-o',
-                    'icon_toggle': True,},),
-            'end_time': TimePickerInput(
-                attrs={
-                    'class': 'form-control',
-                    'append': 'fa fa-clock-o',
-                    'icon_toggle': True,},),   
+      
+            'toll_currency': forms.Select(attrs={'onchange': 'getCurrency();'})
             }
-    # this function will be used for the validation
+
+    # this function will be used for the validation of duration
+    # duration is shown without seconds on form and so when
+    # passed through is thought by validation to be of format mm:ss when it is actually hh:mm
+    # multiplying this by 60 gives total seconds correctly
+    def clean_duration(self):
+        data = self.cleaned_data['duration']
+        data = data * 60
+        return data
+
+    # this function will be used for the validation of the form
     def clean(self):
         # data from the form is fetched using super function
         super(JourneyDetailsForm, self).clean()
@@ -243,10 +276,6 @@ class JourneyDetailsForm(forms.ModelForm):
                 raise ValidationError \
                     ("The ending mileage must be greater than the starting mileage")
 
-        if travel_from and len(travel_from) < 2:
-            raise ValidationError \
-                ("The starting point must have more than 1 character!")
-
         if end_date and end_date < start_date:
             raise ValidationError \
                 ("The end date must be the same or later than the start date")
@@ -263,3 +292,4 @@ class LoginWithPlaceholder(AuthenticationForm):
         self.helper.layout = Layout(Div(Field('username', placeholder='username'), css_class="form-group"),
                                     Div(Field('password', placeholder='password'), css_class="form-group"),
                                     Div(Submit('submit', 'Log in')))
+
