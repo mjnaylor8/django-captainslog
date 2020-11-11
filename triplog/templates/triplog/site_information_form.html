@@ -2,6 +2,7 @@
 {% load static %}
 {% load bootstrap4 %}
 {% block css %}
+<link href="{% static 'triplog/css/bootstrap-toggle.min.css' %}" rel="stylesheet" type="text/css">
 <link href="{% static 'triplog/css/star-rating.min.css' %}" rel="stylesheet" type="text/css">
 <link href="{% static 'triplog/themes/krajee-fas/theme.min.css' %}" rel="stylesheet" type="text/css">
 {% endblock css %}
@@ -27,7 +28,39 @@
 {% endblock %}
 
 {% block js %}
+<script src="{% static 'triplog/js/bootstrap-toggle.min.js' %}" type="text/javascript"></script>
 <script src="{% static 'triplog/themes/krajee-fas/makethemework.js' %}" type="text/javascript"></script>
 <script src="{% static 'triplog/js/star-rating.min.js' %}" type="text/javascript"></script>
 <script src="{% static 'triplog/themes/krajee-fas/theme.min.js' %}" type="text/javascript"></script>
+
+<script type="text/javascript">
+    function getCurrency() {
+        var x = document.getElementById("id_cost_currency").value;
+        var cost_div = document.getElementById("div_id_cost_charges").getElementsByClassName("input-group-text")[0]
+        var costx_div = document.getElementById("div_id_cost_extras").getElementsByClassName("input-group-text")[0]
+        
+        //console.log(x);
+        //console.log(cost_div);
+
+        switch (x) {
+            case "EUR":
+                cost_div.innerHTML=('<i class="fas fa-euro-sign"></i>');
+                costx_div.innerHTML=('<i class="fas fa-euro-sign"></i>');
+                break;
+            case "GBP":
+                cost_div.innerHTML=('<i class="fas fa-pound-sign"></i>');
+                costx_div.innerHTML=('<i class="fas fa-pound-sign"></i>');
+                break;  
+            case "USD":
+                cost_div.innerHTML=('<i class="fas fa-dollar-sign"></i>');
+                costx_div.innerHTML=('<i class="fas fa-dollar-sign"></i>');
+                break;
+            case "CHF":
+                cost_div.innerHTML=("CHF");
+                costx_div.innerHTML=("CHF");
+                break;
+        }
+    }
+
+</script>
 {% endblock js %}

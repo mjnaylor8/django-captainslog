@@ -1,8 +1,8 @@
 """ site urls """
 from django.urls import path, include
 from django.conf import settings
-from .views import SiteInformationView, AddSiteInformationView, ChangeSiteInformationView
-from .views import JourneyDetailsView, AddJourneyDetailsView, \
+from .views import SiteInformationView, AddSiteInformationView, ChangeSiteInformationView, Site2InformationView
+from .views import JourneyDetailsView, AddJourneyDetailsView, Journey2DetailsView, \
     ChangeJourneyDetailsView, index
 mapbox_access_token = settings.MAPBOX_KEY
 
@@ -14,5 +14,7 @@ urlpatterns = [
     path("addjourney", AddJourneyDetailsView.as_view(), name="addjourney"),
     path("journey_details/<int:pk>", ChangeJourneyDetailsView.as_view(), name="changejourney"),
     path("siteindex/", SiteInformationView.as_view(), name="siteindex"),
+    path("site2index/", Site2InformationView.as_view(), name="site2index"),
     path("journeyindex/", JourneyDetailsView.as_view(), name="journeyindex"),
+    path("journey2index/", Journey2DetailsView.as_view(), name="journey2index"),
 ]

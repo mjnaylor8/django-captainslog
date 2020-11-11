@@ -55,10 +55,10 @@ INSTALLED_APPS = [
     'leaflet',
     'crispy_forms',
     'bootstrap4',
-    'bootstrap_datepicker_plus',
     'mapbox_location_field',
     'widget_tweaks',
     'rosetta',
+    'django_tables2',
 ]
 
 MIDDLEWARE = [
@@ -143,7 +143,8 @@ USE_L10N = True
 
 USE_TZ = True
 
-DATE_INPUT_FORMATS = ['%Y-%m-%d', '%m/%d/%Y', '%m/%d/%y', '%d-%m-%Y']
+DATE_INPUT_FORMATS = ['%d/%m/%Y', '%d-%m-%Y', '%Y-%m-%d', '%m/%d/%Y', '%m-%d-%y',]
+TIME_INPUT_FORMATS = ['%H:%M',]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
@@ -208,3 +209,4 @@ BOOTSTRAP4 = {
 LOGIN_REDIRECT_URL = '/triplog/'
 LOGIN_URL = 'accounts/login'
 
+DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap4.html"

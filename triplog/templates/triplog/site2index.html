@@ -1,0 +1,100 @@
+{% extends "triplog/base.html" %}
+{% load static %}
+{% load render_table from django_tables2 %}
+
+{% block css %}
+<link href="{% static 'triplog/css/star-rating.min.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'triplog/themes/krajee-fas/theme.min.css' %}" rel="stylesheet" type="text/css">
+<link href="{% static 'triplog/css/jquery.raty.css' %}" rel="stylesheet" type="text/css">
+<!--<link href="//cdn.bootcss.com/raty/2.7.1/jquery.raty.min.css" rel="stylesheet">-->
+{% endblock css %}
+
+{% block navigation %}
+    {% include 'triplog/navigation.html' %}
+{% endblock %}
+
+{% block title %}
+    {%if site_information_title%}
+        {{site_information_title}}
+    {%endif%}
+{% endblock %}
+
+{% block content %}
+<a type=button class="mx-3 btn btn-success" href="{% url 'addsite' %}">Add New Site</a>
+<h4 class="ml-3">Site Information:</h4>
+<tr class="d-flex">
+    {% render_table table "triplog/extend_bs4_colhead.html" %}
+
+</tr>
+{% endblock %}
+{% block js %}
+
+
+
+<script src="{% static 'triplog/js/star-rating.min.js' %}" type="text/javascript"></script>
+<script src="{% static 'triplog/themes/krajee-fas/theme.min.js' %}" type="text/javascript"></script>
+<script src="{% static 'triplog/js/jquery.raty.js' %}" rel="stylesheet" type="text/javascript"></script>
+<!--<script src="//cdn.bootcss.com/raty/2.7.1/jquery.raty.min.js"></script>-->
+<script type="text/javascript" >
+
+  $(document).ready(function(){
+    var mc = {
+        '0-0'   : 'score-star-inverse',
+        '0.5-1' : 'score-star-danger',
+        '1.5-2' : 'score-star-warning',
+        '2.5-3' : 'score-star-info',
+        '3.5-4' : 'score-star-primary',
+        '4.5-5' : 'score-star-success'
+      };
+      function between(x, min, max) {
+        return x >= min && x <= max;
+      }
+ 
+  $('.score-star-success').each(function (index) {
+      var star_row = (index + 1);
+      //console.log(star_row);
+
+      //Get the star count from the table row and column
+      var star_count = document.getElementById("site_information").rows[star_row].cells[2].textContent;
+      //console.log(document.getElementById("site_information").rows[star_row].cells[0].textContent, document.getElementById("site_information").rows[star_row].cells[1].textContent, document.getElementById("site_information").rows[star_row].cells[2].textContent)
+      //console.log(star_count);
+      //console.log(index);
+
+      //Using the value obtained from the row 
+      $(this).raty({
+          score: star_count,
+          scoreName: 'star-score',
+          starType: 'i',
+          starOff: 'far fa-star',
+          starOn: 'fas fa-star',
+          starHalf: 'fas fa-star-half',
+          cancelOff: 'fas fa-minus-circle',
+          cancelOn: 'fas fa-minus-circle',
+          readOnly: true,
+      });
+
+
+      var dc;
+      var first; 
+      var second;
+      var th;
+    
+      th = $(this);
+    
+      dc = star_count
+  
+      $.each(mc, function(name, value){
+       
+        first = parseFloat(name.split('-')[0],10);
+        second = parseFloat(name.split('-')[1],10);
+        //console.log(dc, first, second)
+        //console.log(between(dc, first, second));
+        
+        if( between(dc, first, second) ){
+          th.addClass(value);
+        }
+      });
+    });
+  });
+  </script>
+{% endblock js %}

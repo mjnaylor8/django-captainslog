@@ -1,0 +1,22 @@
+{% extends "triplog/base.html" %}
+{% load static %}
+{% load render_table from django_tables2 %}
+
+{% block navigation %}
+    {% include 'triplog/navigation.html' %}
+{% endblock %}
+
+
+{% block title %}
+    {%if journey_details_title%}
+        {{journey_details_title}}
+    {%endif%}
+{% endblock %}
+
+{% block content %}
+    <a type=button class="mx-3 btn btn-success" href="{% url 'addjourney' %}">Add New Journey</a>
+    <h4 class="ml-3">Journey Details:</h4>
+    <tr class="d-flex">
+        {% render_table table "triplog/extend_bs4_colhead.html" %}
+    </tr>    
+{% endblock %}
