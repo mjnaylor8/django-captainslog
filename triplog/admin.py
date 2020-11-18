@@ -1,7 +1,7 @@
 """ Admin defined """
 from django.contrib.gis import admin
 from mapbox_location_field.spatial.admin import SpatialMapAdmin
-from triplog.models import SiteInformation, JourneyDetails
+from triplog.models import SiteInformation, JourneyDetail, TripDetail, TripJourneyInline
 
 
 # Register models.
@@ -14,9 +14,14 @@ class SiteInformationAdmin(SpatialMapAdmin):
     search_fields = ("name",)
     readonly_fields = ("created_date", "edited_date")
 
-@admin.register(JourneyDetails)
-class JourneyDetailsAdmin(admin.ModelAdmin):
-    """ Admin for JourneyDetails defined """
+@admin.register(JourneyDetail)
+class JourneyDetailAdmin(admin.ModelAdmin):
+    """ Admin for JourneyDetail defined """
     list_display = ("start_date", "travel_from", "travel_to")
     search_fields = ("start_date",)
     readonly_fields = ("created_date", "edited_date")
+
+@admin.register(TripDetail)
+class TripDetailAdmin(admin.ModelAdmin):
+    """ Admin for TripDetails defined """
+    inlines = (TripJourneyInline,)

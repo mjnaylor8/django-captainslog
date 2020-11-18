@@ -8,9 +8,9 @@ from django.contrib.auth import authenticate, login
 from django.urls import reverse_lazy
 from django_tables2 import SingleTableView
 from braces import views
-from triplog.models import SiteInformation, JourneyDetails
-from triplog.forms import JourneyDetailsForm, SiteInformationForm
-from triplog.tables import SiteInformationTable, JourneyDetailsTable
+from triplog.models import SiteInformation, JourneyDetail, TripDetail
+from triplog.forms import JourneyDetailForm, SiteInformationForm
+from triplog.tables import SiteInformationTable, JourneyDetailTable, TripDetailsTable
 
 SITE_INFORMATION_FORM = "triplog/site_information_form.html"
 JOURNEY_DETAILS_FORM = "triplog/journey_details_form.html"
@@ -111,11 +111,11 @@ class Site2InformationView(LoginRequiredMixin, SingleTableView):
         return super().form_valid(form)
 
 
-class JourneyDetailsView(LoginRequiredMixin, ListView):
+class JourneyDetailView(LoginRequiredMixin, ListView):
     """ List journey details view """
     login_url = '/accounts/login/'
     redirect_field_name = 'redirect_to'
-    model = JourneyDetails
+    model = JourneyDetail
     template_name = "triplog/journeyindex.html"
     success_url = SUCCESS_JOURNEYINDEX
     ordering = ["-start_date",]
@@ -137,8 +137,8 @@ class Journey2DetailsView(LoginRequiredMixin, SingleTableView):
     """ List journey details view """
     login_url = '/accounts/login/'
     redirect_field_name = 'redirect_to'
-    model = JourneyDetails
-    table_class = JourneyDetailsTable
+    model = JourneyDetail
+    table_class = JourneyDetailTable
     template_name = "triplog/journey2index.html"
     paginate_by = 10
 
@@ -154,14 +154,14 @@ class Journey2DetailsView(LoginRequiredMixin, SingleTableView):
         form.instance.edited_by = self.request.user
         return super().form_valid(form)
 
-class AddJourneyDetailsView(LoginRequiredMixin, CreateView):
+class AddJourneyDetailView(LoginRequiredMixin, CreateView):
     """ add journey details view """
     login_url = '/accounts/login/'
     redirect_field_name = 'redirect_to'
-    model = JourneyDetails
+    model = JourneyDetail
     template_name = JOURNEY_DETAILS_FORM
     success_url = SUCCESS_JOURNEYINDEX
-    form_class = JourneyDetailsForm
+    form_class = JourneyDetailForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -185,14 +185,14 @@ class AddJourneyDetailsView(LoginRequiredMixin, CreateView):
         form.instance.edited_by = self.request.user
         return super().form_valid(form)
 
-class ChangeJourneyDetailsView(LoginRequiredMixin, UpdateView):
+class ChangeJourneyDetailView(LoginRequiredMixin, UpdateView):
     """ change journey details view """
     login_url = '/accounts/login/'
     redirect_field_name = 'redirect_to'
-    model = JourneyDetails
+    model = JourneyDetail
     template_name = JOURNEY_DETAILS_FORM
     success_url = SUCCESS_JOURNEYINDEX
-    form_class = JourneyDetailsForm
+    form_class = JourneyDetailForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -212,7 +212,7 @@ def index(request):
 
     # Generate counts of some of the main objects
     num_sites = SiteInformation.objects.all().count()
-    num_journeys = JourneyDetails.objects.all().count()
+    num_journeys = JourneyDetail.objects.all().count()
 
     # Number of visits to this view, as counted in the session variable.
     num_visits = request.session.get('num_visits', 0)
@@ -229,3 +229,24 @@ def index(request):
     # Render the HTML template index.html with the data in the context variable
     return render(request, 'triplog/index.html', context=context)
     
+class Trip2DetailsView(LoginRequiredMixin, SingleTableView):
+    """ List trip details view """
+    login_url = '/accounts/login/'
+    redirect_field_name = 'redirect_to'
+    model = TripDetail
+    table_class = TripDetailsTable
+    template_name = "triplog/trip2index.html"
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        trip_title = 'List Trips'
+        context['trip_details_title'] = trip_title
+        #context['table'].order_by = 'name'
+        return context
+
+    def form_valid(self, form):
+        if form.instance.created_by is None:
+            form.instance.created_by = self.request.user
+        form.instance.edited_by = self.request.user
+        return super().form_valid(form)

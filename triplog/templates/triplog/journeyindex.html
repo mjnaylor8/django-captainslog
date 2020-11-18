@@ -25,13 +25,13 @@
                 <th></th>
             </thead>       
             <tbody>
-                {% for JourneyDetails in object_list %}
+                {% for JourneyDetail in object_list %}
                 <tr>
-                    <td>{{ JourneyDetails.start_date}}</td>
-                    <td>{{ JourneyDetails.end_date}}</td>
-                    <td>{{ JourneyDetails.travel_from}}</td>
-                    <td>{{ JourneyDetails.travel_to}}</td>
-                    <td><a href="{% url 'changejourney' JourneyDetails.pk %}" class="btn btn-secondary">CHANGE</a></td>
+                    <td>{{ JourneyDetail.start_date}}</td>
+                    <td>{{ JourneyDetail.end_date}}</td>
+                    <td>{{ JourneyDetail.travel_from}}</td>
+                    <td>{{ JourneyDetail.travel_to}}</td>
+                    <td><a href="{% url 'changejourney' JourneyDetail.pk %}" class="btn btn-secondary">CHANGE</a></td>
                 </tr>
                 {% endfor %}
             </tbody>

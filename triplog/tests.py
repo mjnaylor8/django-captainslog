@@ -11,9 +11,9 @@ from factory.fuzzy import BaseFuzzyAttribute
 import factory.django
 
 
-from triplog.models import JourneyDetails
+from triplog.models import JourneyDetail
 from triplog.models import SiteInformation
-from triplog.views import JourneyDetailsView
+from triplog.views import JourneyDetailView
 
 # Create your tests here.
 
@@ -125,11 +125,11 @@ class SiteInformationTest(TestCase):
         self.assertEqual(only_site.created_date.month, only_site.created_date.month)
         self.assertEqual(only_site.created_date.year, only_site.created_date.year)
 
-class JourneyDetailsFactory(factory.django.DjangoModelFactory):
-    """ Create JourneyDetails """
+class JourneyDetailFactory(factory.django.DjangoModelFactory):
+    """ Create JourneyDetail """
     class Meta:
         # Create Journey Information
-        model = JourneyDetails
+        model = JourneyDetail
         django_get_or_create = (
             'start_date',
             'end_date',
@@ -167,18 +167,18 @@ class JourneyDetailsFactory(factory.django.DjangoModelFactory):
     notes = 'Nice Site'
 
 
-class JourneyDetailsTest(TestCase):
-    """ Test JourneyDetails """
+class JourneyDetailTest(TestCase):
+    """ Test JourneyDetail """
     def test_create_journey_details(self):
-        """ Test JourneyDetails """
+        """ Test JourneyDetail """
         site = SiteInformationFactory()
         # Create the journey_details
-        journey_details = JourneyDetailsFactory(destination=site)
+        journey_details = JourneyDetailFactory(destination=site)
 
         #In test will have now been added to the database and now need to test we
         #can save OK and retrieve it
 
-        all_journeys = JourneyDetails.objects.all()
+        all_journeys = JourneyDetail.objects.all()
         self.assertEqual(len(all_journeys), 1)
         only_journey = all_journeys[0]
         self.assertEqual(only_journey, journey_details)
@@ -220,7 +220,7 @@ class JourneyDetailsTest(TestCase):
         self.assertEqual(only_journey.destination, site)
         self.assertEqual(only_journey.destination.name, 'test site name')
 
-class JourneyDetailsViewTest(TestCase):
+class JourneyDetailViewTest(TestCase):
     """ Test Journey_DetailView """
     def setUp(self):
         """ Test Journey_DetailView """
@@ -229,6 +229,6 @@ class JourneyDetailsViewTest(TestCase):
     def test_get(self):
         """ Test Journey_DetailView """
         request = self.factory.get(reverse('journeyindex'))
-        response = JourneyDetailsView.as_view()(request)
+        response = JourneyDetailView.as_view()(request)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed('triplog/journey_index.html')

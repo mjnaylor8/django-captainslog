@@ -1,0 +1,73 @@
+{% extends "sitemaps/base.html" %}
+{% load leaflet_tags %}
+{% leaflet_js plugins="ALL" %}
+{% leaflet_css plugins="ALL" %}
+{% load mapbox_location_field_tags %}
+
+{%  block head %}
+    {% leaflet_js %}
+    {% leaflet_css %}
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+
+        <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.js'></script>
+        <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css' rel='stylesheet'/>        
+{% endblock %}
+
+{% block content %}
+    <div id='map'></div>
+    <!--{% leaflet_map "map" callback="mapInit" %}-->
+{% endblock %}
+
+{% block script %}
+<!--{{ mapbox_access_token | safe }}-->
+    <script type="text/javascript">
+        var mbat = "{{mapbox_access_token}}"
+        mapboxgl.accessToken=mbat;
+
+        var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/light-v9',
+        center: [0, 40],
+        zoom: 1
+        });
+
+        var geojson_visited = {
+        type: 'FeatureCollection',
+        features: [
+            {% for i in sites_visited %}
+                {
+                type: 'Feature',
+                geometry: {
+                    type: 'Point',
+                    coordinates: {% tuple_to_array i.location %},
+                },
+                properties: {
+                    title: "<div class='place-title'>{{ i.name }}</div>",
+                    description: "<div class='place-star'><a href='{{ i.get_absolute_url }}'>{{ i.star_rating }}</a><br/></div>"
+                },
+                },
+                //var lngLatWithTag = {% tuple_to_array i.location %};
+                //var marker = new mapboxgl.Marker() .setLngLat(lngLatWithTag) .addTo(map); 
+            {% endfor %}
+            ]
+            };
+
+            // add markers to map
+            geojson_visited.features.forEach(function(marker) {
+           
+            // create a HTML element for each feature
+            var el = document.createElement('div');
+            el.className = 'marker-light-red';
+            console.log(marker.geometry.coordinates, marker.properties.title, marker.properties.description, el);
+            // visited
+            fred = new mapboxgl.Marker(el) .setLngLat(marker.geometry.coordinates) .addTo(map) .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+            .setHTML(marker.properties.title + marker.properties.description))
+            .addTo(map); 
+            new mapboxgl.Marker(el)
+            .setLngLat(marker.geometry.coordinates)
+            .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
+            .setHTML(marker.properties.title + marker.properties.description))
+            .addTo(map);
+            });
+    </script>
+{% endblock %}
