@@ -11,4 +11,5 @@ app_name = 'sitemaps'
 
 urlpatterns = [
     path('', views.default_map, name="default"),
+    path('gl/', views.gl_map, name="default"),
 ]

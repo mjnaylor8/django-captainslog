@@ -12,7 +12,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column, Fieldset, Field, Div, HTML
 from crispy_forms.bootstrap import TabHolder, Tab, FormActions, InlineRadios, PrependedText
-from triplog.models import SiteInformation, JourneyDetails
+from triplog.models import SiteInformation, JourneyDetail
 from triplog.widgets import CheckBoxBootstrapSwitch
 
 STANDARD_COLUMN_CLASS = 'col-md-2 mb-0'
@@ -108,14 +108,14 @@ class SiteInformationForm(forms.ModelForm):
             }
         
 
-class JourneyDetailsForm(forms.ModelForm):
+class JourneyDetailForm(forms.ModelForm):
     """ define the journey details """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['travel_from'].queryset = SiteInformation.objects.order_by('name')
         self.fields['travel_to'].queryset = SiteInformation.objects.order_by('name')
         self.helper = FormHelper(self)
-        self.helper.form_id = 'id-journeydetailsForm'
+        self.helper.form_id = 'id-journeydetailForm'
         self.helper.form_method = 'post' # get or post
         self.helper.add_input(Submit('submit', 'Save Journey', css_class='btn-primary btn-sm ml-4'))
         self.fields['start_date'].initial = datetime.date.today
@@ -158,7 +158,7 @@ class JourneyDetailsForm(forms.ModelForm):
                 )
             )
     class Meta:
-        model = JourneyDetails
+        model = JourneyDetail
         fields = "__all__"
         labels = {
             'start_date': _('Start Date'),
@@ -260,7 +260,7 @@ class JourneyDetailsForm(forms.ModelForm):
     # this function will be used for the validation of the form
     def clean(self):
         # data from the form is fetched using super function
-        super(JourneyDetailsForm, self).clean()
+        super(JourneyDetailForm, self).clean()
 
         # extract the fields from the data
         mileage_start = self.cleaned_data.get('mileage_start')

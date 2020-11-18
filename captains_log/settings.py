@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'rosetta',
     'django_tables2',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
