@@ -1,21 +1,24 @@
 """ Views defined """
 # Create your views here.
-from django.shortcuts import render
-from django.views.generic import CreateView, UpdateView, ListView, FormView
+
+from django.shortcuts import render, get_object_or_404
+from django.views.generic import CreateView, UpdateView, ListView
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import authenticate, login
-from django.urls import reverse_lazy
 from django_tables2 import SingleTableView
-from braces import views
+
+
 from triplog.models import SiteInformation, JourneyDetail, TripDetail
-from triplog.forms import JourneyDetailForm, SiteInformationForm
-from triplog.tables import SiteInformationTable, JourneyDetailTable, TripDetailsTable
+from triplog.forms import JourneyDetailForm, SiteInformationForm, \
+    TripDetailForm
+from triplog.tables import SiteInformationTable, JourneyDetailTable, TripDetailTable
 
 SITE_INFORMATION_FORM = "triplog/site_information_form.html"
 JOURNEY_DETAILS_FORM = "triplog/journey_details_form.html"
 SUCCESS_SITEINDEX = "/triplog/siteindex/"
 SUCCESS_JOURNEYINDEX = "/triplog/journeyindex/"
+TRIP_DETAILS_FORM = "triplog/trip_details_form.html"
+SUCCESS_TRIPINDEX = "/triplog/trip2index/"
 
 class AddSiteInformationView(LoginRequiredMixin, CreateView):
     """ Add site inforamtion view """
@@ -32,7 +35,7 @@ class AddSiteInformationView(LoginRequiredMixin, CreateView):
         site_title = 'Add Site Details'
         context['site_information_title'] = site_title
         return context
-    
+
     def get_initial(self, **kwargs):
         initial = super().get_initial(**kwargs)
         initial['star_rating'] = 0
@@ -82,12 +85,13 @@ class SiteInformationView(LoginRequiredMixin, ListView):
         site_title = 'List Sites'
         context['site_information_title'] = site_title
         return context
-    
-    def form_valid(self, form):
-        if form.instance.created_by is None:
-            form.instance.created_by = self.request.user
-        form.instance.edited_by = self.request.user
-        return super().form_valid(form)
+
+    #def form_valid(self, form):
+    #    if form.instance.created_by is None:
+    #    """ if form is valid return users """
+    #        form.instance.created_by = self.request.user
+    #    form.instance.edited_by = self.request.user
+    #    return super().form_valid(form)
 
 class Site2InformationView(LoginRequiredMixin, SingleTableView):
     """ list site information view """
@@ -103,13 +107,6 @@ class Site2InformationView(LoginRequiredMixin, SingleTableView):
         site_title = 'List Sites'
         context['site_information_title'] = site_title
         return context
-    
-    def form_valid(self, form):
-        if form.instance.created_by is None:
-            form.instance.created_by = self.request.user
-        form.instance.edited_by = self.request.user
-        return super().form_valid(form)
-
 
 class JourneyDetailView(LoginRequiredMixin, ListView):
     """ List journey details view """
@@ -127,12 +124,6 @@ class JourneyDetailView(LoginRequiredMixin, ListView):
         context['journey_details_title'] = journey_title
         return context
 
-    def form_valid(self, form):
-        if form.instance.created_by is None:
-            form.instance.created_by = self.request.user
-        form.instance.edited_by = self.request.user
-        return super().form_valid(form)
-
 class Journey2DetailsView(LoginRequiredMixin, SingleTableView):
     """ List journey details view """
     login_url = '/accounts/login/'
@@ -147,12 +138,6 @@ class Journey2DetailsView(LoginRequiredMixin, SingleTableView):
         journey_title = 'List Journeys'
         context['journey_details_title'] = journey_title
         return context
-
-    def form_valid(self, form):
-        if form.instance.created_by is None:
-            form.instance.created_by = self.request.user
-        form.instance.edited_by = self.request.user
-        return super().form_valid(form)
 
 class AddJourneyDetailView(LoginRequiredMixin, CreateView):
     """ add journey details view """
@@ -178,7 +163,7 @@ class AddJourneyDetailView(LoginRequiredMixin, CreateView):
         response = super().form_invalid(form)
         print(response)
         return response
-    
+
     def form_valid(self, form):
         if form.instance.created_by is None:
             form.instance.created_by = self.request.user
@@ -228,13 +213,13 @@ def index(request):
 
     # Render the HTML template index.html with the data in the context variable
     return render(request, 'triplog/index.html', context=context)
-    
-class Trip2DetailsView(LoginRequiredMixin, SingleTableView):
+
+class Trip2DetailView(LoginRequiredMixin, SingleTableView):
     """ List trip details view """
     login_url = '/accounts/login/'
     redirect_field_name = 'redirect_to'
     model = TripDetail
-    table_class = TripDetailsTable
+    table_class = TripDetailTable
     template_name = "triplog/trip2index.html"
     paginate_by = 10
 
@@ -245,8 +230,71 @@ class Trip2DetailsView(LoginRequiredMixin, SingleTableView):
         #context['table'].order_by = 'name'
         return context
 
+class ChangeTripDetailView(LoginRequiredMixin, UpdateView):
+    """ change trip details view """
+    login_url = '/accounts/login/'
+    redirect_field_name = 'redirect_to'
+    model = TripDetail
+    template_name = TRIP_DETAILS_FORM
+    success_url = SUCCESS_TRIPINDEX
+    form_class = TripDetailForm
+    currentjourneys = None
+
+    def get_initial(self):
+        self.currentjourneys = get_object_or_404(TripDetail, pk=self.kwargs.get('pk'))
+        return {'currentjourneys': self.currentjourneys,}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        trip_title = 'Change Trip Details'
+        context['trip_detail_title'] = trip_title
+        context['currentjourneys'] = self.currentjourneys
+        return context
+
     def form_valid(self, form):
         if form.instance.created_by is None:
             form.instance.created_by = self.request.user
         form.instance.edited_by = self.request.user
+        selectedjourneys = form.cleaned_data['journeychoice']
+        for journey in selectedjourneys:
+            journey = JourneyDetail.objects.get(pk=journey.pk)
+            journey.trip = form.instance
+            journey.save()
+        return super().form_valid(form)
+
+class AddTripDetailView(LoginRequiredMixin, CreateView):
+    """ add trip details view """
+    login_url = '/accounts/login/'
+    redirect_field_name = 'redirect_to'
+    model = TripDetail
+
+    template_name = TRIP_DETAILS_FORM
+    success_url = SUCCESS_TRIPINDEX
+    form_class = TripDetailForm
+
+    def get_context_data(self, **kwargs):
+        context = super(AddTripDetailView, self).get_context_data(**kwargs)
+        trip_title = 'Add a new Trip'
+        context['trip_detail_title'] = trip_title
+        context['currentjourneys'] = ""
+        return context
+
+    def get_initial(self, **kwargs):
+        initial = super().get_initial(**kwargs)
+        return initial
+
+    def form_invalid(self, form):
+        response = super().form_invalid(form)
+        print(response)
+        return response
+
+    def form_valid(self, form):
+        if form.instance.created_by is None:
+            form.instance.created_by = self.request.user
+        form.instance.edited_by = self.request.user
+        selectedjourneys = form.cleaned_data['journeychoice']
+        for journey in selectedjourneys:
+            journey = JourneyDetail.objects.get(pk=journey.pk)
+            journey.trip = form.instance
+            journey.save()
         return super().form_valid(form)

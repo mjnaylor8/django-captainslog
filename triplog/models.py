@@ -14,6 +14,7 @@ class TripDetail(models.Model):
     """ Define TripDetail Model """
     name = models.CharField(max_length=256)
     description = models.CharField(max_length=1024, blank=True, null=True)
+    created_date = models.DateTimeField(auto_now_add=True)
     edited_date = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(User, on_delete=models.DO_NOTHING, \
         blank=True, null=True, related_name='trip_created_by')
@@ -195,7 +196,7 @@ class JourneyDetail(models.Model):
     end_date = models.DateField(blank=True, null=True)
     weather = models.CharField(max_length=256, blank=True)
     trip = models.ForeignKey(TripDetail, \
-        on_delete=models.DO_NOTHING, blank=True, null=True, related_name='journey_trip')
+        on_delete=models.DO_NOTHING, blank=True, null=True, related_name='journeydetails')
     travel_from = models.ForeignKey(SiteInformation, models.SET_NULL, \
         null=True, related_name='journey_travel_from')
     travel_to = models.ForeignKey(SiteInformation, models.SET_NULL, \
@@ -220,10 +221,10 @@ class JourneyDetail(models.Model):
 
 
     def __str__(self):
-       return str('%s' % \
-           (self.start_date,))
-#        return str('%s, %s, %s' % \
-#            (self.start_date, self.travel_from, self.travel_to))
+#        return str('%s' % \
+#            (self.start_date,))
+        return str('%s, %s, %s' % \
+            (self.start_date, self.travel_from, self.travel_to))
 
     #def created_date(self):
     #    return self.created_date.strftime('%B %d %Y')
