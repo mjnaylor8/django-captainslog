@@ -1,26 +1,30 @@
+""" Tables for django-tables2 """
 # triplog/tables.py
 import django_tables2 as tables
 from django_tables2 import TemplateColumn
 from django.utils.html import format_html
 from triplog.models import SiteInformation, JourneyDetail, TripDetail
-from django.db.models.functions import Length
 
 class JourneyDetailTable(tables.Table):
+    """ Table listing Journeys """
     update = TemplateColumn(template_name='changejourneycolumn.html', orderable=False)
     #travel_from = tables.Column(order_by=("travel_from", "start_date"))
     class Meta:
+        """ update meta for formatting """
         attrs = {
             "id": "journey_details",
             "class": "table table-striped",
             'thead' : {
                 'class': 'thead-dark'
-            }}
+            }
+        }
         model = JourneyDetail
         template_name = "django_tables2/bootstrap4.html"
         fields = ("start_date", "end_date", "travel_from", "travel_to", "update")
         order_by = ("start_date")
 
 class SiteInformationTable(tables.Table):
+    """ Table listing Sites """
     stars = tables.Column(
         empty_values=(),
         attrs={
@@ -29,9 +33,12 @@ class SiteInformationTable(tables.Table):
                 "class": "col-2 stars",
                 "scope": "col",
             }
-        })
-    def render_stars (self, value):
-        return format_html('<div style="display:inline" class="score-star-success" id="star-rating"> </div>', value)
+        }
+    )
+    def render_stars(self, value):
+        """ update and add a <div> for stars """
+        return format_html('<div style="display:inline" class="score-star-success" \
+            id="star-rating"> </div>', value)
 
     update = TemplateColumn(template_name='changesitecolumn.html', orderable=False)
 
@@ -41,22 +48,29 @@ class SiteInformationTable(tables.Table):
                 "style": "display:none;",
                 "scope": "col",
             }
-        })
+        }
+    )
+
 
     class Meta:
+        """ Update for formatting """
         attrs = {
             "id": "site_information",
             "class": "table table-striped",
             "thead" : {
                 "class": "thead-dark"
-                }
+            }
         }
         model = SiteInformation
         template_name = "django_tables2/bootstrap4.html"
         fields = ("name", "address", "star_rating", "stars", "update")
         exclude = ("change",)
+        row_attrs = {
+            'data-pk': lambda record: record.pk
+        }
 
-class TripDetailsTable(tables.Table):
+class TripDetailTable(tables.Table):
+    """ Table listing Trips """
     name = tables.Column(
         attrs={
             "td": {
@@ -65,10 +79,10 @@ class TripDetailsTable(tables.Table):
         }
     )
 
-    #journey_trip = tables.ManyToManyColumn(
+    #journeydetails = tables.ManyToManyColumn(
     #    verbose_name="Journeys (Date, From, To)",
-    #    linkify_item=True, 
-    #    accessor=('journey_trip'), 
+    #    linkify_item=True,
+    #    accessor=('journeydetails'),
     #    separator=format_html("<br/> ")
     #)
 
@@ -77,7 +91,7 @@ class TripDetailsTable(tables.Table):
         verbose_name="Date",
         linkify_item=True,
         separator=format_html("<br/> "),
-        accessor=('journey_trip'),
+        accessor=('journeydetails'),
         order_by=("date",),
         transform=lambda obj: obj.start_date
     )
@@ -86,7 +100,7 @@ class TripDetailsTable(tables.Table):
         filter=lambda qs: qs.filter().order_by('start_date'),
         verbose_name="Start",
         separator=format_html("<br/> "),
-        accessor=('journey_trip'),
+        accessor=('journeydetails'),
         transform=lambda obj: format_html('<a href="{}">{}</a>'.\
             format(obj.travel_from.get_absolute_url(), str(obj.travel_from)))
     )
@@ -95,13 +109,15 @@ class TripDetailsTable(tables.Table):
         filter=lambda qs: qs.filter().order_by('start_date'),
         verbose_name="Destination",
         separator=format_html("<br/> "),
-        accessor=('journey_trip'), 
+        accessor=('journeydetails'),
         transform=lambda obj: format_html('<a href="{}">{}</a>'.\
             format(obj.travel_to.get_absolute_url(), str(obj.travel_to)))
     )
 
+    update = TemplateColumn(template_name='changetripcolumn.html', orderable=False)
 
     class Meta:
+        """ Update for formatting """
         attrs = {
             "id": "trip_details",
             "class": "table table-striped",
@@ -111,6 +127,9 @@ class TripDetailsTable(tables.Table):
         }
         model = TripDetail
         template_name = "django_tables2/bootstrap4.html"
-        fields = ("name", "date", "start", "destination")
+        fields = ("name", "date", "start", "destination", "update")
         order_by = ("name", "date")
+        row_attrs = {
+            'data-pk': lambda record: record.pk, 'data-url': " 'changetrip' "
+        }
         

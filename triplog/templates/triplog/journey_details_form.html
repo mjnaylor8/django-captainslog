@@ -20,6 +20,8 @@
 <form action="" method="post" novalidate>
     {% crispy form %}
 </form>
+    {{form.media}}
+    {% include 'triplog/timestamp.html' %}
 {% endblock %}
 {% block js %}
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.js"></script>

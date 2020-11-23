@@ -1,0 +1,35 @@
+{% extends "triplog/base.html" %}
+{% load static %}
+{% load bootstrap4 %}
+{% block css %}
+<link href="{% static 'triplog/css/bootstrap-toggle.min.css' %}" rel="stylesheet" type="text/css">
+{% endblock css %}
+{% load site_tags %}
+{% load crispy_forms_tags %}
+
+{% block navigation %}
+    {% include 'triplog/navigation.html' %}
+{% endblock %}
+
+{% block title %}
+    {%if trip_detail_title%}
+        {{trip_detail_title}}
+    {%endif%}
+{% endblock %}
+
+{% block content %}
+    <form action="" method="post" novalidate>
+        {% crispy form %}
+    </form> 
+    {{form.media}}
+    {% include 'triplog/timestamp.html' %}
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'triplog/js/bootstrap-toggle.min.js' %}" type="text/javascript"></script>
+
+
+<script type="text/javascript">
+
+</script>
+{% endblock js %}

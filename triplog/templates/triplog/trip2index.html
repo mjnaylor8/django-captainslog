@@ -14,9 +14,32 @@
 {% endblock %}
 
 {% block content %}
-    <a type=button class="mx-3 btn btn-success" href="{% url 'addjourney' %}">Add New Trip</a>
+    <a type=button class="mx-3 btn btn-success" href="{% url 'addtrip' %}">Add New Trip</a>
     <h4 class="ml-3">Trip Details:</h4>
     <tr class="d-flex">
         {% render_table table "triplog/extend_bs4_colhead.html" %}
     </tr>    
 {% endblock %}
+
+
+
+
+{% block js %}
+<script src="{% static 'triplog/js/bootstrap-toggle.min.js' %}" type="text/javascript"></script>
+<script type="text/javascript" >
+
+    $('tr').dblclick(function(){
+        var id = $(this).attr('data-pk');
+        var d_url = $(this).attr('data-url')
+        
+        //Needs to be done as a replace as Django trys to construct the stuff in { } and
+        //if not valid return a ReverseMatch console.error();
+        
+        //Construct the full URL with "id"
+        const url = "{% url 'changetrip' 9999 %}".replace(/9999/,id);
+        console.log(id, d_url, url);
+        document.location.href = url;
+        //window.open("your_url");
+    })
+</script>
+{% endblock js %}
