@@ -1,0 +1,63 @@
+.navbar {
+    font-size: 1em;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    color: white;
+    padding: 8px 5px 8px 5px;
+    max-height: 40px;
+}
+
+.navbar a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.navbar-brand {
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.navbar-item {
+    margin-left: 20px;
+}
+.message {
+    font-weight: 600;
+    color: blue;
+}
+
+input[name=message] {
+    width: 80%;
+}
+.message_list th,td {
+    text-align: left;
+    padding-right: 15px;
+}
+.score-star-success {
+    text-align: right;
+    color: #5cb85c;
+    font-size: 1em;
+}
+.score-star-danger {
+    color: #d9534f;
+    font-size: 1em;
+}
+.score-star-warning {
+    color: #f0ad4e ;
+    font-size: 1em;
+}
+.score-star-primary {
+    color: #0275d8;
+    font-size: 1em;
+}
+.score-star-info {
+    color: #5bc0de ;
+    font-size: 1em;
+} 
+.score-star-inverse {
+    color: #292b2c ;
+    font-size: 1em;
+}
+.star-rating {
+    text-align: center;
+    padding-left: 10px;
+    padding-right: 10px;
+}

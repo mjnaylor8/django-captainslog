@@ -1,0 +1,226 @@
+html {
+    height: 100%;
+    position: relative;
+}
+body {    
+    color: #404040;
+    margin: 0;
+    padding: 0;
+    top: 0;
+    height:100%;
+    width:100%;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;}
+
+/* #map { position:absolute; top:0; bottom:0; width:100%; } */
+/* area below the navigation bar */
+
+#routemap-body {
+    display: flex;
+    position: absolute;
+    min-height: 100vh;
+    flex-direction: row;
+}
+#map-container { 
+    position: relative;
+    height: calc(100%);
+    display: flex;
+} 
+/* Map - Flex set to allow map to use available space */
+.map { 
+    position: absolute;
+    width: 100%; 
+    height: 100%;
+    order: 1;
+    flex: 1;
+
+}
+.popupmap { 
+    /* position: absolute; */
+    width: 100%; 
+    height: 75vh;
+    position: relative;
+}
+.message-box {
+    position: relative;
+    top: 0px;
+    left: 0px;
+
+}
+.info-box {
+    height: 120px;
+    width: 150px;
+    position: relative;
+    top: 20px;
+    left: 10px;
+    background-color: rgba(255, 255, 255, .9);
+    padding: 15px;
+    text-align: left;
+    font-family: 'Arial';
+    margin: 0;
+    font-size: 13px;
+}
+#export, #updateDataset, #calcRoute, #import, #openroutes{
+    position: absolute;
+    top:160px;
+    left:10px;
+    z-index:100;
+    background-color:white;
+    color: blue;
+    padding:6px;
+    border-radius:4px;
+    font-family: 'Helvetica Neue';
+    cursor: pointer;
+    font-size:12px;
+    text-decoration:none;
+    height: 30px;
+    width: 30px;
+}
+#openroutes {
+    background-image: url(../pictures/folder-open-solid.svg);
+    background-repeat: no-repeat;
+    background-size: 25px;
+    background-position:center;
+}
+#import {
+    background-image: url(../pictures/file-import-solid.svg);
+    background-repeat: no-repeat;
+    background-size: 25px;
+    background-position:center;
+}
+#export {
+    background-image: url(../pictures/file-export-solid.svg);
+    background-repeat: no-repeat;
+    background-size: 25px;
+    background-position:center;
+}
+#updateDataset {
+    background-image: url(../pictures/save-solid.svg);
+    background-repeat: no-repeat;
+    background-size: 25px;
+    background-position:center;
+}
+#calcRoute {
+    background-image: url(../pictures/route-solid.svg);
+    background-repeat: no-repeat;
+    background-size: 25px;
+    background-position:center;
+}
+#export:hover, #updateDataset:hover, #calcRoute:hover, #import:hover, #openroutes:hover{
+    background-color: #aaa;
+}
+
+.openroutes .openroutestip {
+    visibility: hidden;
+    width: 120px;
+    left:50px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 0px 0;
+    position: absolute;
+    z-index: 1;
+}
+.openroutes:hover .openroutestip {
+    visibility: visible;
+}
+
+.export .exporttip {
+    visibility: hidden;
+    width: 120px;
+    left:50px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 0px 0;
+    position: absolute;
+    z-index: 1;
+}
+.export:hover .exporttip {
+    visibility: visible;
+}
+.update .updatetip {
+    visibility: hidden;
+    width: 120px;
+    left:50px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+}
+.update:hover .updatetip {
+    visibility: visible;
+}
+.calc-route .routetip {
+    visibility: hidden;
+    width: 120px;
+    left:50px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+}
+.calc-route:hover .routetip {
+    visibility: visible;
+}
+.import .importtip {
+    visibility: hidden;
+    width: 120px;
+    left:50px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    position: absolute;
+    z-index: 1;
+}
+.import:hover .importtip {
+    visibility: visible;
+}
+#updateDataset {
+    top: 200px;
+}
+#calcRoute {
+    top: 240px;
+}
+#import {
+    top: 280px;
+}
+#openroutes {
+    top: 320px;
+}
+#features {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 50%;
+    overflow: auto;
+    background: rgba(255, 255, 255, 0.8);
+}
+#map canvas {
+    cursor: crosshair;
+}
+.hide {
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+}
+/* .fas.fa-map-marked {
+    color: white;
+} */
+.white-icon {
+    color: white;
+}
+.red-icon {
+    color: red;
+}

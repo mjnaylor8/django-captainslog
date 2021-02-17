@@ -1,0 +1,45 @@
+/*--- Start Map View --*/
+
+.place-title {
+  font-size: 100%;
+  font-weight: bold;
+  font-family: 'Saira Condensed';
+  text-align: center;
+  padding: 3px 3px 8px 3px;
+}
+
+.place-star {
+  text-align: center;
+  font-family: 'Saira Condensed';
+  font-size: 90%;
+  line-height: 28px;
+  padding: 0 3px;
+}
+
+.marker-light-red {
+  background-image: url(../pictures/light_red_pin.png);
+  background-size: cover;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.marker-light-red:hover {
+  opacity: 0.5;
+}
+.siteowner {
+  text-align: center;
+  color: #404040;
+  outline: none;
+}
+.namelink {
+  text-align: center;
+  text-decoration: underline;
+  color: #404040;
+  outline: none;
+}
+.popup-star-rating {
+  text-align: center;
+  outline: none;
+}

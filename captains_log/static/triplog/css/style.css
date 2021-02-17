@@ -1,0 +1,48 @@
+
+.asteriskField {
+    content:"*";
+    color:red;
+}
+.score-star-success {
+    color: #5cb85c;
+    font-size: 1.5em;
+}
+.score-star-danger {
+    color: #d9534f;
+    font-size: 1.5em;
+}
+.score-star-warning {
+    color: #f0ad4e ;
+    font-size: 1.5em;
+}
+.score-star-primary {
+    color: #0275d8;
+    font-size: 1.5em;
+}
+.score-star-info {
+    color: #5bc0de ;
+    font-size: 1.5em;
+} 
+.score-star-inverse {
+    color: #292b2c ;
+    font-size: 1.5em;
+}
+
+.td_star_size {    
+    width:200px; 
+    height:50px;
+    max-width:200px;
+    min-width:200px; 
+    max-height:50px; 
+    min-height:50px;
+}
+.loggedinuser {
+    color: white;
+    font-weight: bold;
+}
+.nav-link.active {
+    background-color: #0275d8;
+    border-radius: 5px;
+}
+
+
