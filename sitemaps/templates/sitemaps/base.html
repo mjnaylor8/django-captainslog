@@ -1,24 +1,59 @@
 <!DOCTYPE html>
+    {% load static %}
+    
+    {# Load the tag library #}
+    {% load bootstrap4 %}
+    {% load js_handlers %}
 
-{% load static %}
+    {# Load CSS and JavaScript #}
+    {% bootstrap_css %}
+    {% bootstrap_javascript jquery='full' %}
 
 <html>
-<head>
-    <link href="{% static 'sitemaps/css/style.css' %}" rel="stylesheet" type="text/css">
-    <link href="{% static 'sitemaps/css/default.css' %}" rel="stylesheet" type="text/css">
-    <script src='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.js'></script>
-    <link href='https://api.mapbox.com/mapbox.js/v3.3.1/mapbox.css' rel='stylesheet' />
-    <title>Captains Log - Sitemaps</title>
-    {% block head %}
-    {% endblock %}
-</head>
-<body>
-    {% block content %}
-    {% endblock %}
-    <footer>
-        <p>&copy; Michael Naylor <script type="text/javascript">document.write( new Date().getFullYear() );</script></p>
-    </footer>
-    {% block script %}
-    {% endblock %}
-</body>
+    <head id=sitemap-header class=sitemap-header>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        {% include 'sitemaps/_base_css_links.html' %}
+        <title>Captains Log - Sitemaps</title>
+        {% block head %}
+        {% endblock head%}
+    </head>
+
+    <body id=sitemap-body class=sitemap-body>
+        {% block bootstrap4_content %}
+        <div id=sitemap-nav class="sitemap-nav container-fluid bg-dark text-white col-12">
+            <!--Use .container-fluid for a full width container, spanning the entire width of the viewport.-->
+            {% block navigation %}
+            {% endblock navigation %}
+        </div>
+        {% endblock bootstrap4_content %}
+        <!-- {% autoescape off %}{% bootstrap_messages %}{% endautoescape %} -->
+        {% block content %}
+            (no content)
+        {% endblock %} 
+
+        <footer id=sitemap-footer class=sitemap-footer>
+            <p>&copy; Michael Naylor
+                <script 
+                    type="text/javascript">document.write( new Date().getFullYear() );
+                </script>
+            </p>
+        </footer>
+        {% block script %}
+            {% include 'sitemaps/_base_script_src.html' %}
+        {% endblock script %}
+    </body>
 </html>
+<script>
+window.addEventListener('DOMContentLoaded', function(){
+        setupCloseBtns();
+    });
+function setupCloseBtns() {
+    for (var button of 
+            document.querySelectorAll('.CloseBtn')
+        ){
+    button.setAttribute("onclick", "{% go_to_url 'sitemaps:routetable' %}")
+        }
+};
+
+</script>

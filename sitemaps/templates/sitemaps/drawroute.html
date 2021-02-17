@@ -1,0 +1,852 @@
+
+{% load static %}
+{% load render_table from django_tables2 %}
+<!DOCTYPE html>
+<html>
+<head id=drawroute-header class=drawroute-header>
+    <meta charset='utf-8' />
+    <title>Create a route using the Mapbox Directions API</title>
+
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.css' rel='stylesheet'>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script> -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.0/mapbox-gl-draw.css' type='text/css'/>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css" type="text/css"/>
+    <link href="{% static 'sitemaps/css/feature-info.css' %}" rel="stylesheet" type="text/css">
+    <link href="{% static 'sitemaps/css/drawroute.css' %}" rel="stylesheet" type="text/css">
+</head>
+<body id=drawroute-body class=drawroute-body>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.js'></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.0/mapbox-gl-draw.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
+    <script src="https://npmcdn.com/@turf/turf@5.1.6/turf.min.js"></script>
+    <script src="{% static 'sitemaps/js/feature-info.js' %}"></script>
+    <script src="{% static 'sitemaps/js/feature-modes.js' %}"></script>
+    {% include 'sitemaps/messages.html' %}
+    <div id='map-container'>
+        <div id='map' class='map'></div>
+        <div id='info-box' class='info-box'>
+            <p>Draw your route using the draw tools (25 points max)</p>
+            <div id='calculated-line'></div>
+            <div class='export'>
+                <a href='#' id='export' ><div class='exporttip'>Export the line</div></a> 
+            </div>
+            <div class='update'>
+                <a href="#" id='updateDataset'><div class='updatetip'>Update the line</div></a>
+            </div>
+            <div class='calc-route'>
+                <a href="#" id='calcRoute'><div class='routetip'>Calculate the route</div></a>      
+            </div>
+            <div class='import'>
+                <a href='#' id='import' ><div class='importtip'>Import the line</div></a>
+            </div>
+            <div class='openroutes'>
+                <a href='#' id='openroutes' ><div class='openroutestip'>Open and edit routes</div></a>
+            </div>
+        </div>
+    </div>
+
+
+
+{%include 'sitemaps/_form_modal.html' %}
+{%include 'sitemaps/_form_modal_popup.html' %}
+{%include 'sitemaps/_map_modal_popup.html' %}
+
+<script>
+    // (function(d) {
+    //     "use strict"
+    // })(document);
+
+    var mbat = "{{mapbox_access_token}}"
+    mapboxgl.accessToken=mbat;
+    // mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JhZmEiLCJhIjoiY2oydGJoajI5MDA1bjJxbzZzZjd5MXl3NSJ9.vNVFm6NsFzeX0AGSjFHpqg';
+    
+    var map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/satellite-streets-v11',
+            center: [-0.827610, 51.182250],
+            zoom: 5
+        });
+    var datasetId = "test.geojson";
+
+    // GeoJSON object to hold our measurement features
+    var geojson = {
+        'type': 'FeatureCollection',
+        'features': []
+    };
+    var geoJsonFeatures;
+    var routeCoords;
+    DrawNamedLineMode.showNamePrompt = true;
+    
+    var draw = new MapboxDraw({
+        displayControlsDefault: false,
+        controls: {
+            point: true,
+            line_string: true,
+            trash: true
+        },
+        modes: Object.assign({
+        //     lots_of_points: LotsOfPointsMode,
+        }, MapboxDraw.modes, {
+            draw_line_string: DrawNamedLineMode,
+        }),
+    });
+    var scale = new mapboxgl.ScaleControl({
+        maxWidth: 200,
+        unit: 'metric'
+    });
+    var navigation = new mapboxgl.NavigationControl({
+
+    });
+
+    var linestringcontrol = new LineStringInfoControl ({
+        distanceUnits: 'kilometers',
+            drawControl: draw,
+            editProperties: [
+            {
+                name: 'name',
+                label: 'Name'
+            }
+        ],
+        defaultTitle: 'Line'
+    });
+    var multilinecontrol = new MultiLineInfoControl ({
+        distanceUnits: 'kilometers',
+            drawControl: draw,
+            editProperties: [
+            {
+                name: 'name',
+                label: 'Name'
+            }
+        ],
+        defaultTitle: 'Line'
+    });
+    var pointcontrol = new PointInfoControl({
+        drawControl: draw,
+        editProperties: [
+            {
+                name: 'name',
+                label: 'Name'
+            }
+        ],
+        defaultTitle: 'Point'
+        });
+     var directions = new MapboxDirections({
+        accessToken: mapboxgl.accessToken,
+        controls: [{
+            inputs: false,
+            instructions: false
+        }]
+    });
+
+    // add the draw tool to the map
+    
+    map.on('load', function(e) {
+        map.addControl(navigation);
+        map.addControl(scale);
+        map.addControl(draw, 'bottom-right');
+        map.addControl(linestringcontrol);
+        map.addControl(pointcontrol);
+        map.addControl(multilinecontrol);
+        //draw.changeMode('lots_of_points', {count:7});
+    });
+    window.addEventListener('DOMContentLoaded', function(){
+            popupForm();
+        });
+    map.on('click', function (e) {
+    });
+    map.on('mousemove', function(e){
+    });
+
+    // add create, update, or delete actions
+    map.on('draw.create', updateRoute);
+    map.on('draw.update', updateRoute);
+    map.on('draw.delete', removeRoute);
+    map.on('draw.selectionchange', changeRoute);
+
+
+    function popupForm() {
+        document.getElementById('openroutes').addEventListener('click', () => {
+            var modal_url = '/maps/routetable/'
+            var modal = document.getElementById('form-modal');
+            var modalBody = document.getElementById('form-modal-body')
+            loadModalForm('form-modal-body', modal_url);
+            $(modal).modal('show');
+            
+            var formheader = document.querySelector('#form-modal-header');
+            var closeheader = formheader.querySelector('.close');
+            var isHeaderText = formheader.querySelector("h4");
+            if (!isHeaderText) {
+                var headerText = document.createElement("h4");
+                var textnode = document.createTextNode("Routes:");
+                headerText.appendChild(textnode);
+                document.querySelector('#form-modal-header').insertBefore(headerText, closeheader);
+            };
+            
+            
+        });
+    };
+
+
+    function changeRoute (){
+       //console.log("change", draw.getMode(), draw.getAll());
+    }
+
+    // use the coordinates you just drew to make your directions request
+    function updateRoute(e) {
+        //var data = draw.getAll().features;
+        var data = e.features;
+        console.log(map, data, draw.getAll().features)
+        removeRoute(); // overwrite any existing layers
+        if (data[0].geometry.type != "Point") {
+            var answer = document.getElementById('calculated-line');
+            var lastFeature = data.length - 1;
+            var coords = data[lastFeature].geometry.coordinates;
+            var newCoords = coords.join(';')
+            answer.innerHTML = "Points on line: " + coords.length + "<br>";
+            routeCoords = newCoords
+        }
+        else {
+            document.getElementById('calculated-line').innerHTML = '';
+        };
+        //getMatch(newCoords);
+    }
+
+    // make a directions request
+    function getMatch(e) {
+        // https://www.mapbox.com/api-documentation/#directions
+        var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + e +'?geometries=geojson&steps=true&&access_token=' + mapboxgl.accessToken;
+        var req = new XMLHttpRequest();
+        req.responseType = 'json';
+        req.open('GET', url, true);
+        req.onload  = function() {
+        var jsonResponse = req.response;
+        var distance = jsonResponse.routes[0].distance*0.001; // convert to km
+        var duration = jsonResponse.routes[0].duration/60; // convert to minutes
+        // add results to info box
+        document.getElementById('calculated-line').innerHTML = document.getElementById('calculated-line').innerHTML + 'Distance: ' + distance.toFixed(2) + ' km<br>Duration: ' + duration.toFixed(2) + ' minutes';
+        var coords = jsonResponse.routes[0].geometry;
+        // add the route to the map
+        addRoute(coords);
+        };
+        req.send();
+    }
+
+    // adds the route as a layer on the map
+    function addRoute (coords) {
+        // check if the route is already loaded
+        if (map.getSource('route')) {
+            map.removeLayer('route')
+            map.removeSource('route')
+        } else{
+            map.addLayer({
+            "id": "route",
+            "type": "line",
+            "source": {
+                "type": "geojson",
+                "data": {
+                "type": "Feature",
+                "properties": {},
+                "geometry": coords
+                }
+            },
+            "layout": {
+                "line-join": "round",
+                "line-cap": "round"
+            },
+            "paint": {
+                "line-color": "#3b9ddd",
+                "line-width": 8,
+                "line-opacity": 0.8
+            }
+            });
+        };
+    }
+
+    // remove the layer if it exists
+    function removeRoute () {
+        if (map.getSource('route')) {
+            map.removeLayer('route');
+            map.removeSource('route');
+            document.getElementById('calculated-line').innerHTML = '';
+            // var data = draw.getAll();
+            // var countofFeatures = data.features.length;
+            // var delFeatures = [];
+            // var i;
+            // for (i=0; i < (countofFeatures - 1); i++) {
+            //     delFeatures[i] = data.features[i].id;
+            // }
+            // draw.delete(delFeatures);
+        } else  {
+            return;
+        }
+    }
+
+    document.getElementById('export').onclick = function(e) {
+        // Extract GeoJson from featureGroup
+        var data = draw.getAll();
+        var savename;
+        if (data.features.length > 0) {
+            savename = getFileName(data);
+            if (saveName != 'cancelled') {
+                // Stringify the GeoJson
+                var convertedData = 'text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
+
+                // Create export
+                document.getElementById('export').setAttribute('href', 'data:' + convertedData);
+                document.getElementById('export').setAttribute('download', savename + '.geojson');
+                alert("The file " + savename + '.geojson' + " has been saved in your browser downloads folder" );
+            } else {
+                alert("Wouldn't you like to draw some data?");
+            };
+        };
+        
+    }
+    document.getElementById('updateDataset').onclick = function(e) {
+        e.preventDefault();
+        uploadFeatures();
+    }
+    document.getElementById('calcRoute').onclick = function(e) {
+        getMatch(routeCoords);
+    }
+
+    function setFeatureId(){
+        return getData(datasetId);
+    }   
+
+    function getRouteNames() {
+        var geturl = "{% url 'sitemaps:ajax_get_route_names' %}"
+        $.ajax({
+            url: geturl,
+            type: 'GET',
+            dataType: 'json',
+            async: false
+        })
+        .done(function(getdata){
+            console.log(getdata);
+        })
+    }
+    function getData(datasetId) {
+        $.ajax({
+            url: datasetId,
+            type: 'GET',
+            dataType: 'json',
+            async: false
+        })
+        .done(function(oldData){
+            geoJsonFeatures = oldData;
+            return geoJsonFeatures;
+        });
+    }
+
+    function getFileName(drawdata) {
+        ddFeatures = drawdata.features
+        fId = ddFeatures[0].id;
+        fName = ddFeatures[0].properties.name;
+        fGeoType = ddFeatures[0].geometry.type;
+        if (ddFeatures.length == 1) {
+            if (isnotNull(fName)) {
+                return fName;
+            }
+            else {
+                return fGeoType
+            }
+        }
+        else {
+            var saveName = prompt("There are " + ddFeatures.length + " features being saved.\nTo save please enter a file name");
+                if (saveName == null || saveName == "") {
+                    alert("Saving file cancelled!");
+                    return 'cancelled';
+                }
+                else {
+                    return saveName;
+                }
+            
+        }
+    };
+
+    function uploadFeatures(){
+        var drawnData = draw.getAll();
+        var i;
+        var saveName;
+        if (drawnData.features.length > 0) {
+            var url = "{% url 'sitemaps:ajax_save_route' %}"
+            saveName = getFileName(drawnData);
+            if (saveName != 'cancelled') {
+                const csrftoken = getCookie('csrftoken');
+                $.ajaxSetup({
+                    contentType : 'application/json',
+                    processData : false
+                });
+                $.ajax({
+                    type:'PUT', 
+                    url : url,
+                    data:JSON.stringify({'file': drawnData, 'name': saveName}),
+                    headers: {'X-CSRFToken': csrftoken,},
+                    success : function(data){
+                        r_json = JSON.parse(data);
+                        alert(r_json.msg);
+                    }
+                })
+            }
+        }
+        else {
+            alert("Wouldn't you like to draw some data?");
+        }
+    }
+    function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+    }
+    function formAddModalFooterButton (type, url) {
+        var footer = document.getElementById('form-modal-footer');
+        var createRouteButton = document.getElementById('create-route')
+        if (!createRouteButton) {
+            var button = footer.appendChild(document.createElement('button'));
+            button.id = type + "-route";
+            button.className = "create-route btn btn-secondary";
+            button.innerHTML = "Create Route";
+            button.setAttribute("data-form-url", "{% url 'sitemaps:createroute' %}");
+        };
+    };
+
+    function formAjaxSubmit (form, formtype, modal, action) {
+        
+        var footer = $(modal).find('.modal-footer');
+        var formname = formtype + "-form";
+        var formform = document.getElementById(formtype + "-form");
+        var formsubmitbtn = document.getElementById('submitBtn');
+        var formmethod = document.getElementById(formtype + "-form").getAttribute('method')
+        //var formaction = formform.getAttribute('action')
+
+        //$(form).submit(function (e) {
+        $(form).one('submit', function (e) {
+            e.preventDefault();
+            footer.addClass('lds-roller');
+            // either use the action supplied by the form, or the original rendering url
+            var url = $(this).attr('action') || action;
+            var type = $(this).attr('method') || formmethod;
+
+            var formData = new FormData(formform);
+            if (formname == 'update-route') {
+                formData.append('files', $('input[type=file]')[0].files[0]); 
+            };
+            const csrftoken = getCookie('csrftoken');
+
+            $.ajax({
+                type: type,
+                url: url,
+                data: formData,
+                headers: {'X-CSRFToken': csrftoken,},
+                processData: false,
+                contentType: false,
+                async: false,
+                beforeSend: function () {
+                //$(settings.submitBtn).prop("disabled", true);
+                    formsubmitbtn.disabled = true;
+                },
+                success: function (xhr, ajaxOptions, thrownError) {
+                // If the server sends back a successful response,
+                // we need to further check the HTML received
+
+                // If xhr contains any field errors, the form did not
+                // validate successfully, so we update the modal body
+                // with the new form and its error
+                    if ( $(xhr).find('.has-error').length > 0 ) {
+                        $(modal).find('.modal-body').html(xhr);
+                        formAjaxSubmit(form, formtype, modal);
+                    } else {
+                        console.log(xhr);
+                        $(modal).modal('hide');
+                        formsubmitbtn.disabled = false;
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) { console.log('error2', xhr);
+                },
+                complete: function() {
+                    clearPopupModalBodyandHide();
+                    reloadModal('/maps/routetable/');
+                    footer.removeClass('lds-roller');
+                }
+            });
+        });
+    };
+
+    async function loadModalForm (parentElementId, filePath) {
+            const csrftoken = getCookie('csrftoken');
+            const init = {
+                method : "GET",
+                headers : { "Content-Type" : "text/html", "X-CSRFToken": csrftoken, "Call-From" : "fetch"},
+                mode : "cors",
+                cache : "default"
+            };
+            const req = new Request(filePath, init);
+            await fetch(req)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    } else {
+                        return response.text();
+                    }
+                })
+                .then(myText => {
+                    var popupModalBody = document.getElementById('form-modal-body');
+                    popupModalBody.innerHTML = myText;
+                })
+                .then (load => {
+                    updateTableHeaders(parentElementId);
+                    updateTablePagination(parentElementId);
+                    formAddModalFooterButton ('create', filePath);
+                    addModalPopupClicks();
+                })
+                .catch(e => {
+                        console.log('There has been a problem with your fetch operation: ' + e.message);
+                });
+
+    };
+
+    async function loadPopupModalForm (filePath) {
+        const csrftoken = getCookie('csrftoken');
+        const init = {
+            method : "GET",
+            headers : { "Content-Type" : "text/html", "X-CSRFToken": csrftoken, "Call-From" : "fetch"},
+            mode : "cors",
+            cache : "default"
+        };
+        const req = new Request(filePath, init);
+        console.log(req, filePath);
+        await fetch(req)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                } else {
+                    return response.text();
+                }
+            })
+            .then(myText => {
+                var popupModalBody = document.getElementById('form-modal-popup-body');
+                popupModalBody.innerHTML = myText;
+            })
+            .catch(e => {
+                    console.log('There has been a problem with your fetch operation: ' + e.message);
+            });
+    };
+
+    async function processPopupModal(event) {
+        target = event.target;
+        if (target.getAttribute('id') == 'create-route') {
+            url = event.target.getAttribute("data-form-url");
+            formId = event.target.getAttribute('id');
+        }
+        else {
+            url = event.target.parentNode.getAttribute("data-form-url");
+            formId = event.target.parentNode.getAttribute('id');
+        }
+        await popupModalForm(event, target, url, formId);
+        var modal = document.getElementById('form-modal-popup');
+        var modalBody = document.getElementById('form-modal-popup-body');
+        addPopupModalClicks(modalBody, formId, modal, url);
+        $(modal).modal('show');
+    };
+
+    function addModalPopupClicks() {
+        document.querySelectorAll('.update-route').forEach(item => {
+        item.addEventListener('click',event => {
+            processPopupModal(event)
+        })});
+        document.querySelectorAll('.plot-route').forEach(item => {
+        item.addEventListener('click',event => {
+            recordKey = event.target.parentNode.getAttribute('record-pk');
+            plotRoute(recordKey);
+        })});
+        document.querySelectorAll('.delete-route').forEach(item => {
+        item.addEventListener('click',event => {
+            processPopupModal(event)
+        })});  
+        document.querySelectorAll('.create-route').forEach(item => {
+        item.addEventListener('click',event => {
+            processPopupModal(event)
+        })});   
+        document.querySelectorAll('.view-route').forEach(item => {
+        item.addEventListener('click',event => {
+            recordKey = event.target.parentNode.getAttribute('record-pk');
+            showRoute(recordKey, event);
+        })});            
+    };
+
+    function addPopupModalClicks(modalBody, formtype, modal, popup_url) {
+        var modal = document.getElementById('form-modal-popup-body');
+        for (var input of 
+            modal.querySelectorAll('input[type="submit"]')) {
+                input.addEventListener('click',event => {
+                    formAjaxSubmit(modalBody, formtype, modal, popup_url);
+                });
+            };
+        var modal = document.getElementById('form-modal-popup');
+        // for (var button of
+        //     modal.querySelectorAll('button[type="button"]')) {
+        //         button.addEventListener('click',event => {
+        //             clearPopupModalBodyandHide()
+        //     });
+        // };
+    };
+    
+$('#form-modal-popup').on('hide.bs.modal', function (event) {
+    var button = $(event.relatedTarget) // Button that triggered the modal
+    //var recipient = button.data('whatever') // Extract info from data-* attributes
+    // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+    // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+    var modal = $(this)
+    console.log('Popup', event, button, modal);
+    //modal.find('.modal-title').text('New message to ' + recipient)
+    //modal.find('.modal-body input').val(recipient)
+});
+$('#form-modal-popup').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget) // Button that triggered the modal
+    //var recipient = button.data('whatever') // Extract info from data-* attributes
+    // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+    // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+    var modal = $(this)
+    console.log('Popup', event, button, modal);
+    //modal.find('.modal-title').text('New message to ' + recipient)
+    //modal.find('.modal-body input').val(recipient)
+});
+$('#form-modal').on('hide.bs.modal', function (event) {
+    var button = $(event.relatedTarget) // Button that triggered the modal
+    //var recipient = button.data('whatever') // Extract info from data-* attributes
+    // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+    // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+    var modal = $(this)
+    console.log('Modal',event, button, modal);
+    //modal.find('.modal-title').text('New message to ' + recipient)
+    //modal.find('.modal-body input').val(recipient)
+});
+$('#form-modal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget) // Button that triggered the modal
+    //var recipient = button.data('whatever') // Extract info from data-* attributes
+    // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+    // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+    var modal = $(this)
+    console.log('Modal',event, button, modal);
+    //modal.find('.modal-title').text('New message to ' + recipient)
+    //modal.find('.modal-body input').val(recipient)
+});
+
+function clearPopupModalBodyandHide() {
+    var modal = document.getElementById('form-modal-popup-body');
+    for (var input of 
+        modal.querySelectorAll('input[type="submit"]')) {
+            input.removeEventListener('click',event => {
+                formAjaxSubmit(modalBody, formtype, modal, popup_url);
+            });
+            };
+    modal.innerHTML = "";
+        $(document.getElementById('form-modal-popup')).modal('hide');
+    
+};
+
+    async function popupModalForm (event, target, url, type) {
+            event.preventDefault();
+            await loadPopupModalForm(url)
+            document.querySelector('#form-modal-popup-header').style.display = 'none';
+            document.querySelector('#form-modal-popup-footer').style.display = 'none';  
+    };
+
+    function updateTableHeaders(parentElementId) {
+        var tableheaders = document.getElementById(parentElementId).getElementsByClassName('orderable');
+        filePath = '/maps/routetable/';
+        for (var i=0; i < tableheaders.length; i++) {
+            var newAtt = document.createAttribute('onClick');
+            var hrefAtt = tableheaders[i].getElementsByTagName('a')[0].getAttribute('href');
+            tableheaders[i].getElementsByTagName('a')[0].setAttribute('href', '#');
+            var path = ("'" + filePath + hrefAtt + "'");
+            var strAtt = ("'" + hrefAtt + "'")
+            newAtt.value = 'reloadModal('+ path + ',' + strAtt + ');'
+            tableheaders[i].getElementsByTagName('a')[0].setAttributeNode(newAtt);
+        };
+    };
+    
+    function updateTablePagination(parentElementId) {
+        var tablepagination = document.getElementById(parentElementId).getElementsByClassName('page-link');
+        filePath = '/maps/routetable/';
+        for (var i=0; i < tablepagination.length; i++) {
+            var newAtt = document.createAttribute('onClick');
+            var hrefAtt = tablepagination[i].getAttribute('href');
+            tablepagination[i].setAttribute('href', '#');
+            var path = ("'" + filePath + hrefAtt + "'");
+            var strAtt = ("'" + hrefAtt + "'")
+            newAtt.value = 'reloadModal('+ path + ',' + strAtt + ');'
+            tablepagination[i].setAttributeNode(newAtt);
+        }
+    };
+
+    async function reloadModal (path, hrefAtt){
+        var modalBody = document.getElementById('form-modal-body');
+        // Clear the modal body
+        modalBody.innerHTML = '';
+        // wait for the form to load so all buttons have right links etc
+        await loadModalForm ('form-modal-body', path);
+        fadeOut(document.getElementById('django-messages'));
+    };
+
+    async function showRoute (primaryKey, event) {
+        // 1) reads a predefined dataset
+        // 2) copies to to a variable geoJsonFeatures
+        // 3) loads a new source
+
+        //Get table and extract the route name and file name from the table elements using the event passed
+        var routeTable = document.getElementById('route-details');
+        var routeTableHeader = document.getElementById('route-details-header');
+        var routeTableBody = document.getElementById('route-details-body');
+        var tableRowIndex = event.target.parentNode.closest('tr').rowIndex
+        var th = []
+        for (var heading of
+            routeTable.getElementsByTagName('th')) {
+            for (var child of
+                heading.children) {
+                    th.push(child.innerText);
+                };
+        };
+        var TableColNameIndex = Array.prototype.indexOf.call(th, "Route name")
+        var TableColFileIndex = Array.prototype.indexOf.call(th, "Route file")
+        var TableRouteName = routeTableBody.rows[tableRowIndex-1].cells[TableColNameIndex].innerText
+        var TableFileName = routeTableBody.rows[tableRowIndex-1].cells[TableColFileIndex].innerText
+        document.getElementById('map-modal-title').innerText = ("Route " + TableRouteName + " - File Name: " + TableFileName);
+
+        await getRouteData(primaryKey);
+
+        var sourceName = 'source' + primaryKey
+        var layerName = 'layer' + primaryKey
+
+        var popupmap = new mapboxgl.Map({
+            container: 'map-modal-popup-body',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [-0.827610, 51.182250],
+            zoom: 5
+        });
+        popupmap.on('load', function(e) {
+            popupmap.addControl(navigation);
+            popupmap.addControl(scale);
+            popupmap.addSource(sourceName, {type: 'geojson', data: geoJsonFeatures});
+            popupmap.addLayer({
+                'id': layerName,
+                'type': 'line',
+                'source': sourceName,
+                'paint': {
+                    'line-color': '#8B0000',
+                    'line-width': 3,
+                },
+                'filter': ['==', '$type', 'LineString']
+            });
+        });
+        var modal = document.getElementById('map-modal-popup');
+        var modalBody = document.getElementById('map-modal-popup-body');
+        $(modal).modal('show');
+
+        // Given that modal has an id extracted above into modal
+        // and the map is under the variable popupmap
+        // use the ‘shown.bs.modal’ event handler as the event handler for Bootstrap Modals.
+        // and resize the map into the container and then fit it to the bounds of the elements plotted
+        $(modal).on('shown.bs.modal', function () {
+            popupmap.resize();
+            var bbox = turf.bbox(geoJsonFeatures);
+            // uses name of map, the geojson elements to use and the padding (px)
+            fitMapToBounds(popupmap, bbox, 20);
+  
+        });
+        // Clear the 
+        $(modal).on('hidden.bs.modal', function () {
+            popupmap.remove();
+            modalBody.innerHTML='';
+        });
+
+
+    };
+
+    function fitMapToBounds(map, bbox ,pad) {
+        map.fitBounds(bbox, {padding: pad});
+    }
+
+    async function plotRoute (primaryKey) {
+        // 1) reads a predefined dataset
+        // 2) copies to to a variable geoJsonFeatures
+        // 3) loads a new source
+
+        await getRouteData(primaryKey);
+        console.log(geoJsonFeatures);
+        draw.add(geoJsonFeatures);
+
+        // var sourceName = 'source' + primaryKey
+        // var layerName = 'layer' + primaryKey
+        // if (map.getSource(sourceName)) {
+        //     map.removeLayer(layerName);
+        //     map.removeSource(sourceName);
+        // }
+        // map.addSource(sourceName, {type: 'geojson', data: geoJsonFeatures});
+        // map.addLayer({
+        //     'id': layerName,
+        //     'type': 'line',
+        //     'source': sourceName,
+        //     'paint': {
+        //         'line-color': '#8B0000',
+        //         'line-width': 3,
+        //     },
+        //     'filter': ['==', '$type', 'LineString']
+        // });
+    };
+
+    async function getRouteData(record_key) {
+        const url = "{% url 'sitemaps:ajax_get_route_data' %}"+"?record_key="+record_key;
+        const csrftoken = getCookie('csrftoken');
+        const init = {
+            method : "GET",
+            headers : { "Content-Type" : "text/html", "X-CSRFToken": csrftoken, "Call-From" : "fetch"},
+            mode : "cors",
+            cache : "default"
+        };
+        const req = new Request(url, init);
+        await fetch(req)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                } else {
+                    return response.json();
+                }
+            })
+            .then(myGeojson => {
+                geoJsonFeatures = myGeojson;
+            })
+            .catch(e => {
+                    console.log('There has been a problem with your fetch operation: ' + e.message);
+            });
+    };
+
+    // Hide message
+    function fadeOut(el) {
+        el.style.opacity = 1;
+        (function fade() {
+            if ((el.style.opacity -= .01) < 0) {
+                el.style.display = "none";
+            } else {
+                requestAnimationFrame(fade);
+            }
+        })();
+    };
+</script>

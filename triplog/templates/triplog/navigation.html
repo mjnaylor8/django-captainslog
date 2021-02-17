@@ -1,22 +1,25 @@
 <nav class="navbar navbar-expand-xl navbar-dark bg-dark">
-    <a class="navbar-brand" href="{% url 'index' %}">Home</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <!--<a class="navbar-brand" href="{% url 'index' %}">Home</a>-->
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" \
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
-      </button>
+    </button>
 
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav mr-auto">
             <!-- mr-auto - margin right -->
-            <li class="nav-item"><a class="nav-link" href="{% url 'siteindex' %}">Site Index</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'trip2index' %}">Trip Index</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'journeyindex' %}">Journey Index <span class="sr-only">(current)</span></a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'addsite' %}">Add Site</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'addtrip' %}">Add Trip</a></li>
-            <li class="nav-item"><a class="nav-link" href="{% url 'addjourney' %}">Add Journey</a></li>
-        </ul>
-        <span class="navbar-text">
+            <li class="nav-item"><a class="nav-link" id="index" href="{% url 'index' %}">Home</a></li>
+            <li class="nav-item"><a class="nav-link" id="siteindex" href="{% url 'site2index' %}">Site Index</a></li>
+            <li class="nav-item"><a class="nav-link" id="tripindex" href="{% url 'trip2index' %}">Trip Index</a></li>
+            <li class="nav-item"><a class="nav-link" id="journeyindex" href="{% url 'journey2index' %}">Journey Index <span class="sr-only">(current)</span></a></li>
+            <li class="nav-item"><a class="nav-link" id="addsite" href="{% url 'addsite' %}">Add Site</a></li>
+            <li class="nav-item"><a class="nav-link" id="addtrip" href="{% url 'addtrip' %}">Add Trip</a></li>
+            <li class="nav-item"><a class="nav-link" id="addjourney" href="{% url 'addjourney' %}">Add Journey</a></li>
+            <li class="nav-item"><a class="nav-link" id="sitemap" href="{% url 'sitemaps:sitemap' %}">Site Map</a></li>        
+          </ul>
+        <span class="navbar-text navbar-right">
           {% if user.is_authenticated %}
-            {{ user.get_username }} is logged in: <a href="{% url 'logout'%}?next={{request.path}}">Logout</a>
+            <span class=loggedinuser>{{ user.get_username }}</span> is logged in: <a href="{% url 'logout'%}?next={{request.path}}" class="btn-sm btn-primary navbar-btn">Logout</a>
           {% else %}
             <a href="{% url 'login'%}?next={{request.path}}">Login</a>
           {% endif %} 

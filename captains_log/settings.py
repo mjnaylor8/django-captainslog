@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'rosetta',
     'django_tables2',
     'django_filters',
+    'guardian',
 ]
 
 MIDDLEWARE = [
@@ -74,6 +75,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'captains_log.urls'
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend', # this is default
+    'guardian.backends.ObjectPermissionBackend',
+)
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -157,7 +162,7 @@ MEDIA_URL = '/media/'
 STATICFILES_DIRS = []
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder'
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
 
 LEAFLET_CONFIG = {

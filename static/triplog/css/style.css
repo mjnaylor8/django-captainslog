@@ -27,3 +27,22 @@
     color: #292b2c ;
     font-size: 1.5em;
 }
+
+.td_star_size {    
+    width:200px; 
+    height:50px;
+    max-width:200px;
+    min-width:200px; 
+    max-height:50px; 
+    min-height:50px;
+}
+.loggedinuser {
+    color: white;
+    font-weight: bold;
+}
+.nav-link.active {
+    background-color: #0275d8;
+    border-radius: 5px;
+}
+
+

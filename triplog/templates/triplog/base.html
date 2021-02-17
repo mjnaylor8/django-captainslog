@@ -1,13 +1,13 @@
 <!DOCTYPE html>
     {% load static %}
-<html lang="en">
+    <html lang="en">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="shortcut icon" type="image/png" href="{% static 'triplog/favicon.ico' %}"/>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css" integrity="sha256-gvEnj2axkqIj4wbYhPjbWV7zttgpzBVEgHub9AAZQD4=" crossorigin="anonymous" />
-    <link href="{% static 'triplog/css/style.css' %}" rel="stylesheet" type="text/css">
+    
     {# Include FontAwesome#}
     <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.css">
     <link href="{% static '/triplog/bootstrap4-glyphicons/css/bootstrap-glyphicons.min.css' %}" rel="stylesheet" type="text/css">
@@ -26,11 +26,13 @@
     {# Load CSS and JavaScript #}
     {% bootstrap_css %}
     {% bootstrap_javascript jquery='full' %}
-    {% block css %}{% endblock css %}
+    
+    {% block css %}
+    {% endblock css %}
     <!-- Moment.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.23.0/moment.min.js" integrity="sha256-VBLiveTKyUZMEzJd6z2mhfxIqz3ZATCuVMawPZGzIfA=" crossorigin="anonymous"></script>
     <script type="text/javascript" src="{% static 'bootstrap-tab.js' %}">  </script>
-
+    <link href="{% static 'triplog/css/style.css' %}" rel="stylesheet" type="text/css">
    
     {% block head %}
         <title>Captains Log - Triplog</title>
@@ -38,13 +40,13 @@
 </head>
 <body>
     {% block bootstrap4_content %}
-        <div class="container-fluid p-2 my-2 bg-dark text-white">
+        <div class="container-fluid p-2 mb-2 bg-dark text-white">
             <!--Use .container-fluid for a full width container, spanning the entire width of the viewport.-->
             <!--padding (p) 2 and margins (m) 2  (y) top and bottom Dark background with white text -->
-            <div class="col-8">
+            <div class="col-12">
                 {% block navigation %}
                 {% endblock navigation %}
-                <div class=ml-4>  
+                <div id=pagetitle class=ml-4>  
                     <h2>{% block title %}(no title){% endblock %}</h2> 
                 </div>
             </div>
@@ -53,12 +55,16 @@
             <div class="col-12">
                 {% autoescape off %}{% bootstrap_messages %}{% endautoescape %}
                 {% block content %}(no content){% endblock %}
-                {{ form.media }}
+                <!--{{ form.media }}-->
             </div>
         </div>
     {% endblock bootstrap4_content %}
     <footer>
-        <p class="small ml-4">&copy; Michael Naylor <script type="text/javascript">document.write( new Date().getFullYear() );</script></p>
+        <p class="small pl-3 ml-4">&copy; Michael Naylor
+            <script 
+                type="text/javascript">document.write( new Date().getFullYear() );
+            </script>
+        </p>
     </footer>
     {% block js %}
         <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.js"></script>

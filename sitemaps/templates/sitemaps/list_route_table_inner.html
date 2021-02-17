@@ -1,0 +1,7 @@
+{% load static %}
+{% load render_table from django_tables2 %}
+{% include 'sitemaps/messages.html' %}
+<div id='form-modal-body-table'>
+    {% render_table table "sitemaps/extend_bs4_colhead.html" %}
+</div>
+{% include 'sitemaps/list_route_script.html' %}

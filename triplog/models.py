@@ -6,7 +6,10 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.urls import reverse
 from mapbox_location_field.spatial.models import SpatialLocationField
-from mapbox_location_field.models import AddressAutoHiddenField
+from mapbox_location_field.models import \
+    AddressAutoHiddenField, AddressCountryField, AddressRegionField, \
+    AddressDistrictField, AddressPlaceField, AddressLocalityField, AddressPostcodeField, \
+    AddressLineField
 
 # Create your models here.
 
@@ -14,6 +17,8 @@ class TripDetail(models.Model):
     """ Define TripDetail Model """
     name = models.CharField(max_length=256)
     description = models.CharField(max_length=1024, blank=True, null=True)
+    trip_route = models.FileField(upload_to='media/', blank=True, null=True)
+    uploaded_trip_route_at = models.DateTimeField(auto_now_add=True)
     created_date = models.DateTimeField(auto_now_add=True)
     edited_date = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(User, on_delete=models.DO_NOTHING, \
@@ -38,6 +43,12 @@ class SiteOwnerChoice(models.TextChoices):
     CACC_SITE = "C&CC Site", _("C&CC Site")
     INDEPENDENT = "Independent", _("Independent")
     FRANCE_PASSION = "France Passion", _("France Passion")
+    AIRE = "Aire", _("Aire")
+    PUB = "Pub", _("Pub")
+    HOTEL = "Hotel", _("Hotel")
+    RESTAURANT = "Restaurant", _("Restaurant")
+    ROADSIDE = "Roadside", _("Roadside")
+    HOME = "Home", _("Home")
     NA = "n/a", _("n/a")
 class GreetingChoice(models.TextChoices):
     """ Define Greeting Choices """
@@ -113,14 +124,23 @@ class SiteInformation(models.Model):
     ]
 
     name = models.CharField(max_length=256)
-    address = AddressAutoHiddenField()
+    address = AddressAutoHiddenField(map_id="map_1")
+    addressline = AddressLineField(blank=True, null=True, map_id="map_1")
+    locality = AddressLocalityField(blank=True, null=True, map_id="map_1")
+    place = AddressPlaceField(blank=True, null=True, map_id="map_1")
+    district = AddressDistrictField(blank=True, null=True, map_id="map_1")
+    postcode = AddressPostcodeField(blank=True, null=True, map_id="map_1")
+    region = AddressRegionField(blank=True, null=True, map_id="map_1")
+    country = AddressCountryField(blank=True, null=True, map_id="map_1")
     email = models.CharField(max_length=256, blank=True)
     siteowner = models.CharField(max_length=256, blank=True, \
         choices=SiteOwnerChoice.choices, default=SiteOwnerChoice.NA)
     phone_number = models.CharField(max_length=256, blank=True)
     location = SpatialLocationField(null=True, blank=True, map_attrs={
+        "id": "map_1",
         "center": [-0.827610, 51.182250],
         "placeholder": "Pick a location on the map below",
+        "style": "mapbox://styles/mapbox/satellite-streets-v11"
         })
     #star_rating = models.CharField(blank=True, \
     # choices=STAR_RATING_CHOICES, max_length=256, null=True)

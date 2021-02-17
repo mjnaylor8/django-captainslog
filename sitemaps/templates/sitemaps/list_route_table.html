@@ -1,0 +1,9 @@
+{% extends "sitemaps/base.html" %}
+{% load static %}
+{% load render_table from django_tables2 %}
+
+
+{% block content %}
+    {% include 'sitemaps/list_route_table_inner.html' %}
+{% endblock %}
+

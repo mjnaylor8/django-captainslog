@@ -17,15 +17,15 @@
 
 
 {% block content %}
-<form action="" method="post" novalidate>
-    {% crispy form %}
+<form action="" method="post" novalidate class="ml-3">
+    {% crispy form form.helper %}
 </form>
     {{form.media}}
     {% include 'triplog/timestamp.html' %}
 {% endblock %}
 {% block js %}
 <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.js"></script>
-//<script src="https://cdn.jtsage.com/jtsage-datebox/5.3.3/jtsage-datebox-5.3.3.bootstrap4.min.js" type="text/javascript"></script>
+<script src="https://cdn.jtsage.com/jtsage-datebox/5.3.3/jtsage-datebox-5.3.3.bootstrap4.min.js" type="text/javascript"></script>
 <script src="{% static 'triplog/js/jtsage-datebox.min.js' %}" type="text/javascript"></script>
 <script type="text/javascript">
     function getCurrency() {
@@ -123,7 +123,13 @@
         //set Duration and Distance when form is opened
         setDistance();
         setDuration();
+        $(".nav-link active").removeClass("active");
+        $("#addjourney").addClass("active");
+        pagetitle = document.getElementById('pagetitle').textContent;
+        pagetitle = pagetitle.trim();
+        console.log(pagetitle, pagetitle.startsWith("Change"));
+        if (pagetitle.startsWith("Change")) {
+            document.getElementById('addjourney').textContent="Change / Add Journey";}
     })
-    
 </script>
 {% endblock js %}
