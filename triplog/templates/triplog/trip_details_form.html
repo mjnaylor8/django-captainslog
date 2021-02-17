@@ -18,10 +18,10 @@
 {% endblock %}
 
 {% block content %}
-    <form action="" method="post" novalidate>
-        {% crispy form %}
+    <form action="" method="post" novalidate class="ml-3">
+        {% crispy form form.helper %}
     </form> 
-    {{form.media}}
+    <!-- {{form.media}} -->
     {% include 'triplog/timestamp.html' %}
 {% endblock %}
 
@@ -30,6 +30,9 @@
 
 
 <script type="text/javascript">
-
+    $(document).ready(function(){
+    $(".nav-link active").removeClass("active");
+    $("#addtrip").addClass("active");
+    })
 </script>
 {% endblock js %}

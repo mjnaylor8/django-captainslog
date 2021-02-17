@@ -161,7 +161,6 @@ class AddJourneyDetailView(LoginRequiredMixin, CreateView):
 
     def form_invalid(self, form):
         response = super().form_invalid(form)
-        print(response)
         return response
 
     def form_valid(self, form):
@@ -255,7 +254,17 @@ class ChangeTripDetailView(LoginRequiredMixin, UpdateView):
         if form.instance.created_by is None:
             form.instance.created_by = self.request.user
         form.instance.edited_by = self.request.user
+        form.name = form.cleaned_data['name']
+        form.description = form.cleaned_data['description']
         selectedjourneys = form.cleaned_data['journeychoice']
+        form.save(commit=False)
+        form.save_m2m()
+        # when updating the journey the delete current journeys first
+        for journey in JourneyDetail.objects.filter(trip=self.currentjourneys):
+            journey = JourneyDetail.objects.get(pk=journey.pk)
+            journey.trip = None
+            journey.save()
+        # then save the selected journeys
         for journey in selectedjourneys:
             journey = JourneyDetail.objects.get(pk=journey.pk)
             journey.trip = form.instance
@@ -292,7 +301,11 @@ class AddTripDetailView(LoginRequiredMixin, CreateView):
         if form.instance.created_by is None:
             form.instance.created_by = self.request.user
         form.instance.edited_by = self.request.user
+        form.name = form.cleaned_data['name']
+        form.description = form.cleaned_data['description']
         selectedjourneys = form.cleaned_data['journeychoice']
+        form.save(commit=False)
+        form.save_m2m()
         for journey in selectedjourneys:
             journey = JourneyDetail.objects.get(pk=journey.pk)
             journey.trip = form.instance

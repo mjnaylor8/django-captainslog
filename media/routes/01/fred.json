@@ -1,0 +1,1 @@
+{"type": "FeatureCollection", "features": [{"id": "d1a4514d2d66234a6fe5e79adb46df9a", "type": "Feature", "properties": {"name": "fred"}, "geometry": {"coordinates": [[-1.1094944060143064, 52.28328738242715], [1.81481528114017, 49.83744417019241], [5.033454839403504, 50.002497859990655], [3.2389920768320053, 49.00991326616008]], "type": "LineString"}}]}

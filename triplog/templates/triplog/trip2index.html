@@ -14,9 +14,9 @@
 {% endblock %}
 
 {% block content %}
-    <a type=button class="mx-3 btn btn-success" href="{% url 'addtrip' %}">Add New Trip</a>
+    <a type=button class="mx-3 btn-sm btn-success" href="{% url 'addtrip' %}">Add New Trip</a>
     <h4 class="ml-3">Trip Details:</h4>
-    <tr class="d-flex">
+    <tr class="ml-3 d-flex">
         {% render_table table "triplog/extend_bs4_colhead.html" %}
     </tr>    
 {% endblock %}
@@ -40,6 +40,10 @@
         console.log(id, d_url, url);
         document.location.href = url;
         //window.open("your_url");
+    })
+    $(document).ready(function(){
+    $(".nav-link active").removeClass("active");
+    $("#tripindex").addClass("active");
     })
 </script>
 {% endblock js %}

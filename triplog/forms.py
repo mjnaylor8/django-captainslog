@@ -10,7 +10,7 @@ from django.utils.translation import gettext_lazy as _
 from django.core.exceptions import ValidationError
 from django.contrib.auth.forms import AuthenticationForm
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Row, Column, Field, Div
+from crispy_forms.layout import Layout, Submit, Row, Column, Field, Div, HTML
 from crispy_forms.bootstrap import TabHolder, Tab, InlineRadios, PrependedText
 from triplog.models import SiteInformation, JourneyDetail, TripDetail
 
@@ -29,7 +29,7 @@ class SiteInformationForm(forms.ModelForm):
         self.helper = FormHelper(self)
         self.helper.form_id = 'id-sitedetailsForm'
         self.helper.form_method = 'post' # get or post
-        self.helper.add_input(Submit('submit', 'Save Site', css_class='btn-primary btn-sm ml-4'))
+        self.helper.add_input(Submit('submit', 'Save Site', css_class='btn-sm'))
         self.fields['star_rating'].initial = 0
         self.fields['would_return'].initial = True
         self.fields['ambience'].empty_label = "n/a"
@@ -42,7 +42,7 @@ class SiteInformationForm(forms.ModelForm):
                     ),
                     Row(
                         Column('siteowner', css_class=STANDARD_COLUMN_CLASS),
-                        Column('days_stayed', css_class='col-md-1 mb-0'),
+                        Column('days_stayed', css_class=STANDARD_COLUMN_CLASS),
                         Column(PrependedText('cost_charges',
                                              mark_safe('<i class="fas fa-pound-sign"></i>')), \
                                              css_class=STANDARD_COLUMN_CLASS),
@@ -52,9 +52,31 @@ class SiteInformationForm(forms.ModelForm):
                         Column('notes', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH)
                     ),
                     Row(
+                        Column('address', type="hidden"),
+                        Field('addressline', type="hidden"),
                         Column('location', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH),
-                        Column('address', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH)
+                        Field('place', type="hidden"),
+                        Field('district', type="hidden"),
+                        Field('region', type="hidden"),
+                        Field('locality', type="hidden"),
+                        Field('postcode', type="hidden"),
+                        Field('country', type="hidden")
                     ),
+                    Row(HTML('<div id="menu"> \
+                                    <input id="streets-v11" type="radio" name="rtoggle" value="streets" />\
+                                    <label for="streets-v11">streets</label> \
+                                    <input id="light-v10" type="radio" name="rtoggle" value="light" /> \
+                                    <label for="light-v10">light</label> \
+                                    <input id="dark-v10" type="radio" name="rtoggle" value="dark" /> \
+                                    <label for="dark-v10">dark</label> \
+                                    <input id="outdoors-v11" type="radio" name="rtoggle" value="outdoors" /> \
+                                    <label for="outdoors-v11">outdoors</label> \
+                                    <input id="satellite-v9" type="radio" name="rtoggle" value="satellite" /> \
+                                    <label for="satellite-v9">satellite</label> \
+                                    <input id="satellite-streets-v11" type="radio" name="rtoggle" value="satellite streets" checked="checked"/> \
+                                    <label for="satellite-streets-v11">satellite streets</label> \
+                            </div>')
+                        )
                     ),
                 Tab("Further Details",
                     Row(
@@ -128,7 +150,8 @@ class SiteInformationForm(forms.ModelForm):
                                              active=True), \
                                              css_class=STANDARD_COLUMN_CLASS),
                         Column(PrependedText('laundry',
-                                             mark_safe('<i class="mdi mdi-local-laundry-service mdi-lg"></i>'),
+                                             mark_safe('<i class="mdi mdi-local-laundry-service \
+                                                        mdi-lg"></i>'),
                                              active=True), \
                                              css_class=STANDARD_COLUMN_CLASS)
                     ),
@@ -140,6 +163,13 @@ class SiteInformationForm(forms.ModelForm):
         model = SiteInformation
         fields = "__all__"
         labels = {
+            'country': _('Country'),
+            'region': _('Region'),
+            'district': _('District'),
+            'locality': _('Locality'),
+            'place': _('Place'),
+            'postcode': _('Postcode'),
+            'addressline': _('Address'),
             'tv_signal': _('TV Signal'),
             'wifi': _('Wi-Fi'),
             'phone_signal_3G_4G': _('Phone Signal'),
@@ -165,7 +195,8 @@ class JourneyDetailForm(forms.ModelForm):
         self.helper = FormHelper(self)
         self.helper.form_id = 'id-journeydetailForm'
         self.helper.form_method = 'post' # get or post
-        self.helper.add_input(Submit('submit', 'Save Journey', css_class='btn-primary btn-sm ml-4'))
+        self.helper.form_class = "ml-3"
+        self.helper.add_input(Submit('submit', 'Save Journey', css_class='btn-sm'))
         self.fields['start_date'].initial = datetime.date.today
         self.fields['end_date'].initial = datetime.date.today
         self.fields['start_date'].input_formats = settings.DATE_INPUT_FORMATS
@@ -177,7 +208,6 @@ class JourneyDetailForm(forms.ModelForm):
         self.fields['end_time'].input_formats = settings.TIME_INPUT_FORMATS
         self.helper.layout = Layout(
 
-            Tab("Journey Details",
                 Row(
                     Column('travel_from', css_class='col-md-3 mb-0'),
                     Column('travel_to', css_class='col-md-3 mb-0'),
@@ -185,15 +215,13 @@ class JourneyDetailForm(forms.ModelForm):
                 Row(
                     Column('start_date', css_class=STANDARD_COLUMN_CLASS),
                     Column('start_time', css_class='col-md-1 mb-0'),
-                ),
-                Row(
                     Column('end_date', css_class=STANDARD_COLUMN_CLASS),
                     Column('end_time', css_class='col-md-1 mb-0'),
                     Column('duration', css_class='col-md-1 mb-0'),
                     ),
                 Row(
-                    Column('mileage_start', css_class='col-md-1 mb-0'),
-                    Column('mileage_end', css_class='col-md-1 mb-0'),
+                    Column('mileage_start', css_class='col-md-2 mb-0'),
+                    Column('mileage_end', css_class='col-md-2 mb-0'),
                     Column('distance', css_class='col-md-1 mb-0'),
                     ),
                 Row(
@@ -208,7 +236,7 @@ class JourneyDetailForm(forms.ModelForm):
                                          mark_safe('<i class="fas fa-pound-sign"></i>')), \
                                          css_class=STANDARD_COLUMN_CLASS),
                     ),
-                )
+
         )
         super(JourneyDetailForm, self).__init__(*args, **kwargs)
     class Meta:
@@ -305,6 +333,7 @@ class JourneyDetailForm(forms.ModelForm):
             ),
             'notes': forms.Textarea(attrs={'placeholder': 'Enter Notes on the journey', \
                 'class': 'form-control', \
+                'rows': 4, \
                 'onchange': 'checkTime();'}),
             'weather' : forms.TextInput(attrs={'placeholder': 'What was the weather like?', \
                 'class': 'form-control'}),
@@ -378,7 +407,7 @@ class TripDetailForm(forms.ModelForm):
         self.helper = FormHelper(self)
         self.helper.form_id = 'id-tripdetailsForm'
         self.helper.form_method = 'post' # get or post
-        self.helper.add_input(Submit('submit', 'Save Trip', css_class='btn-primary btn-sm ml-4'))
+        self.helper.add_input(Submit('submit', 'Save Trip', css_class='btn-sm'))
         self.helper.layout = Layout(
 
             Tab("Trip Details",
@@ -410,8 +439,8 @@ class TripDetailForm(forms.ModelForm):
             'currentjourneys': forms.HiddenInput,
             }
 
-    def save(self, commit=True):
-        trip = self.instance
-        trip.name = self.cleaned_data['name']
-        trip.description = self.cleaned_data['description']
-        return trip
+class TripRouteForm(forms.ModelForm):
+    class Meta:
+        model = TripDetail
+        fields = ('trip_route',)
+        

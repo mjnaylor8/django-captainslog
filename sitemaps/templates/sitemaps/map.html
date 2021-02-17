@@ -1,73 +1,612 @@
 {% extends "sitemaps/base.html" %}
-{% load leaflet_tags %}
-{% leaflet_js plugins="ALL" %}
-{% leaflet_css plugins="ALL" %}
 {% load mapbox_location_field_tags %}
+{% load static %}
 
 {%  block head %}
-    {% leaflet_js %}
-    {% leaflet_css %}
+        <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.css' rel='stylesheet'>
+        <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.js'></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <link href="{% static 'sitemaps/css/sitemap.css' %}" rel="stylesheet" type="text/css">
+        <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet'>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <link href="{% static 'triplog/css/jquery.raty.css' %}" rel="stylesheet" type="text/css">
+{% endblock %}
 
-        <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.js'></script>
-        <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css' rel='stylesheet'/>        
+{% block navigation %}
+    {% include 'triplog/navigation.html' %}
 {% endblock %}
 
 {% block content %}
-    <div id='map'></div>
-    <!--{% leaflet_map "map" callback="mapInit" %}-->
-{% endblock %}
+<div id='map-container'>
+
+    <div id='map-sidebar' class='sidebar flex-element'>
+        <select id='sel-trip-content' class='sel-trip-content'>
+                <option tabindex="0">All Sites - Select Trip to filter Sites</option>
+                {% for trip in trips_taken %}
+                    <option data-trip-key={{trip.id}}>{{trip.name}}</option>
+                {% endfor %}
+        </select>
+        <div id='listings' class='listings'></div>
+    </div>
+
+    <div id='map-main' class='mapmain'>
+        <div id="map-menu" class="mapmenu">
+            <input id="streets-v11" type="radio" name="rtoggle" value="streets" />
+            <label for="streets-v11">streets</label>
+            <input id="light-v10" type="radio" name="rtoggle" value="light" /> 
+            <label for="light-v10">light</label>
+            <input id="dark-v10" type="radio" name="rtoggle" value="dark" />
+            <label for="dark-v10">dark</label>
+            <input id="outdoors-v11" type="radio" name="rtoggle" value="outdoors" />
+            <label for="outdoors-v11">outdoors</label>
+            <input id="satellite-v9" type="radio" name="rtoggle" value="satellite" />
+            <label for="satellite-v9">satellite</label>
+            <input id="satellite-streets-v11" type="radio" name="rtoggle" value="satellite streets" checked="checked"/>
+            <label for="satellite-streets-v11">satellite streets</label>
+        </div>
+        <div id="map-gl" class="map-gl">
+            <div id='map' class='map'></div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock content %}
 
 {% block script %}
-<!--{{ mapbox_access_token | safe }}-->
+
+    <script src="{% static 'triplog/js/jquery.raty.js' %}" rel="stylesheet" type="text/javascript"></script>
+
     <script type="text/javascript">
+
+        /* This will let you use the .remove() function later on */
+        if (!('remove' in Element.prototype)) {
+            Element.prototype.remove = function() {
+                if (this.parentNode) {
+                this.parentNode.removeChild(this);
+                }
+            };
+        }
+
+        document.getElementById('sel-trip-content').selectedIndex = 0;
+
         var mbat = "{{mapbox_access_token}}"
         mapboxgl.accessToken=mbat;
 
+        var markers=[];
+        var bounds = new mapboxgl.LngLatBounds();
+        var trip_id="All";
+        var northumberland_url = "/static/data/north.geojson";
+        var france1_url = "/static/data/france1.geojson";
+        var france2_url = "/static/data/france2.geojson";
+
+        // Setup default map
         var map = new mapboxgl.Map({
-        container: 'map',
-        style: 'mapbox://styles/mapbox/light-v9',
-        center: [0, 40],
-        zoom: 1
+            container: 'map',
+            style: 'mapbox://styles/mapbox/satellite-streets-v11',
+            center: [-0.827610, 51.182250],
+            zoom: 5
         });
 
+        // Create geojson of all the sites
         var geojson_visited = {
-        type: 'FeatureCollection',
-        features: [
-            {% for i in sites_visited %}
-                {
-                type: 'Feature',
-                geometry: {
-                    type: 'Point',
-                    coordinates: {% tuple_to_array i.location %},
-                },
-                properties: {
-                    title: "<div class='place-title'>{{ i.name }}</div>",
-                    description: "<div class='place-star'><a href='{{ i.get_absolute_url }}'>{{ i.star_rating }}</a><br/></div>"
-                },
-                },
-                //var lngLatWithTag = {% tuple_to_array i.location %};
-                //var marker = new mapboxgl.Marker() .setLngLat(lngLatWithTag) .addTo(map); 
-            {% endfor %}
-            ]
-            };
+            type: 'FeatureCollection',
+            features: 
+                [
+                {% for i in sites_visited %}
+                    {
+                        type: 'Feature',
+                        geometry: {
+                            type: 'Point',
+                            coordinates: {% tuple_to_array i.location %},
+                            },
+                        properties: {
+                        name: "{{ i.name }}",
+                        link: "<a class='namelink' target='_blank' href='{{ i.get_absolute_url }}'>{{ i.name }}</a>",
+                        stars: "{{ i.star_rating }}",
+                        popup: "<div class='popup-star-rating' stars={{ i.star_rating }}> \
+                            <a class='namelink' target='_blank' href='{{ i.get_absolute_url }}'>{{ i.name }}</a></br> \
+                            <span class='siteowner' >{{ i.siteowner }}</span></br></div>",
+                        description: "{{ i.description }}",
+                        siteowner: "{{ i.siteowner }}",
+                        trip: "",
+                        primarykey: "{{ i.pk }}"
+                        },
+                    },
+                {% endfor %}
+                ]
+        };
+        
 
-            // add markers to map
-            geojson_visited.features.forEach(function(marker) {
-           
-            // create a HTML element for each feature
-            var el = document.createElement('div');
-            el.className = 'marker-light-red';
-            console.log(marker.geometry.coordinates, marker.properties.title, marker.properties.description, el);
-            // visited
-            fred = new mapboxgl.Marker(el) .setLngLat(marker.geometry.coordinates) .addTo(map) .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-            .setHTML(marker.properties.title + marker.properties.description))
-            .addTo(map); 
-            new mapboxgl.Marker(el)
-            .setLngLat(marker.geometry.coordinates)
-            .setPopup(new mapboxgl.Popup({ offset: 25 }) // add popups
-            .setHTML(marker.properties.title + marker.properties.description))
-            .addTo(map);
+        // Add an id to the properties
+        geojson_visited.features.forEach(function(geojson_visited, k){
+            geojson_visited.properties.id = k;
+            geojson_visited.properties.trip = "All";
+        });   
+
+        // Add the data to your map as a layer
+        map.on('load', function(e) {
+
+            map.addSource('geojson_visited', {
+            type: 'geojson',
+            data: geojson_visited
             });
+                buildLocationList(geojson_visited, trip_id);
+                addMarkers(geojson_visited, trip_id);
+                buildstars('.star-rating');
+                fittomarkers(geojson_visited, trip_id);
+        });
+
+
+
+        // Loop through the markers for a trip (or all of them) and bound the map show all of them show
+        function fittomarkers(data, tripid) {
+            bounds = new mapboxgl.LngLatBounds()
+            
+            data.features.forEach(function(feature) {
+                if (feature.properties.trip === tripid) {
+                    
+                    bounds.extend(feature.geometry.coordinates);
+                }
+            });
+
+            map.fitBounds(bounds, { padding: 50 });
+        }
+
+        // Add markers to map
+        function addMarkers(data, trip_id){
+            // add markers to map
+            data.features.forEach(function(marker) {
+            if (marker.properties.trip === trip_id) {
+                siteowner = marker.properties.siteowner
+                // create a HTML element for each feature
+                // there are 2 ways to do this - 1) appendChild (not used here but commented out)
+                // or 2) using the mapbox Marker element property using 'ej' below
+                var el = document.createElement('span');
+                var ej = document.createElement('i');
+                // var ek = document.createElement('i');
+                el.appendChild(ej);
+                //var ei = document.createElement('i');
+                //ei.classList.add('fas', 'fa-map-marker-alt');
+                //ei.style.color = 'green';
+                //el.appendChild(ei);
+
+                switch(siteowner) {
+                    case "Home":
+                        ej.classList.add('fas', 'fa-home');
+                        ej.style.color = '#8B0000';
+                        break;
+                    case "Roadside":
+                        ej.classList.add('fas', 'fa-road');
+                        ej.style.color = '#3CB371';
+                        break;
+                    case "Pub":
+                        ej.classList.add('fas', 'fa-beer');
+                        ej.style.color = '#D2691E';
+                        break;    
+                    case "Restaurant":
+                        ej.classList.add('fas', 'fa-utensils');
+                        ej.style.color = '#8A2BE2';
+                        break;
+                    case "Hotel":
+                        ej.classList.add('fas', 'fa-hotel');
+                        ej.style.color = '#DC143C';
+                        break;
+                    case "Aire":
+                        ej.classList.add('Aire-marker');
+                        break;       
+                    case "France Passion":
+                        ej.classList.add('France-Passion-marker');
+                        break;    
+                    case "CAMC CL":
+                        ej.classList.add('CAMC-CL-marker');
+                        break;
+                    case "CAMC Site":
+                        ej.classList.add('CAMC-Site-marker');
+                        break;
+                    case "C&amp;CC Site":
+                        ej.classList.add('CACC-Site-marker');
+                        break;
+                    case "C&amp;CC CL":
+                        ej.classList.add('CACC-CL-marker');
+                        break;          
+                    default:
+                        ej.classList.add('fas', 'fa-campground', 'fa-stack-x1');
+                        ej.style.color = 'blue';
+
+                }
+
+                ej.id = "marker-" + marker.properties.id;
+                el.classList.add('marker');
+
+                //console.log(marker.geometry.coordinates, marker.properties.id, marker.properties.title,marker.properties.stars, marker.properties.description, el);
+                // newmarker = new mapboxgl.Marker(el, {anchor: 'center', offset: [0, 0], element: ej})
+                newmarker = new mapboxgl.Marker(el, {anchor: 'center', offset: [0, 0], element: ej})    
+                    .setLngLat(marker.geometry.coordinates)
+                    .addTo(map);
+                    //Create an array for markers used to later remove those on the mapboxgl
+                    markers.push(newmarker)
+                    /**
+                     * Listen to the element and when it is clicked, do three things:
+                     * 1. Fly to the point
+                     * 2. Close all other popups and display popup for clicked store
+                     * 3. Highlight listing in sidebar (and remove highlight for all other listings)
+                     **/
+                    ej.addEventListener('click', function(e){
+                        /* Fly to the point */
+                        flyToStore(marker);
+                        /* Close all other popups and display popup for clicked store */
+                        createPopUp(marker);
+                        /* Highlight listing in sidebar */
+                        var activeItem = document.getElementsByClassName('active');
+                        e.stopPropagation();
+                        if (activeItem[0]) {
+                            activeItem[0].classList.remove('active');
+                        }
+                        var listing = document.getElementById('listing-' + marker.properties.id);
+                        listing.classList.add('active');
+                });
+            }
+            });
+        }
+
+        // Create a Mapbox GL JS `Popup`.
+        function createPopUp(currentFeature) {
+            var popUps = document.getElementsByClassName('mapboxgl-popup');
+            if (popUps[0]) popUps[0].remove();
+            var popup = new mapboxgl.Popup({closeOnClick: false, offset: [0,46] })
+            .setLngLat(currentFeature.geometry.coordinates)
+            .setHTML(currentFeature.properties.popup)
+            .addTo(map);
+            buildstars('.popup-star-rating');
+        }
+
+        // Use Mapbox GL JS's `flyTo` to move the camera smoothly a given center point.
+        function flyToStore(currentFeature) {
+            map.flyTo({
+                center: currentFeature.geometry.coordinates,
+                zoom: 15
+            });
+        }
+
+        // Build location list for sidebar
+        function buildLocationList(data, trip_id) {
+        data.features.forEach(function(site, i){
+
+             // Create a shortcut for `listing.properties`, which will be used several times below.
+            var prop = site.properties;
+            if (prop.trip === trip_id) {
+                /* Add a new listing section to the sidebar. */
+                var listings = document.getElementById('listings');
+                var listing = listings.appendChild(document.createElement('div'));
+                /* Assign a unique `id` to the listing. */
+                listing.id = "listing-" + prop.id;
+                /* Assign the `item` class to each listing for styling. */
+                listing.className = 'item';
+                
+
+                /* Add the link to the individual listing created above. */
+                var linkspan = listing.appendChild(document.createElement('span'));
+                var link = linkspan.appendChild(document.createElement('a'));
+                link.href = '#';
+                link.className = 'title';
+                link.id = "link-" + prop.id;
+                link.innerHTML = prop.name;
+                link.style = "display: inline"
+
+                /* Add details to the individual listing. */
+                var starsspan = linkspan.appendChild(document.createElement('span'));
+                var details = linkspan.appendChild(document.createElement('span'));
+                starsspan.className = 'star-rating';
+                starsspan.setAttribute('stars', prop.stars)
+                details.innerHTML = prop.siteowner;
+                details.className = 'tablistingl';
+                
+
+                /**
+                 * Listen to the element and when it is clicked, do four things:
+                 * 1. Update the `currentFeature` to the store associated with the clicked link
+                 * 2. Fly to the point
+                 * 3. Close all other popups and display popup for clicked store
+                 * 4. Highlight listing in sidebar (and remove highlight for all other listings)
+                **/
+                link.addEventListener('click', function(e){
+                    for (var i=0; i < data.features.length; i++) {
+                    if (this.id === "link-" + data.features[i].properties.id) {
+                        var clickedListing = data.features[i];
+                        flyToStore(clickedListing);
+                        createPopUp(clickedListing);
+                        var listing = document.getElementById('listing-' + data.features[i].properties.id);
+                    }
+                    }
+                    var activeItem = document.getElementsByClassName('active');
+                    if (activeItem[0]) {
+                        activeItem[0].classList.remove('active');
+                    }
+                    
+                    listing.classList.add('active');
+          
+                });
+            }
+        });
+        
+        }
+
+        // Build Stars on Location List
+        function buildstars(divelement) {
+            $(divelement).each(function (index) {
+
+                //Get the star count from the attribute
+                var star_count = this.getAttribute('stars');
+
+                //Using the value obtained from the attribute make a star 
+                $(this).raty({
+                    score: star_count,
+                    scoreName: 'stars',
+                    starType: 'i',
+                    starOff: 'far fa-star',
+                    starOn: 'fas fa-star',
+                    starHalf: 'fas fa-star-half',
+                    cancelOff: 'fas fa-minus-circle',
+                    cancelOn: 'fas fa-minus-circle',
+                    readOnly: true,
+                });
+                // add score calsses to allow css colors
+                var mc = {
+                    '0-0'   : 'score-star-inverse',
+                    '0.5-1' : 'score-star-danger',
+                    '1.5-2' : 'score-star-warning',
+                    '2.5-3' : 'score-star-info',
+                    '3.5-4' : 'score-star-primary',
+                    '4.5-5' : 'score-star-success'
+                };
+                function between(x, min, max) {
+                    return x >= min && x <= max;
+                }
+
+                var dc;
+                var first; 
+                var second;
+                var th;
+                
+                th = $(this);
+                
+                dc = star_count
+                // setColor($(this), dc);
+            
+                $.each(mc, function(name, value){
+                
+                    first = parseFloat(name.split('-')[0],10);
+                    second = parseFloat(name.split('-')[1],10);
+
+                    if( between(dc, first, second) ){
+                    th.addClass(value);
+                    }
+                });
+                });
+                // nice little funtion to colour whatever is passed assuming a scale of 1-10
+                function setColor(obj, rvalue) {
+                    var rating = parseFloat(rvalue);
+                    var color;
+                    var parts = (rating > 5) ? (1-((rating-5)/5)) : rating/5;
+                    parts = Math.round(parts * 255);
+                    if (rating < 5) {
+                        color = [255, parts, 0];
+                    }
+                    else if (rating > 5){
+                        color = [parts, 255, 0];
+                    }
+                    else {
+                        color = [255,255,0]
+                    }
+                    obj.css('color','rgb(' + color.join(',') + ')');
+                }
+            }
+
+        //start of added for maptype selection
+        var layerList = document.getElementById('map-menu');
+        if (layerList !== null) {
+            var inputs = layerList.getElementsByTagName('input');
+            function switchLayer(layer) {
+                var layerId = layer.target.id;
+                map.setStyle('mapbox://styles/mapbox/' + layerId);
+            }
+                
+            for (var i = 0; i < inputs.length; i++) {
+            inputs[i].onclick = switchLayer;
+        }}
+        //end of added for maptype selection
+            
+        //start of added cursor arrow controls
+        //pixels the map pans when the up or down arrow is clicked
+        var deltaDistance = 100;
+        
+        //degrees the map rotates when the left or right arrow is clicked
+        var deltaDegrees = 25;
+    
+        function easing(t) {
+            return t * (2 - t);
+        }
+    
+        map.on('load', function () {
+            map.getCanvas().focus();
+        
+            map.getCanvas().addEventListener(
+            'keydown',
+            function (e) {
+                e.preventDefault();
+                if (e.which === 38) {
+                    // up
+                    map.panBy([0, -deltaDistance], {
+                    easing: easing
+                    });
+                } else if (e.which === 40) {
+                // down
+                map.panBy([0, deltaDistance], {
+                easing: easing
+                });
+                } else if (e.which === 37) {
+                // left
+                map.easeTo({
+                bearing: map.getBearing() - deltaDegrees,
+                easing: easing
+                });
+                } else if (e.which === 39) {
+                // right
+                map.easeTo({
+                bearing: map.getBearing() + deltaDegrees,
+                easing: easing
+                });
+                }
+            },
+            true
+            );
+        });
+        //end of added cursor arrow controls
+
+        // Control selection of the trip - used ajax
+        $("#sel-trip-content").on('change', function() {
+            var element = $("option:selected", this);
+            var myTag = element.attr("data-trip-key");
+            // If nothing returned for trip then show all sites
+            if (myTag === undefined) {
+                tripId = "All";
+                // Set all trip values to 'All'
+                geojson_visited.features.forEach(function(geojson_visited){
+                    geojson_visited.properties.trip = "All";
+                });
+                clearMap();
+                buildLocationList(geojson_visited, tripId);
+                addMarkers(geojson_visited, tripId);
+                buildstars('.star-rating');
+                var popUps = document.getElementsByClassName('mapboxgl-popup');
+                if (popUps[0]) popUps[0].remove();
+                // map.flyTo({
+                //     center: [-0.827610, 51.182250],
+                //     zoom: 5})
+                fittomarkers(geojson_visited, tripId);
+            }
+            // Otherwise get the trip
+            else {
+                var tripId = myTag;
+                var url = "{% url 'sitemaps:ajax_load_tripsites' %}"
+                // Call to get all unique sites for a trip
+                $.ajax({
+                    url: url,
+                    data: {'trip': tripId},
+                    success: function (uniquesites){
+                        // Save the result from the call
+                        var result = JSON.parse(uniquesites);
+                        // var sorder = JSON.parse(siteorder);
+                        // console.log(siteorder);
+
+                        // Build a list of site keys in a trip
+                        var filtered = [];
+                        result.forEach (function(result){filtered.push(result.pk)});
+                        
+                        // add an id to the properties by looping through sites
+                        geojson_visited.features.forEach(function(geojson_visited){
+                            // Check to ensure valid entry - note p-key returned is string not int from ajax call
+                            if (filtered.indexOf(parseInt(geojson_visited.properties.primarykey)) > -1) {
+                                geojson_visited.properties.trip = tripId;}
+                            else {
+                                geojson_visited.properties.trip = "";
+                            }
+                        });
+
+                        // Clear the map as we have data back from the ajax call
+                        clearMap();
+                        buildLocationList(geojson_visited, tripId);
+                        addMarkers(geojson_visited, tripId);
+                        buildstars('.star-rating');
+                        fittomarkers(geojson_visited, tripId);
+                        
+                        switch(tripId) {
+                            case '23':
+                                if (!map.getSource('northumberland')){
+                                    map.addSource('northumberland', {type: 'geojson', data: northumberland_url});
+                                }
+                                if (map.getLayer('north_route')){
+                                    map.removeLayer('north_route');
+                                }
+                                map.addLayer({
+                                    'id': 'north_route',
+                                    'type': 'line',
+                                    'source': 'northumberland',
+                                    'paint': {
+                                        'line-color': '#8B0000',
+                                        'line-width': 3,
+                                    },
+                                    'filter': ['==', '$type', 'LineString']
+                                });
+                            break;
+                            case '22':
+                                if (!map.getSource('france1')){
+                                    map.addSource('france1', {type: 'geojson', data: france1_url});
+                                }
+                                if (map.getLayer('france1_route')){
+                                    map.removeLayer('france1_route');
+                                }
+                                map.addLayer({
+                                    'id': 'france1_route',
+                                    'type': 'line',
+                                    'source': 'france1',
+                                    'paint': {
+                                        'line-color': '#8B0000',
+                                        'line-width': 3,
+                                    },
+                                    'filter': ['==', '$type', 'LineString']
+                                });
+                            break;
+                            case '20':
+                                if (!map.getSource('france2')){
+                                    map.addSource('france2', {type: 'geojson', data: france2_url});
+                                }
+                                if (map.getLayer('france2_route')){
+                                    map.removeLayer('france2_route');
+                                }
+                                map.addLayer({
+                                    'id': 'france2_route',
+                                    'type': 'line',
+                                    'source': 'france2',
+                                    'paint': {
+                                        'line-color': '#8B0000',
+                                        'line-width': 3,
+                                    },
+                                    'filter': ['==', '$type', 'LineString']
+                                });
+                            break;
+
+                        }
+
+                    }
+                });
+            }
+
+            });
+        
+        // Clear the map
+        function clearMap(){
+            // Using saved markers remove them
+            markers.forEach((marker) => marker.remove());
+            // And reset the markers array to empty
+            markers = [];
+            // Now remove all the listings from the sidebar
+            var listings = document.getElementById('listings');
+            //Javascript
+            while (listings.firstChild) {
+                listings.removeChild(listings.firstChild);
+            }
+            //Same thing but JQuery
+            // $("#listings").empty();
+            // map.removeSource('geojson_visited');
+        }
+
+        // Make the navigation pretty
+        $(document).ready(function(){
+            $(".nav-link active").removeClass("active");
+            $("#sitemap").addClass("active");
+        })
     </script>
-{% endblock %}
+{% endblock script %}

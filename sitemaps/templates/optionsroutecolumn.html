@@ -1,0 +1,4 @@
+<a id="update-route" record-pk="{{ record.pk }}" href="{% url 'sitemaps:updateroute' record.id %}" data-form-url="{% url 'sitemaps:updateroute' record.id %}" class="update-route bs-modal btn btn-sm btn-primary"><i class="fas fa-pen"></i></a>
+<a id="plot-route" record-pk="{{ record.pk }}" class="plot-route bs-modal btn btn-sm btn-primary"><i class="fas fa-map-marked white-icon"></i></a>
+<a id="view-route" record-pk="{{ record.pk }}" class="view-route bs-modal btn btn-sm btn-primary"><i class="far fa-eye white-icon"></i></a>
+<a id="delete-route" record-pk="{{ record.pk }}" href="{% url 'sitemaps:deleteroute' record.id %}" class="delete-route bs-modal btn btn-sm btn-danger" data-form-url="{% url 'sitemaps:deleteroute' record.id %}"><i class="far fa-trash-alt white-icon"></i></a>

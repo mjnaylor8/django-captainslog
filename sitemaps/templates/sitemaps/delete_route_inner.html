@@ -1,0 +1,25 @@
+{% load static %}
+{% load widget_tweaks %}
+
+<form id="delete-route-form" method="post" action="" >
+  {% csrf_token %}
+
+  <div class="modal-popup-header modal-header">
+    <h3 class="modal-title">Delete Route</h3>
+    <button type="button" class="CloseBtn close" data-dismiss="modal" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-popup-body modal-body">
+    <p>Are you sure you want to delete the route with the name
+      <strong>{{ object }}</strong>?</p>
+  </div>
+
+  <div class="modal-popup-footer modal-footer">
+    <button type="button" class="CloseBtn btn btn-secondary">Close</button>
+    <input type="submit" class="btn btn-primary" id="submitBtn" value=Delete>
+    <!-- <button type="submit" class="btn btn-danger" id="submitBtn">Delete</button> -->
+  </div>
+
+</form>

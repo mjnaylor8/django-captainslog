@@ -8,8 +8,9 @@
 }
 
 .js-mapbox-input-location-field {
-    visibility: visible;
-    margin: 0.3%;
+    visibility: hidden;
+    width: 30%;
+    margin: 0.0%;
 }
 
 .mapboxgl-canvas {

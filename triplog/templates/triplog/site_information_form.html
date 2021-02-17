@@ -20,10 +20,10 @@
 {% endblock %}
 
 {% block content %}
-    <form action="" method="post" novalidate>
+    <form action="" method="post" novalidate class="ml-3">
         {% crispy form %}
     </form> 
-    {{form.media}}
+    <!--{{form.media}}-->
     {% include 'triplog/timestamp.html' %}
 {% endblock %}
 
@@ -61,6 +61,23 @@
                 break;
         }
     }
+    //Hide the input element constructed from the mapbox-location-field
+    $(".js-mapbox-input-location-field").each(function () {
+        this.type = "hidden";
+    })
+
+    //Make the navigation menu pretty
+    $(document).ready(function(){
+        $(".nav-link active").removeClass("active");
+        $("#addsite").addClass("active");
+        pagetitle = document.getElementById('pagetitle').textContent;
+        pagetitle = pagetitle.trim();
+        if (pagetitle.startsWith("Change")) {
+            document.getElementById('addsite').textContent = "Change / Add Site" }
+        
+        top.location.href = '#navbar';
+    });
+
 
 </script>
 {% endblock js %}

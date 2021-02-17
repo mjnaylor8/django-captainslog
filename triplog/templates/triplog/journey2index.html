@@ -14,9 +14,32 @@
 {% endblock %}
 
 {% block content %}
-    <a type=button class="mx-3 btn btn-success" href="{% url 'addjourney' %}">Add New Journey</a>
+    <a type=button class="mx-3 btn-sm btn-success" href="{% url 'addjourney' %}">Add New Journey</a>
     <h4 class="ml-3">Journey Details:</h4>
-    <tr class="d-flex">
+    <tr class="ml-3 d-flex">
         {% render_table table "triplog/extend_bs4_colhead.html" %}
     </tr>    
 {% endblock %}
+{% block js %}
+
+<script type="text/javascript" >
+
+    $('tr').dblclick(function(){
+        var id = $(this).attr('data-pk');
+        var d_url = $(this).attr('data-url')
+        
+        //Needs to be done as a replace as Django trys to construct the stuff in { } and
+        //if not valid return a ReverseMatch console.error();
+        
+        //Construct the full URL with "id"
+        const url = "{% url 'changejourney' 9999 %}".replace(/9999/,id);
+        console.log(id, d_url, url);
+        document.location.href = url;
+        //window.open("your_url");
+    })
+    $(document).ready(function(){
+    $(".nav-link active").removeClass("active");
+    $("#journeyindex").addClass("active");
+    })
+</script>
+{% endblock js %}

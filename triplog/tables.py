@@ -13,7 +13,7 @@ class JourneyDetailTable(tables.Table):
         """ update meta for formatting """
         attrs = {
             "id": "journey_details",
-            "class": "table table-striped",
+            "class": "ml-3 table table-striped",
             'thead' : {
                 'class': 'thead-dark'
             }
@@ -22,6 +22,9 @@ class JourneyDetailTable(tables.Table):
         template_name = "django_tables2/bootstrap4.html"
         fields = ("start_date", "end_date", "travel_from", "travel_to", "update")
         order_by = ("start_date")
+        row_attrs = {
+            'data-pk': lambda record: record.pk, 'data-url': " 'changejourney' "
+        }
 
 class SiteInformationTable(tables.Table):
     """ Table listing Sites """
@@ -30,7 +33,7 @@ class SiteInformationTable(tables.Table):
         attrs={
             "th": {"style": "display:none;",},
             "td": {
-                "class": "col-2 stars",
+                "class": "star, td_star_size",
                 "scope": "col",
             }
         }
@@ -56,7 +59,7 @@ class SiteInformationTable(tables.Table):
         """ Update for formatting """
         attrs = {
             "id": "site_information",
-            "class": "table table-striped",
+            "class": "ml-3 table table-striped",
             "thead" : {
                 "class": "thead-dark"
             }
@@ -66,7 +69,7 @@ class SiteInformationTable(tables.Table):
         fields = ("name", "address", "star_rating", "stars", "update")
         exclude = ("change",)
         row_attrs = {
-            'data-pk': lambda record: record.pk
+            'data-pk': lambda record: record.pk, 'data-url': " 'changesite' "
         }
 
 class TripDetailTable(tables.Table):
@@ -74,7 +77,7 @@ class TripDetailTable(tables.Table):
     name = tables.Column(
         attrs={
             "td": {
-                "class": "col-3",
+                #"class": "col-3",
             }
         }
     )
@@ -120,7 +123,7 @@ class TripDetailTable(tables.Table):
         """ Update for formatting """
         attrs = {
             "id": "trip_details",
-            "class": "table table-striped",
+            "class": "ml-3 table table-striped",
             "thead": {
                 "class": "thead-dark"
             }

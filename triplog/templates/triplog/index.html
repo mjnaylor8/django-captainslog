@@ -28,3 +28,11 @@
     </ul>
     <p>You have visited this page {{ num_visits }}{% if num_visits == 1 %} time{% else %} times{% endif %}.</p>
 {% endblock %}
+{% block js %}
+<script type="text/javascript" >
+    $(document).ready(function(){
+        $(".nav-link active").removeClass("active");
+        $("#index").addClass("active");
+    })
+</script>
+{% endblock js %}

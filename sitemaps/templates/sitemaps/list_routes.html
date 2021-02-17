@@ -1,0 +1,41 @@
+
+{% load widget_tweaks %}
+
+<form method="get" action="">
+  {% csrf_token %}
+
+  <div class="modal-header">
+    <h3 class="modal-title">List Routes</h3>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body">
+
+    <div class="{% if form.non_field_errors %}invalid{% endif %} mb-2">
+      {% for error in form.non_field_errors %}
+        {{ error }}
+      {% endfor %}
+    </div>
+
+{% for geojsonroute in geojsonroutes  %}
+    <div class="text-center">
+      <!-- Read route buttons -->
+      <button type="button" id="read-route" class="bs-modal btn btn-sm btn-primary" data-form-url="{% url 'read_route' geojsonroute.pk %}">
+        <span class="fa fa-eye"></span>
+      </button>
+      <!-- Update route buttons -->
+      <button type="button" id="update-route" class="bs-modal btn btn-sm btn-primary" data-form-url="{% url 'update_route' geojsonroute.pk %}">
+        <span class="fa fa-pencil"></span>
+      </button>
+      <!-- Delete route buttons -->
+      <button type="button" id="delete-route" class="bs-modal btn btn-sm btn-danger" data-form-url="{% url 'delete_route' geojsonroute.pk %}">
+        <span class="fa fa-trash"></span>
+      </button>
+    </div>
+{% endfor %}
+
+</div>
+
+</form>
