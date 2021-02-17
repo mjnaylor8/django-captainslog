@@ -1,0 +1,19 @@
+.location-field-map {
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    overflow: hidden;
+    height: 350px;
+
+}
+
+.js-mapbox-input-location-field {
+    visibility: hidden;
+    width: 30%;
+    margin: 0.0%;
+}
+
+.mapboxgl-canvas {
+    right: 1px;
+    left: 1px;
+}
