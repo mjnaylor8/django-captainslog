@@ -13,14 +13,14 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 import environ
 
-root = environ.Path(__file__) - 3  # get root of the project
+root = environ.Path(__file__) - 4  # get root of the project
 env = environ.Env()
 environ.Env.read_env()  # reading .env file
 
 SITE_ROOT = root()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 # Quick-start development settings - unsuitable for production
@@ -35,11 +35,6 @@ MAPBOX_KEY = env.str('MAPBOX_ACCESS_TOKEN')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', default=False)
 
-ALLOWED_HOSTS = ["192.168.1.250",
-                "captainslog.thenaylors.co.uk",]
-
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -59,6 +54,7 @@ INSTALLED_APPS = [
     'django_tables2',
     'django_filters',
     'guardian',
+    'django_node_assets',
 ]
 
 MIDDLEWARE = [
@@ -161,6 +157,7 @@ STATICFILES_DIRS = []
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    'django_node_assets.finders.NodeModulesFinder',
 )
 
 BOOTSTRAP4 = {
@@ -198,3 +195,4 @@ LOGIN_REDIRECT_URL = '/triplog/'
 LOGIN_URL = 'accounts/login'
 
 DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap4.html"
+

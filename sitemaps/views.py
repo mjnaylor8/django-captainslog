@@ -116,12 +116,12 @@ def save_route(request):
             file_name = route_file['name']
             # path = join(settings.MEDIA_ROOT, 'routes', file_name + '.json')
             path = 'routes' + "/" + str(request.user.id).zfill(2) + "/"
-            filename = path + file_name + '.geojson'
+            filename = path + file_name.replace(' ', '_') + '.geojson'
             allroutes = None
-            if not GeoJSONRoute.objects.filter(route_name=file_name, route_file=filename).exists():
+            if not GeoJSONRoute.objects.filter(route_name=file_name, route_file=filename.replace(' ', '_')).exists():
                 route = GeoJSONRoute.objects.create(route_name=file_name)
             else:
-                allroutes = GeoJSONRoute.objects.filter(route_name=file_name, route_file=filename)
+                allroutes = GeoJSONRoute.objects.filter(route_name=file_name, route_file=filename.replace(' ', '_'))
                 route = allroutes[0]
             data = route_file['file']
             content_file = ContentFile(json.dumps(data))

@@ -10,21 +10,31 @@ body {
     height:100%;
     width:100%;
     overflow: hidden;
-    -webkit-font-smoothing: antialiased;}
-
+    -webkit-font-smoothing: antialiased;
+}
+* {
+    box-sizing: border-box;
+}
 /* #map { position:absolute; top:0; bottom:0; width:100%; } */
 /* area below the navigation bar */
 
-#routemap-body {
-    display: flex;
+#drawroute-body {
+    /* display: flex; */
     position: absolute;
     min-height: 100vh;
-    flex-direction: row;
+    /* flex-direction: column; */
 }
 #map-container { 
     position: relative;
     height: calc(100%);
-    display: flex;
+    /* display: flex; */
+    /* display: grid; */
+    /* grid-template-columns: repeat(7, 1fr); 
+    grid-template-rows: 1fr; */
+    align-items: start;
+    justify-items: start;
+    justify-content: start;
+    align-content: start;  
 } 
 /* Map - Flex set to allow map to use available space */
 .map { 
@@ -32,7 +42,9 @@ body {
     width: 100%; 
     height: 100%;
     order: 1;
-    flex: 1;
+    float: left;
+    transition: margin-left .5s
+    /* flex: 1; */
 
 }
 .popupmap { 
@@ -47,156 +59,260 @@ body {
     left: 0px;
 
 }
-.info-box {
-    height: 120px;
-    width: 150px;
+.menu-column {
     position: relative;
+    width: auto;
+    height: 100%;
+    overflow-y: auto;
+ 
+}
+
+#menu-column > div {
+    margin: 0px
+}
+#menu-items {
+    position: relative;
+    visibility: visible;
+    height: 100%;
+    top: 0;
+    left: 0;
+    transition-timing-function: ease-in-out;
+    transition-property: transform;
+    transform: translate3d(0, 0, 0);
+}
+#menu-items > div {
+    margin-top: 6px;
+    margin-left: 0px;
+}
+.info-box {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-height: 200px;
     top: 20px;
     left: 10px;
     background-color: rgba(255, 255, 255, .9);
-    padding: 15px;
+    padding: 6px;
     text-align: left;
     font-family: 'Arial';
-    margin: 0;
     font-size: 13px;
-}
-#export, #updateDataset, #calcRoute, #import, #openroutes{
-    position: absolute;
-    top:160px;
-    left:10px;
-    z-index:100;
-    background-color:white;
-    color: blue;
-    padding:6px;
     border-radius:4px;
+    margin: 6px;
+    overflow-y: auto;
+}
+#calcDirections {
+    position: relative;
+    top:20px;
+    left:10px;
+    z-index:10;
+    color:black;
+    padding: 3px;
+    border-radius: 4px;
+    border-style: solid;
+    border-width: 1px;
+    border-color:black;
     font-family: 'Helvetica Neue';
     cursor: pointer;
-    font-size:12px;
+    font-size: 15px;
     text-decoration:none;
-    height: 30px;
-    width: 30px;
+    text-align: center;
+    height: 30px !important;
+    width: 30px !important;
+    display: inline-block;
 }
-#openroutes {
-    background-image: url(../pictures/folder-open-solid.svg);
-    background-repeat: no-repeat;
-    background-size: 25px;
-    background-position:center;
+.calc-mapping {
+    position: relative;
+    top:20px;
+    left:10px;
+    z-index:10;
+    color:black;
+    padding: 3px;
+    border-radius: 4px;
+    border-style: solid;
+    border-width: 1px;
+    border-color:black;
+    font-family: 'Helvetica Neue';
+    cursor: pointer;
+    font-size: 15px;
+    text-decoration:none;
+    text-align: center;
+    height: 30px !important;
+    width: 30px !important;
+    display: inline-block;
 }
-#import {
-    background-image: url(../pictures/file-import-solid.svg);
-    background-repeat: no-repeat;
-    background-size: 25px;
-    background-position:center;
+#calcMappingButton {
+    position: relative;
+    display: none;
 }
-#export {
-    background-image: url(../pictures/file-export-solid.svg);
-    background-repeat: no-repeat;
-    background-size: 25px;
-    background-position:center;
+#calcMappingButton:checked + label:before {
+    position: relative;
+    color: #0F0;
+    background-color: white;
+    cursor: pointer;
+    z-index:10;
 }
-#updateDataset {
-    background-image: url(../pictures/save-solid.svg);
-    background-repeat: no-repeat;
-    background-size: 25px;
-    background-position:center;
+#calcMappingButton:checked ~ .update-background {
+    background-color: white;
+}
+#calcMappingButton + label:before {
+    position: relative;
+    color:black;
+    cursor: pointer;
+    z-index:10;
+}
+.update-background {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 4px;
+    z-index: 5;
 }
 #calcRoute {
-    background-image: url(../pictures/route-solid.svg);
-    background-repeat: no-repeat;
-    background-size: 25px;
-    background-position:center;
+    position: relative;
+    top:20px;
+    left:10px;
+    z-index:10;
+    color:black;
+    padding: 3px;
+    border-radius: 4px;
+    border-style: solid;
+    border-width: 1px;
+    border-color:black;
+    font-family: 'Helvetica Neue';
+    cursor: pointer;
+    font-size: 15px;
+    text-decoration:none;
+    text-align: center;
+    height: 30px !important;
+    width: 30px !important;
+    display: inline-block;
+    margin-top: 6px;
 }
-#export:hover, #updateDataset:hover, #calcRoute:hover, #import:hover, #openroutes:hover{
+#export, #updateDataset, #import, #openroutes, #menu-icon, #inspectmap {
+    position: relative;
+    top:20px;
+    left:10px;
+    z-index:10;
+    color:black;
+    padding: 3px;
+    border-radius: 4px;
+    border-style: solid;
+    border-width: 1px;
+    border-color:black;
+    font-family: 'Helvetica Neue';
+    cursor: pointer;
+    font-size: 15px;
+    text-decoration:none;
+    text-align: center;
+    height: 30px !important;
+    width: 30px !important;
+    margin: auto;
+}
+
+#inspectmapbutton {
+    display: none;
+} 
+#inspectmapbutton:checked + label::before {
+    position: relative;
+    color: #0F0;
+    z-index:10;
+    top:-0.5px;
+    right: -2px;
+}
+
+#inspectmapbutton:checked + label::after {
+    position: relative;
+    content: "";
+    color: #0F0;
+    z-index:10;
+}
+#inspectmapbutton + label::after {
+    position: relative;
+    content: "\f715";
+    color: #F00;
+    transform: rotate(90deg);
+    display: block;
+    text-align: center;
+    top: -11px;
+    left: -2px;
+    z-index:10;
+}
+#inspectmapbutton + label::before {
+    position: relative;
+    color: #F00;
+    top:3px;
+    z-index:10;
+}
+#inspectmapbutton:checked ~ .update-background {
+    background-color: white;
+    z-index:5;
+}
+#showelevation, #undopoint, #redopoint{
+    position: relative;
+    z-index:10;
+    color:black;
+    padding: 3px;
+    border-radius: 4px;
+    border-style: solid;
+    border-width: 1px;
+    border-color:black;
+    font-family: 'Helvetica Neue';
+    cursor: pointer;
+    font-size: 15px;
+    text-decoration:none;
+    text-align: center;
+    height: 22px !important;
+    width: 22px !important;
+    margin: 0px;
+    display: inline-block;
+}
+#showelevation{
+    margin: 0px 0px 0px 5px;
+}
+#export:hover, #updateDataset:hover, #undopoint:hover, #redopoint:hover, #calcRoute:hover, #calcMapping:hover, #calcDirections:hover, #import:hover, #openroutes:hover, #inspectmap:hover, #showelevation:hover, #select-type-set:hover{
     background-color: #aaa;
+    transition: all 0.5s;
+}
+#menu-icon:hover {
+    background-color: #aaa;
+    transition: all 0.5s;
+    color: #66ff00;
 }
 
-.openroutes .openroutestip {
+.menu-icontip {
     visibility: hidden;
-    width: 120px;
-    left:50px;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 0px 0;
+    width: auto;
+    left:30px;
+    top: 0px;
+    background-color: white;
+    color: black;
+    text-align: left;
+    border-radius: 4px;
+    border-style: solid;
+    border-width: 1px;
+    border-color:black;
+    font-size: 10px;
+    padding: 0px 5px 0px;
     position: absolute;
-    z-index: 1;
+    z-index: 10;
+    white-space:nowrap;
 }
-.openroutes:hover .openroutestip {
+.routetip, .directionstip {
+    top: -25px;
+}
+.redopointtip, .showelevationtip, .undopointtip {
+    top: 30px;
+}
+.redopointtip {
+    left: 20px;
+}
+.undopointtip {
+    left: 20px;
+}
+.menu-icon:hover .menu-icontip {
     visibility: visible;
-}
-
-.export .exporttip {
-    visibility: hidden;
-    width: 120px;
-    left:50px;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 0px 0;
-    position: absolute;
-    z-index: 1;
-}
-.export:hover .exporttip {
-    visibility: visible;
-}
-.update .updatetip {
-    visibility: hidden;
-    width: 120px;
-    left:50px;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px 0;
-    position: absolute;
-    z-index: 1;
-}
-.update:hover .updatetip {
-    visibility: visible;
-}
-.calc-route .routetip {
-    visibility: hidden;
-    width: 120px;
-    left:50px;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px 0;
-    position: absolute;
-    z-index: 1;
-}
-.calc-route:hover .routetip {
-    visibility: visible;
-}
-.import .importtip {
-    visibility: hidden;
-    width: 120px;
-    left:50px;
-    background-color: black;
-    color: #fff;
-    text-align: center;
-    border-radius: 6px;
-    padding: 5px 0;
-    position: absolute;
-    z-index: 1;
-}
-.import:hover .importtip {
-    visibility: visible;
-}
-#updateDataset {
-    top: 200px;
-}
-#calcRoute {
-    top: 240px;
-}
-#import {
-    top: 280px;
-}
-#openroutes {
-    top: 320px;
 }
 #features {
     position: absolute;
@@ -207,20 +323,169 @@ body {
     overflow: auto;
     background: rgba(255, 255, 255, 0.8);
 }
-#map canvas {
-    cursor: crosshair;
+#map, canvas {
+    /* cursor: crosshair; */
 }
 .hide {
     position: absolute !important;
+    visibility: hidden;
     top: -9999px !important;
     left: -9999px !important;
+    transition: all 0.5s;
+
 }
-/* .fas.fa-map-marked {
-    color: white;
-} */
 .white-icon {
     color: white;
 }
 .red-icon {
     color: red;
+}
+
+/* Select style and float over map */
+.selectmenu {
+    background-color: #fff;
+    z-index: 10;
+    border: 1px solid #eee;
+    font-size: 12px;
+    text-align: center;
+    vertical-align: middle;
+    height: auto;
+    margin: 10px;
+    margin-top: 0px;
+}
+fieldset{
+    position: relative;
+    display: inline-block;
+    top:20px;
+    left:10px;
+    width: min-content;
+    border: 1px solid;
+    border-color: black;
+    box-sizing: border-box; 
+    grid-area: 1 / 1; 
+  }
+
+fieldset > legend {
+    font-size: 10px;
+    text-align: center;
+    width: auto;
+    margin: 0px 5px 0px 5px;
+    color: black;
+    padding: 0 5px 0 5px;
+}
+.select-mapping-options {
+    display: inline-block;
+    width: max-content;
+}
+
+.radio-inline > label {
+    font-size: 11px;
+    margin: 2px;
+    padding-top: 2px;
+}
+.fa-undo-alt::before {
+    position: relative;
+    top:-5px;
+}
+.fa-redo-alt::before {
+    position: relative;
+    top:-5px;
+}
+
+#showelevationbutton {
+    position: relative;
+    display: none;
+}
+
+#showelevationbutton:checked + label:before {
+    position: relative;
+    color: #0F0;
+    z-index:10;
+}
+#showelevationbutton:checked ~ .update-background {
+    background-color: white;
+    z-index:5;
+}
+#showelevationbutton + label:before {
+    position: relative;
+    color: #F00;
+    left: -1px;
+    top: -5px;
+    z-index:10;
+
+}
+.form-check-inline {
+    color: black;
+    padding: 0 5px 0 5px;
+}
+#spinner:not([hidden]) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+  
+#spinner::after {
+    content: "";
+    width: 80px;
+    height: 80px;
+    border: 2px solid #f3f3f3;
+    border-top: 3px solid #f25a41;
+    border-radius: 100%;
+    /* border-top-color: #0e0;
+    border-right-color: #0dd;
+    border-bottom-color: #f90; */
+    /* background: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);*/
+    will-change: transform;
+    animation: spin 1s infinite linear
+}
+  
+@keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+}
+
+#elevationChartDiv {
+    position: absolute;
+    right: 40px;
+    bottom: 30px;
+    /* display: block; */
+    /* margin-left: 35%;
+    margin-right: 35%; */
+    z-index: 30;
+    padding: 0px 0px 10px 0px;
+    background: white;
+    height: 20%;
+    /*width: 30%;*/
+    width: 30%;
+    resize: both;
+    overflow:  hidden;
+
+    /* margin: 0px auto;
+    border: 1px solid #d8d8d8; */
+} 
+
+  
+#elevationChartDivHeader {
+text-align: center;
+padding: 3px;
+cursor: move;
+z-index: 40;
+background-color: #2196F3;
+color: #fff;
+}
+
+button:disabled {
+    background:rgb(241, 148, 148);
+}
+button {
+    background:rgb(170, 241, 148);
 }

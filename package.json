@@ -1,0 +1,11 @@
+{
+  "private": true,
+    "scripts": {
+    "build-my-js": "browserify main.js -o ./node_modules/compiled.js"
+  },
+
+  "dependencies": {
+    "browserify": "^17.0.0",
+    "mapbox-elevation": "^1.0.0"
+  }
+}

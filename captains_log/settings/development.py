@@ -42,3 +42,6 @@ LEAFLET_CONFIG = {
     'MINIMAP': True,
     #'PLUGINS': [],
 }
+
+NODE_PACKAGE_JSON = '/home/michael/project/django-captainslog/package.json'
+NODE_MODULES_ROOT = '/home/michael/project/django-captainslog/node_modules'

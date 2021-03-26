@@ -2,55 +2,134 @@
 {% load static %}
 {% load render_table from django_tables2 %}
 <!DOCTYPE html>
+<link rel="shortcut icon" href="{%  static 'sitemaps/icons/favicon.ico' %}">
 <html>
 <head id=drawroute-header class=drawroute-header>
     <meta charset='utf-8' />
     <title>Create a route using the Mapbox Directions API</title>
 
-    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
 
-    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.css' rel='stylesheet'>
-    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script> -->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css">
+    <link rel='stylesheet' href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.css' type="text/css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css" type="text/css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.0/mapbox-gl-draw.css' type='text/css'/>
     <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.css" type="text/css"/>
-    <link href="{% static 'sitemaps/css/feature-info.css' %}" rel="stylesheet" type="text/css">
-    <link href="{% static 'sitemaps/css/drawroute.css' %}" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css" type="text/css">
+    <link rel="stylesheet" href="{% static 'sitemaps/css/feature-info.css' %}"  type="text/css">
+    <link rel="stylesheet" href="{% static 'sitemaps/css/drawroute.css' %}" type="text/css">
 </head>
 <body id=drawroute-body class=drawroute-body>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
     <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.0/mapbox-gl-draw.js"></script>
     <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/immutable/3.8.2/immutable.min.js"></script>
+    <script src="{% static 'compiled.js' %}"></script>
     <script src="https://npmcdn.com/@turf/turf@5.1.6/turf.min.js"></script>
     <script src="{% static 'sitemaps/js/feature-info.js' %}"></script>
     <script src="{% static 'sitemaps/js/feature-modes.js' %}"></script>
+    <script src="{% static 'sitemaps/js/lotsofpoints-mode.js' %}"></script>
+    <script src="{% static 'sitemaps/js/commander.js' %}"></script>
     {% include 'sitemaps/messages.html' %}
     <div id='map-container'>
         <div id='map' class='map'></div>
-        <div id='info-box' class='info-box'>
-            <p>Draw your route using the draw tools (25 points max)</p>
-            <div id='calculated-line'></div>
-            <div class='export'>
-                <a href='#' id='export' ><div class='exporttip'>Export the line</div></a> 
+        <div id='menu-column' class='menu-column'>
+            <div id='menu-icon' class='menu-icon'><i class="fas fa-bars fa-lg"></i>
+                <span class='menu-icontip'>Show/Hide Controls</span>
             </div>
-            <div class='update'>
-                <a href="#" id='updateDataset'><div class='updatetip'>Update the line</div></a>
-            </div>
-            <div class='calc-route'>
-                <a href="#" id='calcRoute'><div class='routetip'>Calculate the route</div></a>      
-            </div>
-            <div class='import'>
-                <a href='#' id='import' ><div class='importtip'>Import the line</div></a>
-            </div>
-            <div class='openroutes'>
-                <a href='#' id='openroutes' ><div class='openroutestip'>Open and edit routes</div></a>
+            <div id='menu-items' class='menu-items hide'>
+                <div id='info-box' class='info-box'>
+                    <div id=info-instructions>Draw your route using the draw tools (25 points max)</div>
+                    <div id='calculated-line'></div>
+                </div>
+                <div id='export' class='menu-icon export'><i class="fas fa-file-export fa-lg"></i>
+                    <a id='exportfile'></a>
+                    <span class='menu-icontip exporttip'>Export the route</span>
+                </div>
+                <div id='updateDataset' class='menu-icon update'><i class="fas fa-save fa-lg"></i>
+                    <span class='menu-icontip updatetip'>Save/Update the line</span>
+                </div>
+                <span>
+                    <div id='calcRoute' class='menu-icon calc-route'><i class="fas fa-route fa-lg"></i>
+                        <span class='menu-icontip routetip'>Calculate the route</span>   
+                    </div>
+                    <div id='calcDirections' class='menu-icon calc-directions'><i class="fas fa-directions fa-lg"></i>
+                        <span class='menu-icontip directionstip'>Get Directions</span>   
+                    </div>
+                    <div id='calcMapping' class='menu-icon calc-mapping'>
+                        <input type="checkbox" id="calcMappingButton">
+                        <label for="calcMappingButton" class="fas fa-draw-polygon fa-lg"></label>
+                        <span class='menu-icontip mappingtip'>Start Mapping Route</span> 
+                        <div class="update-background"></div>  
+                    </div>
+                </span>
+                <div id='import' class='menu-icon import'><i class="fas fa-file-import fa-lg"></i>
+                        <span class='menu-icontip importtip'>Import a route</span>
+                </div>
+                <div id='openroutes' class='menu-icon openroutes'><i class="fas fa-folder-open fa-lg"></i>
+                        <span class='menu-icontip openroutestip'>Open and edit routes</span>
+                </div>
+                <div id='inspectmap' class='menu-icon inspectmap'>
+                    <input type="checkbox" id="inspectmapbutton">
+                    <label for="inspectmapbutton" class="fas fa-search-location fa-lg"></label>
+                    <span class='menu-icontip inspectmaptip'>Inspect the map objects</span>
+                    <div class="update-background"></div>
+                </div>                    
+                <fieldset id="select-type-set">
+                <legend>Select a map style</legend>
+                <select id="select-type" class="selectmenu form-select form-select-sm" onchange="selectStyle()" aria-label=".form-select-sm">
+                    <option value="streets-v11">streets</option>
+                    <option value="light-v10">light</option> 
+                    <option value="dark-v10">dark</option>
+                    <option value="outdoors-v11" selected>outdoors</option>
+                    <option value="satellite-v9">satellite</option>
+                    <option value="satellite-streets-v11">satellite streets</option>
+                </select>
+                </fieldset>
+                <fieldset id="select-routing-set" class="hide">
+                    <legend>Select routing method</legend>
+                    <div id="select-routing" class="radio-inline form-check-inline" aria-label=".radio-inline">
+                        <input id="radio-traffic" type="radio" name="routetype" value="driving-traffic">
+                        <label for="radio-trafic">Traffic</label>
+                        <input id="radio-driving" type="radio" name="routetype" value="driving">
+                        <label for="radio-driving">Driving</label>
+                        <input id="radio-cycling" type="radio" name="routetype" value="cycling" checked>
+                        <label for="radio-cycling">Cycling</label>
+                        <input if="radio-walking" type="radio" name="routetype" value="walking">
+                        <label for="radio-walking">Walking</label>
+                </div>
+                </fieldset>
+                <fieldset id="select-mapping-options" class="hide select-mapping-options">
+                    <legend>Mapping Options</legend>
+                        <span>
+                            <div id='showelevation' class='menu-icon showelevation'>
+                                <input type="checkbox" id="showelevationbutton">
+                                <label for="showelevationbutton" class="fas fa-mountain fa-sm"></label>
+                                <span class='menu-icontip showelevationtip'>Show the elevation chart</span>
+                                <div class="update-background"></div>
+                            </div>
+                            <button id='undopoint' class='menu-icon undopoint'><i class="fas fa-undo-alt fa-sm"></i>
+                                <span class='menu-icontip undopointtip'>Delete / Undo last point</span>
+                            </button>
+                            <button id='redopoint' class='menu-icon redopoint'><i class="fas fa-redo-alt fa-sm"></i>
+                                <span class='menu-icontip redopointtip'>Redo last point</span>
+                            </button>
+                        </span>
+                </fieldset>
             </div>
         </div>
+        <div id='elevationChartDiv' class="elevChartContainer hide">
+            <div id="elevationChartDivHeader" class="elevChartContainerHeader">Elevation Chart</div>
+            <canvas id="elevationChart"></canvas>
+        </div>
+        <div hidden id="spinner"></div>
     </div>
+
+    <!-- <pre id="features"></pre> -->
 
 
 
@@ -62,16 +141,28 @@
     // (function(d) {
     //     "use strict"
     // })(document);
-
+// Make the elevation chart element draggable:
+    dragElement(document.getElementById("elevationChartDiv"));
+    //---------------------------------------------------------------------
+    // SET UP MAP
+    //---------------------------------------------------------------------
+    const spinner = document.getElementById("spinner");
     var mbat = "{{mapbox_access_token}}"
+
     mapboxgl.accessToken=mbat;
     // mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JhZmEiLCJhIjoiY2oydGJoajI5MDA1bjJxbzZzZjd5MXl3NSJ9.vNVFm6NsFzeX0AGSjFHpqg';
-    
+    var MapboxElevation = window.MapboxElevation;
+    var getElevation = MapboxElevation(mbat);
+
+    // getElevation([86.925313, 27.988730], function(err, elevation) {
+    //   console.log('elevation at the summit of mt everest', elevation);
+    // });
+
     var map = new mapboxgl.Map({
             container: 'map',
-            style: 'mapbox://styles/mapbox/satellite-streets-v11',
+            style: 'mapbox://styles/mapbox/outdoors-v11',
             center: [-0.827610, 51.182250],
-            zoom: 5
+            zoom: 14
         });
     var datasetId = "test.geojson";
 
@@ -82,27 +173,52 @@
     };
     var geoJsonFeatures;
     var routeCoords;
+    var doingCalcMapping; //holds boolean for when calcMapping checkbox is selected
+
+    //---------------------------------------------------------------------
+    // SHOW NAME PROMPT FOR BESPOKE LINE TOOL
+    //---------------------------------------------------------------------
     DrawNamedLineMode.showNamePrompt = true;
     
     var draw = new MapboxDraw({
         displayControlsDefault: false,
+        // userProperties: true,
         controls: {
             point: true,
             line_string: true,
+            lots_of_points: true,
             trash: true
         },
         modes: Object.assign({
-        //     lots_of_points: LotsOfPointsMode,
+             lots_of_points: LotsOfPointsMode,
         }, MapboxDraw.modes, {
             draw_line_string: DrawNamedLineMode,
         }),
+        // styles : [
+        //     //     {
+        //     //     'id': 'gl-draw-polygon-and-line-vertex-inactive',
+        //     //     'type': 'circle',
+        //     //     'filter': ['all', ['==', 'meta', 'vertex'],
+        //     //         ['==', '$type', 'Point'],
+        //     //         ['!=', 'mode', 'static']
+        //     //     ],
+        //     //     'paint': {
+        //     //         'circle-radius': 5,
+        //     //         'circle-color': '#0f0'
+        //     //     },
+        //     //     // 'layout': {
+        //     //     //     'text-field': ['get', 'coord_path']
+        //     //     // }
+        //     // },
+        //         ],
     });
+
     var scale = new mapboxgl.ScaleControl({
         maxWidth: 200,
         unit: 'metric'
     });
-    var navigation = new mapboxgl.NavigationControl({
 
+    var navigation = new mapboxgl.NavigationControl({
     });
 
     var linestringcontrol = new LineStringInfoControl ({
@@ -116,6 +232,7 @@
         ],
         defaultTitle: 'Line'
     });
+
     var multilinecontrol = new MultiLineInfoControl ({
         distanceUnits: 'kilometers',
             drawControl: draw,
@@ -127,6 +244,7 @@
         ],
         defaultTitle: 'Line'
     });
+
     var pointcontrol = new PointInfoControl({
         drawControl: draw,
         editProperties: [
@@ -137,11 +255,13 @@
         ],
         defaultTitle: 'Point'
         });
-     var directions = new MapboxDirections({
+
+    var directions = new MapboxDirections({
         accessToken: mapboxgl.accessToken,
         controls: [{
-            inputs: false,
-            instructions: false
+            inputs: true,
+            instructions: true,
+            profileSwitcher: true
         }]
     });
 
@@ -154,15 +274,102 @@
         map.addControl(linestringcontrol);
         map.addControl(pointcontrol);
         map.addControl(multilinecontrol);
+        
         //draw.changeMode('lots_of_points', {count:7});
     });
-    window.addEventListener('DOMContentLoaded', function(){
+    map.resize();
+    var canvas = map.getCanvasContainer();
+    canvas.style.cursor = 'grab';
+    
+    //---------------------------------------------------------------------
+    // CHECK ITEMS LOADED THEN
+    //  1) SET UP THE EVENT LISTENER FOR THE MAIN MODAL FORM
+    //  2) MAKE SURE THE CONTROL FOR THE MAP INSPECTION IS NOT CHECKED
+    //---------------------------------------------------------------------
+
+    window.addEventListener('DOMContentLoaded', function() {
             popupForm();
-        });
+            document.getElementById('inspectmapbutton').checked = false;
+            document.getElementById('showelevationbutton').checked = false;
+            document.getElementById('calcMappingButton').checked = false;
+    });
+    
     map.on('click', function (e) {
     });
+
+    //---------------------------------------------------------------------
+    // ALLOW VIEWING OF FEATURES IF CONTROL SELECTED
+    //---------------------------------------------------------------------
+
     map.on('mousemove', function(e){
+        if (document.getElementById('inspectmapbutton').checked) {
+            var features = map.queryRenderedFeatures(e.point);
+    
+            // Limit the number of properties we're displaying for
+            // legibility and performance
+            var displayProperties = [
+                'type',
+                'properties',
+                'id',
+                'layer',
+                'source',
+                'sourceLayer',
+                'state'
+            ];
+            
+            var displayFeatures = features.map(function (feat) {
+                var displayFeat = {};
+                displayProperties.forEach(function (prop) {
+                    displayFeat[prop] = feat[prop];
+                });
+                return displayFeat;
+            });
+
+            if(displayFeatures.length) {
+                var popUps = document.getElementsByClassName('mapboxgl-popup');
+                if (popUps[0]) popUps[0].remove();
+                var popup = new mapboxgl.Popup({closeOnClick: false, offset: [0,0] })
+                .setLngLat(e.lngLat)
+                .setHTML(JSON.stringify(
+                    displayFeatures,
+                    null,
+                    2
+                ))
+                .addTo(map);
+                }
+        }
+        else {
+            var popUps = document.getElementsByClassName('mapboxgl-popup');
+            if (popUps[0]) popUps[0].remove();
+        }
+        // if (doingCalcMapping) {
+        //     map.on('mouseenter', 'gl-draw-point-inactive.hot', function() {
+        //     //console.log('entered hot')
+        //     map.setPaintProperty('gl-draw-point-inactive.hot', 'circle-color', '#ff0000');
+        //     canvas.style.cursor = 'crosshair';
+        //     });
+        //     map.on('mouseenter', 'gl-draw-point-inactive.cold', function() {
+        //     //console.log('entered cold')
+        //     map.setPaintProperty('gl-draw-point-inactive.cold', 'circle-color', '#ff0000');
+        //     canvas.style.cursor = 'crosshair';
+        //     });
+        //     map.on('mouseleave', 'gl-draw-point-inactive.hot', function() {
+        //     //console.log('left hot')
+        //     map.setPaintProperty('gl-draw-point-inactive.hot', 'circle-color', '#00ffff');
+        //     canvas.style.cursor = 'crosshair';
+        //     });
+        //     map.on('mouseleave', 'gl-draw-point-inactive.cold', function() {
+        //     //console.log('left cold')
+        //     map.setPaintProperty('gl-draw-point-inactive.cold', 'circle-color', '#00ffff');
+        //     canvas.style.cursor = 'crosshair';
+        //     });
+        //     }
+            // else {}
     });
+
+    //---------------------------------------------------------------------
+    // SET UP DRAW BEHAVIOURS
+    //---------------------------------------------------------------------
 
     // add create, update, or delete actions
     map.on('draw.create', updateRoute);
@@ -171,38 +378,23 @@
     map.on('draw.selectionchange', changeRoute);
 
 
-    function popupForm() {
-        document.getElementById('openroutes').addEventListener('click', () => {
-            var modal_url = '/maps/routetable/'
-            var modal = document.getElementById('form-modal');
-            var modalBody = document.getElementById('form-modal-body')
-            loadModalForm('form-modal-body', modal_url);
-            $(modal).modal('show');
-            
-            var formheader = document.querySelector('#form-modal-header');
-            var closeheader = formheader.querySelector('.close');
-            var isHeaderText = formheader.querySelector("h4");
-            if (!isHeaderText) {
-                var headerText = document.createElement("h4");
-                var textnode = document.createTextNode("Routes:");
-                headerText.appendChild(textnode);
-                document.querySelector('#form-modal-header').insertBefore(headerText, closeheader);
-            };
-            
-            
-        });
-    };
 
+
+    //---------------------------------------------------------------------
+    // SET UP DRAW ROUTINES
+    //---------------------------------------------------------------------
 
     function changeRoute (){
-       //console.log("change", draw.getMode(), draw.getAll());
+       console.log("change", draw.getMode(), draw.getAll());
     }
 
-    // use the coordinates you just drew to make your directions request
+
     function updateRoute(e) {
+        console.log("update", draw.getMode(), draw.getAll());
         //var data = draw.getAll().features;
         var data = e.features;
-        console.log(map, data, draw.getAll().features)
+        //console.log(map.queryRenderedFeatures())
+        //console.log(map, data, draw.getAll().features)
         removeRoute(); // overwrite any existing layers
         if (data[0].geometry.type != "Point") {
             var answer = document.getElementById('calculated-line');
@@ -215,64 +407,13 @@
         else {
             document.getElementById('calculated-line').innerHTML = '';
         };
-        //getMatch(newCoords);
-    }
-
-    // make a directions request
-    function getMatch(e) {
-        // https://www.mapbox.com/api-documentation/#directions
-        var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + e +'?geometries=geojson&steps=true&&access_token=' + mapboxgl.accessToken;
-        var req = new XMLHttpRequest();
-        req.responseType = 'json';
-        req.open('GET', url, true);
-        req.onload  = function() {
-        var jsonResponse = req.response;
-        var distance = jsonResponse.routes[0].distance*0.001; // convert to km
-        var duration = jsonResponse.routes[0].duration/60; // convert to minutes
-        // add results to info box
-        document.getElementById('calculated-line').innerHTML = document.getElementById('calculated-line').innerHTML + 'Distance: ' + distance.toFixed(2) + ' km<br>Duration: ' + duration.toFixed(2) + ' minutes';
-        var coords = jsonResponse.routes[0].geometry;
-        // add the route to the map
-        addRoute(coords);
-        };
-        req.send();
-    }
-
-    // adds the route as a layer on the map
-    function addRoute (coords) {
-        // check if the route is already loaded
-        if (map.getSource('route')) {
-            map.removeLayer('route')
-            map.removeSource('route')
-        } else{
-            map.addLayer({
-            "id": "route",
-            "type": "line",
-            "source": {
-                "type": "geojson",
-                "data": {
-                "type": "Feature",
-                "properties": {},
-                "geometry": coords
-                }
-            },
-            "layout": {
-                "line-join": "round",
-                "line-cap": "round"
-            },
-            "paint": {
-                "line-color": "#3b9ddd",
-                "line-width": 8,
-                "line-opacity": 0.8
-            }
-            });
-        };
-    }
+    };
 
     // remove the layer if it exists
     function removeRoute () {
         if (map.getSource('route')) {
             map.removeLayer('route');
+            map.removeLayer('points');
             map.removeSource('route');
             document.getElementById('calculated-line').innerHTML = '';
             // var data = draw.getAll();
@@ -285,41 +426,1181 @@
             // draw.delete(delFeatures);
         } else  {
             return;
+        };
+    };
+
+    //---------------------------------------------------------------------
+    // SET UP MODAL
+    //---------------------------------------------------------------------
+
+    function popupForm() {
+        document.getElementById('openroutes').addEventListener('click', loadTheModal);
+        // document.getElementById('openroutes').addEventListener('click', () => {
+        //     var modal_url = '/maps/routetable/'
+        //     var modal = document.getElementById('form-modal');
+        //     var modalBody = document.getElementById('form-modal-body')
+        //     loadModal(modal_url);
+        //     $(modal).modal('show');
+            
+        //     var formheader = document.querySelector('#form-modal-header');
+        //     var closeheader = formheader.querySelector('.close');
+        //     var isHeaderText = formheader.querySelector("h4");
+        //     if (!isHeaderText) {
+        //         var headerText = document.createElement("h4");
+        //         var textnode = document.createTextNode("Routes:");
+        //         headerText.appendChild(textnode);
+        //         document.querySelector('#form-modal-header').insertBefore(headerText, closeheader);
+        //     };            
+        // });
+    };
+
+    const loadTheModal = async () => {
+        var modal_url = '/maps/routetable/'
+        var modal = document.getElementById('form-modal');
+        var modalBody = document.getElementById('form-modal-body')
+        try {
+            const loadTheModalForm = await loadModalForm ('form-modal-body', modal_url);
+            $(modal).modal('show');       
         }
+        catch (err) {
+            console.log(err);
+        };
+        
+        var formheader = document.querySelector('#form-modal-header');
+        var closeheader = formheader.querySelector('.close');
+        var isHeaderText = formheader.querySelector("h4");
+        if (!isHeaderText) {
+            var headerText = document.createElement("h4");
+            var textnode = document.createTextNode("Routes:");
+            headerText.appendChild(textnode);
+            document.querySelector('#form-modal-header').insertBefore(headerText, closeheader);
+        };  
+    }
+    //---------------------------------------------------------------------
+    // 
+    //--------------------------------------------------------------------- 
+    async function loadModal (path){
+        // wait for the form to load so all buttons have right links etc
+        await loadModalForm ('form-modal-body', path);
+    };
+
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
+    async function loadModalForm (parentElementId, filePath) {
+            const csrftoken = getCookie('csrftoken');
+            const init = {
+                method : "GET",
+                headers : { "Content-Type" : "text/html", "X-CSRFToken": csrftoken, "Call-From" : "fetch"},
+                mode : "cors",
+                cache : "default"
+            };
+            const req = new Request(filePath, init);
+            await fetch(req)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    } else {
+                        return response.text();
+                    }
+                })
+                .then(myText => {
+                    var popupModalBody = document.getElementById('form-modal-body');
+                    popupModalBody.innerHTML = myText;
+                })
+                .then (load => {
+                    updateTableHeaders(parentElementId);
+                    updateTablePagination(parentElementId);
+                    formAddModalFooterButton ('create', filePath);
+                    addModalPopupClicks();
+                })
+                .catch(e => {
+                        console.log('There has been a problem with your fetch operation: ' + e.message);
+                });
+
+    };
+
+
+    //---------------------------------------------------------------------
+    // SET UP MAPBOX LINE MATCHINGS
+    //---------------------------------------------------------------------
+
+    // make a matching request
+    async function getLineMatchings() {
+        var data = draw.getAll();
+        if (!data.features.length) {alert('Please draw a line to calculate routing'); 
+            //console.log(data.features.length); 
+            return;}
+        //Get routing profile
+        const rbs = document.querySelectorAll('input[name="routetype"]')
+        let profile;
+        for (const rb of rbs) {
+            if (rb.checked) {
+                profile = rb.value;
+                break;
+            }
+        };
+        //console.log(profile);
+        //console.log(data);
+        //if (feature.type = "LineString"){
+            console.log(data.features)
+        var coords = [];
+        data.features.slice().reverse().forEach(element => {
+            if(element.geometry.type = 'LineString'){
+                coords = element.geometry.coordinates;
+                
+            };
+            })
+            console.log(coords);
+        //var lastFeature = data.features.length - 1;
+        //var coords = data.features[lastFeature].geometry.coordinates;
+        //var profile = "driving";
+        var radius = [];
+        coords.forEach(element => {
+            radius.push(50);
+            });
+        var radiuses = radius.join(';')
+        var newCoords = coords.join(';');
+            console.log(newCoords);
+        var url = 'https://api.mapbox.com/matching/v5/mapbox/' + profile + '/' + newCoords + '?geometries=geojson&overview=full&tidy=true&radiuses=' + radiuses + '&steps=true&&access_token=' + mapboxgl.accessToken;
+        
+        // const loadTheModal = async () => {
+        let response = await new Promise (resolve => {
+            var req = new XMLHttpRequest();
+            spinner.removeAttribute('hidden');
+            req.responseType = 'json';
+            req.open('GET', url, true);
+                req.onload  = function (e) {
+                    resolve(req.response);
+                };
+                req.onerror = function () {
+                    resolve(undefined);
+                    spinner.setAttribute('hidden', '');
+                    alert('An error has occurred reading getting the route!')
+                    return
+                };
+                req.send();
+        });
+
+        var jsonResponse = response;
+        if (jsonResponse.code == "InvalidInput") {
+            spinner.setAttribute('hidden', '');
+            alert('Using the routing method of '+ profile + ' has resulted in an error .... ' + jsonResponse.message + ". Please try again after replotting the line.");
+            return;
+        }
+        plotCoords = [];  
+        for (var match of jsonResponse.matchings) 
+            { 
+                for (var geo of match.geometry.coordinates) {
+                    plotCoords.push(geo)
+                };
+            };
+
+        plotGeometry = jsonResponse.matchings[0].geometry
+        plotGeometry.coordinates = plotCoords
+        
+        removeRoute(plotGeometry);
+        addRoute(plotGeometry);
+        if (jsonResponse.matchings.length == 1) {
+            var distance = jsonResponse.matchings[0].distance*0.001; // convert to km
+            var duration = jsonResponse.matchings[0].duration/60; // convert to minutes
+            
+            // add results to info box
+            document.getElementById('calculated-line').innerHTML = 'Distance: ' + distance.toFixed(2) + ' km<br>Duration: ' + duration.toFixed(2) + ' minutes';
+        } else {
+            document.getElementById('calculated-line').innerHTML = "There are " + jsonResponse.matchings.length + " segments on the route. There should be one.  Look at the points off the route"; 
+            //document.getElementById('calculated-line').innerHTML = jsonResponse.matchings.length;
+         };
+        document.getElementById('info-instructions').textContent = '';
+        spinner.setAttribute('hidden', '');
+
+        var legs = jsonResponse.matchings[0].legs;
+        var directions = document.getElementById('info-instructions');
+        var tripDirections = [];
+          // Output the instructions for each step of each leg in the response object
+        for (var i = 0; i < legs.length; i++) {
+            var steps = legs[i].steps;
+            for (var j = 0; j < steps.length; j++) {
+            tripDirections.push('<br><li>' + steps[j].maneuver.instruction) + '</li>';
+            }
+        }
+        directions.innerHTML = '<br>Trip duration: ' + Math.floor(jsonResponse.matchings[0].duration / 60) + ' min.' + tripDirections;
+        };
+
+//---------------------------------------------------------------------
+// NEW POINT BY POINT SET UP MAPBOX LINE MATCHINGS
+//---------------------------------------------------------------------
+var undo = document.getElementById('undopoint');
+var redo = document.getElementById('redopoint');
+var myHistory = [Immutable.List([])];
+var historyIndex = 0;
+undo.disabled = (historyIndex != 0) ? '' : 'disabled';
+redo.disabled = (historyIndex !== myHistory.length - 1) ? '' : 'disabled';
+
+
+// clicking undo goes back in time, unless
+// there is no history left.
+undo.addEventListener('click', function() {
+
+    if (historyIndex > 0) {
+        //get differences in current and prior point states
+        //if the sizes are different then a point was added and we want the new point details
+        //for removal
+        if (myHistory[historyIndex].size > myHistory[historyIndex-1].size) {
+            var pointUndoDiff = pointDifferences(myHistory[historyIndex], myHistory[historyIndex-1]);
+        }
+        //if they are the same then a point was changed and the comparison is the opposite way around to get
+        //the coordinates of the old point so we can move the point back where it was
+        else if (myHistory[historyIndex].size == myHistory[historyIndex-1].size) {
+            var pointUndoDiff = pointDifferences(myHistory[historyIndex-1], myHistory[historyIndex]);
+        }
+
+        //delete the latest point plotted
+        draw.delete(pointUndoDiff.id)
+        //workout whether we have a new point or it was there before but moved
+        //pointUndoDiff has the id of the point changed if this is the same as the existing
+        //history point then it was moved and we need to plot it again otherwise we can just
+        //delete it 
+        if (myHistory[historyIndex].size == myHistory[historyIndex-1].size || pointUndoDiff.id < pointcount) {
+
+            const coords = [pointUndoDiff.x, pointUndoDiff.y];
+            var point = {
+            type: 'Feature',
+            id: pointUndoDiff.id,
+            properties: {
+                count: 50,
+                id: pointUndoDiff.id,
+            },
+            geometry: {
+                type: 'Point',
+                coordinates: coords
+            }
+            };
+
+            draw.add(point);
+        }
+        historyIndex--;
+        pointcount--;
+        undo.disabled = (historyIndex != 0) ? '' : 'disabled';
+        redo.disabled = (historyIndex !== myHistory.length - 1) ? '' : 'disabled';
+    }
+});
+
+// clicking redo goes forward in time, unless
+// there is no future left.
+redo.addEventListener('click', function() {
+
+    if (historyIndex < myHistory.length -1) {
+        //increase the index to get the future state we want to return to
+        historyIndex++;
+        pointcount++;
+        var pointRedoDiff = pointDifferences(myHistory[historyIndex], myHistory[historyIndex-1]);
+
+        const coords = [pointRedoDiff.x, pointRedoDiff.y];
+        var point = {
+        type: 'Feature',
+        id: pointRedoDiff.id,
+        properties: {
+            count: 50,
+            id: pointRedoDiff.id,
+        },
+        geometry: {
+            type: 'Point',
+            coordinates: coords
+        }
+        };
+        //if the future point is on the map delete it before we add it again with the new coordinates
+        //if it not on the map it must be new and we add it
+        if (draw.get(pointRedoDiff.id)) {
+            draw.delete(pointRedoDiff.id)
+        }
+        draw.add(point);
+        undo.disabled = (historyIndex != 0) ? '' : 'disabled';
+        redo.disabled = (historyIndex !== myHistory.length - 1) ? '' : 'disabled';
+    }
+});
+
+function pointDifferences(Index1, Index2) {
+   var difference = Index1.filter(x => !Index2.includes(x));
+   var id = difference.get(0).get("id")
+   var x = difference.get(0).get("x")
+   var y = difference.get(0).get("y")
+   var pointObject= {id: id, x: x, y: y }
+   return pointObject
+}
+
+function operation(fn) {
+    // first, make sure that there is no future
+    // in the history list. for instance, if the user
+    // draws something, clicks undo, and then
+    // draws something else, we need to dispose of the
+    // future state
+    myHistory = myHistory.slice(0, historyIndex + 1);
+    
+    // create a new version of the data by applying
+    // a given function to the current head
+    var newVersion = fn(myHistory[historyIndex]);
+    
+    // add the new version to the history list and increment
+    // the index to match
+    myHistory.push(newVersion);
+    historyIndex++;
+};
+
+function addPoint(x, y, id) {
+    operation(function(data) {
+        return data.push(
+            Immutable.Map({
+                x: x , 
+                y: y, 
+                id: id
+            })
+        );  
+    });
+};
+
+
+function removePoint(id) {
+    operation(function(data) {
+        return data.filter(function(dot) {
+            return dot.get('id') !== id;
+        });
+    });
+};
+function movePoint(x,y,id) {
+    console.log('move')
+    operation(function(data) {
+        return data.update(
+        data.findIndex(function(item) { 
+            return item.get("id") === id; 
+        }),
+            function(item) {
+                return item.set("x",x).set("y", y);
+            }); 
+    });
+};
+
+function getPointbyPointMatchings(radiusNumber, lat, lng) {
+    undo.disabled = (historyIndex != 0) ? '' : 'disabled';
+    redo.disabled = (historyIndex !== myHistory.length - 1) ? '' : 'disabled';
+};
+
+
+//---------------------------------------------------------------------
+// SET UP MAPBOX POINT MATCHINGS
+//---------------------------------------------------------------------
+
+    // make a matching request
+    async function getPointMatchings(radiusNumber) {
+        var data = draw.getAll(); 
+        console.log('draw data', data);
+        if (!data.features.length) {
+            document.getElementById('info-instructions').textContent = 'Click the map to add points on a route using routing profile e.g. Cycling.  Click the Esc key to stop plotting and reselect the control to calculate the route';
+            return;
+        }
+        if (data.features.length == 1)  {
+            alert('Please draw more than 1 point to start calculating line');
+            return;
+            }
+        coords=[];
+        data.features.forEach(feature => {
+            if (feature.type = "Point"){
+                coords.push(feature.geometry.coordinates)
+            };
+        });
+        //Get routing profile
+        const rTypes = document.querySelectorAll('input[name="routetype"]')
+        let profile;
+        for (const rType of rTypes) {
+            if (rType.checked) {
+                profile = rType.value;
+                break;
+            }
+        };
+        //Set up radius on points
+        var radius = [];
+        coords.forEach(element => {
+            radius.push(radiusNumber);
+            });
+        var radiuses = radius.join(';')
+        var newCoords = coords.join(';');
+
+        var url = 'https://api.mapbox.com/matching/v5/mapbox/' + profile + '/' + newCoords + '?geometries=geojson&overview=full&tidy=true&radiuses=' + radiuses + '&steps=true&&access_token=' + mapboxgl.accessToken;
+        
+        // const loadTheModal = async () => {
+        let response = await new Promise (resolve => {
+            var req = new XMLHttpRequest();
+            spinner.removeAttribute('hidden');
+            req.responseType = 'json';
+            req.open('GET', url, true);
+                req.onload  = function (e) {
+                    resolve(req.response);
+                };
+                req.onerror = function () {
+                    resolve(undefined);
+                    spinner.setAttribute('hidden', '');
+                    alert('An error has occurred reading getting the route!')
+                    return
+                };
+                req.send();
+        });
+
+        var jsonResponse = response;
+        console.log(jsonResponse);
+        if (jsonResponse.code == "InvalidInput") {
+            spinner.setAttribute('hidden', '');
+            alert('Using the routing method of '+ profile + ' has resulted in an error .... ' + jsonResponse.message + ". Please try again after replotting the line.");
+            return;
+        }
+        if (jsonResponse.code == "NoMatch") {
+            spinner.setAttribute('hidden', '');
+            alert('Using the routing method of '+ profile + ' has resulted in an error .... ' + jsonResponse.message + ". Please try again after replotting the line.");
+            return;
+        }
+        
+        plotCoords = [];  
+        for (var match of jsonResponse.matchings) 
+            { 
+                for (var geo of match.geometry.coordinates) {
+                    plotCoords.push(geo)
+                };
+            };
+
+        plotGeometry = jsonResponse.matchings[0].geometry
+        plotGeometry.coordinates = plotCoords
+        
+        removeRoute(plotGeometry);
+        addRoute(plotGeometry);
+
+        if (jsonResponse.matchings.length == 1) {
+            var distance = jsonResponse.matchings[0].distance*0.001; // convert to km
+            var duration = jsonResponse.matchings[0].duration/60; // convert to minutes
+            
+            // add results to info box
+
+            if(jsonResponse.tracepoints.filter(x => x==null).length > 0) {
+                document.getElementById('calculated-line').innerHTML = 'There are ' + jsonResponse.tracepoints.filter(x => x==null).length + ' points plotted which cannot be used.\
+                For an accurate routing please move or delete these. <br>Distance: ' + distance.toFixed(2) + ' km<br>Duration: ' + duration.toFixed(2) + ' minutes';
+            }
+            else {
+                document.getElementById('calculated-line').innerHTML = 'Distance: ' + distance.toFixed(2) + ' km<br>Duration: ' + duration.toFixed(2) + ' minutes';
+            }
+        } 
+        else {
+            document.getElementById('calculated-line').innerHTML = "There are " + jsonResponse.matchings.length + " segments on the route. There should be one.  Look at the points off the route"; 
+            //document.getElementById('calculated-line').innerHTML = jsonResponse.matchings.length;
+        };
+        document.getElementById('info-instructions').textContent = '';
+        spinner.setAttribute('hidden', '');
+
+        var legs = jsonResponse.matchings[0].legs;
+        var directions = document.getElementById('info-instructions');
+        var tripDirections = [];
+          // Output the instructions for each step of each leg in the response object
+        for (var i = 0; i < legs.length; i++) {
+            var steps = legs[i].steps;
+            for (var j = 0; j < steps.length; j++) {
+            if (!steps[j].maneuver.instruction.startsWith("You have arrived")) {
+                tripDirections.push('<br><li>' + steps[j].maneuver.instruction) + '</li>'};
+            }
+        }
+        directions.innerHTML = '<br>Trip duration: ' + Math.floor(jsonResponse.matchings[0].duration / 60) + ' min.' + tripDirections;
+
+        // Loop through the co-ordinates
+        const coordLoop = async(plotGeo) => {
+            var elevationCoords = plotGeo.coordinates;
+            // Get a series of promises from co-ordinates of elevation
+            const peCord = elevationCoords.map (async coord => {
+                //Get the promise and resolve it
+                const numElevation = geteData(coord).then(res => res)
+                //return the promise
+                return numElevation
+            })
+            //Resolve the promises
+            var peCords = await Promise.all(peCord)
+            //return elevation array promise
+            return peCords;
+        };
+        //Get each elevation requested
+        const geteData = (c) =>{
+            //Create a promise on the request and return this to requestor
+            return new Promise(
+                (resolve, reject) => {
+                    var eData;
+                    getElevation(c, function(err, elevation) {
+                        if (err) {
+                            throw (err);
+                        }
+                        else {
+                            eData = Math.round(elevation * 1e2) / 1e2;
+                            resolve(eData);
+                        }
+                    })
+                }
+            )
+        };
+        //Get the elevation data
+        var elevationReturned = await coordLoop(plotGeometry);
+
+        //Now lets get the distance in meters between each point using turf
+
+        var coordPairs = plotGeometry.coordinates.reduce(
+            function(result, value, index, array) {
+            //if (index % 2 === 0)
+            if (plotGeometry.coordinates.length > index + 1)
+                result.push(array.slice(index, index + 2));
+            return result;
+            }, 
+            []
+            );
+        //console.log(plotGeometry.coordinates, 'coordPairs',coordPairs);
+        var coordDistanceDiff = coordPairs.map(coord =>  {
+            if (coord.length == 2) {
+                var point1 = turf.point(coord[0]);
+                var point2 = turf.point(coord[1]);
+                var options = {units: 'kilometers'};
+                //console.log(point1, point2, options);
+                distance = turf.distance(point1, point2, options);
+            } 
+            else {
+                var point1 = turf.point(coord[0]);
+                var point2 = turf.point(coord[0]);
+                var options = {units: 'kilometers'};
+                distance = turf.distance(point1, point2, options);
+            }
+            
+            //console.log(distance)
+            return distance * 1000;
+        })
+        //add zero as starting distance
+        //coordDistanceDiff.unshift(0)
+        //console.log('coordDistance',coordDistanceDiff);
+
+        //Now lets get the elevation between points too...
+
+        var coordElevationDiff = elevationReturned.reduce(            
+            function(result, value, index, array) {
+            //if (index % 2 === 0)
+            if (elevationReturned.length > index + 1)
+                result.push(array[index+1] - array[index]);
+            return result;
+            }, 
+            []
+            );
+        //console.log('elevation: ', elevationReturned, coordElevationDiff)
+
+        //create x,y scatter array for plotting
+        //1) distance (x) vs elevation (y)
+        //add zero as starting distance
+        coordDistanceDiff.unshift(0);
+        //use reduce twice firstly to create new array containing elapsed
+        //distance + elevation
+        //secon dly to get the elapsed distance for the first reduce using the
+        //index to slice the aryy for a sum
+        //make sense?  
+        var coordScatterDstvsEle = coordDistanceDiff.reduce(
+            function(result, value, index, array) {
+            var distance = array.slice(0, index + 1).reduce(
+                    function(result, value, index, array) {
+                        return result + value
+                    })
+                var pair = [distance, elevationReturned[index]]
+                result.push(pair);
+            return result;
+            }, 
+            []
+            );
+
+        //console.log('elevation scatter: ', coordScatterDstvsEle, elevationReturned)
+
+        //Now we also want to create a pair array as above but with distance vs gradient
+        //we have the elevation change from above
+        //gradient is rise divided by run in this case the change in elevation vs change in distance
+        //so we can use reduce again
+        //     
+        var coordGradient = coordDistanceDiff.reduce(
+            function(result, value, index, array) {
+                //We dont want to process the last distance diff as the last 
+                //gradient is from the last -1 to last points i.e. one less that the
+                //distance differences to which we added 0 at the start earlier
+                if (coordDistanceDiff.length > index + 1)
+                    result.push(coordElevationDiff[index]/array[index + 1])
+                return result;
+            },
+            []
+            );
+        //console.log('gradient: ', coordGradient, coordElevationDiff, coordDistanceDiff)
+        
+        processChart(elevationReturned, distance);
+
+
+    };
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------
+    
+    function processChart(chartData, distance) {
+        var ctx = document.getElementById("elevationChart")
+            var labels=[];
+            var data = {
+                labels: labels.length === chartData.length ? labels : new Array(chartData.length).fill(""),
+                datasets: [
+                    {
+                    label: "Elevation",
+                    data: chartData,
+                    },
+                ],
+            };
+            //console.log(data);
+            var maxElevation = (Math.max(...chartData))
+            var options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        left: 0,
+                        right: 10,
+                        top: 0,
+                        bottom: 10,
+                    },
+                },
+                tooltips: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                scales: {
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'height (m)',
+
+                        },
+                        ticks: {
+                            beginAtZero: true,
+                            max: (Math.ceil((maxElevation + 1) / 100)) * 100,
+                            steps: (Math.ceil((maxElevation + 1) / 100)) * 10, 
+                            },
+                    }],
+                    xAxes: [{
+                        //display: false,
+                    gridLines: {
+                        drawTicks: false,
+                    },
+                    scaleLabel: {
+                        display: true,
+                    //         labelString: 'distance (km)',
+
+                    //     },
+                    //     ticks: {
+                    //         beginAtZero: true,
+                    //         max: (Math.round(distance *10))/10,
+                    //         steps: (Math.round(distance *10))/100
+                    },
+                    }]
+                }
+            };
+                //console.log(options);
+            var elevationChart = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: options
+                });
+    };
+
+
+    //---------------------------------------------------------------------
+    // UNUSED FUNCTION - 200x SLOWER than that used above!
+    //---------------------------------------------------------------------
+    async function getElevationData(plotGeo) {
+        // get co-cordinates
+        var elevationCoords = plotGeo.coordinates;
+        //Put the async getElevation node.js API into something we can get the result from
+        function getElevationFromCoord(coord, fn){
+                getElevation(coord, function(err, elevation) {
+                    fn(elevation); 
+            });};
+        //Get the elevation using a Promise which resolves to an elevation we can return
+        const getPromiseElevationFromCoord = coord => new Promise(resolve => {
+            return getElevationFromCoord(coord, function(elevation){
+                resolve(elevation.toFixed(2));
+            });
+        });
+        //Use reduce function on co-ordinates array to get results and return them
+        return await elevationCoords.reduce(async (previous, coord) => {
+            const result = await previous;
+            return [...result, await getPromiseElevationFromCoord(coord)];
+            }, Promise.resolve([])
+        );
+    };
+
+    //const getElevationData = async(plotGeo) => {
+    // async function getElevationData(plotGeo) {
+    //         var elevationData = [];
+    //         var elevationCoords = plotGeo.coordinates;
+    //         const gete = (c) => 
+    //             {getElevation(c, function(err, elevation) {
+    //                 if (err) {
+    //                     throw (err);
+    //                 }
+    //                 else {
+    //                     elevationData.push(elevation.toFixed(2));
+    //                     //console.log(elevation);
+    //                 }
+    //             })};
+    //         function fgete(coord, fn){
+    //             getElevation(coord, function(err, elevation) {
+    //                 fn(elevation); 
+    //         });};
+    // }
+
+            //fgete(coord, function(location){
+            //    console.log('fgete',location); // this is where you get the return value
+            // //});
+            // let eResult = async (elevationCoords) => {
+            //     //console.log('in result', elevationCoords)
+            //     let eCords = await Promise.all(elevationCoords.map (
+            //         async (coord) => {
+            //             let childPromise = await gete(coord);
+            //             await childPromise;
+            //             // await fgete(coord, function(location){
+            //             //     console.log('fgete',location); // this is where you get the return value
+            //             // });
+            //         }
+            //     ));
+            //     await Promise.all(eCords);
+            // };
+            //console.log('eCords+', elevationData); 
+        //console.log('eData', elevationData);
+        //await eResult(elevationCoords);
+
+
+        // const getResult = x => new Promise(resolve => {
+        //     return fgete(x, function(location){
+        //         //console.log(x, location);
+        //         resolve(location);
+        //     });
+        // });
+
+        // return await elevationCoords.reduce(async (previous, cod) => {
+        // const result = await previous;
+
+        // return [...result, await getResult(cod)];
+        
+        // }, Promise.resolve([]))
+        //.then(console.log);
+        //return elevationData;
+
+
+        // function eCall(coord){    
+        //     getElevation(coord,function(err, value){
+        //         if(err){
+        //             return false;
+        //         }else{
+        //             console.log(value);
+        //             return value;
+        //         }
+        //     })
+        // };
+
+        // const cResult = new Promise((resolve,reject) => {
+        //     let data = cCall();
+        //     if(data == false)
+        //         reject(data);
+        //     else
+        //         resolve(data);
+        // }
+
+
+    //     async function printFiles () {
+            
+
+    //         await elevationCoords.reduce(async (promise, file) => {
+    //             // This line will wait for the last async function to finish.
+    //             // The first iteration uses an already resolved Promise
+    //             // so, it will immediately continue.
+    //             await promise;
+    //             const contents = await fs.readFile(file, 'utf8');
+    //             console.log(contents);
+    //         }, Promise.resolve());
+    // }
+
+    //};
+    //---------------------------------------------------------------------
+    // SET UP MAPBOX DIRECTIONS
+    //---------------------------------------------------------------------
+    // use the coordinates you just drew to make your directions request
+    // make a directions request
+    function getDirections(e) {
+        // https://www.mapbox.com/api-documentation/#directions
+        var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + e +'?geometries=geojson&steps=true&&access_token=' + mapboxgl.accessToken;
+        //var url = 'https://api.mapbox.com/matching/v5/mapbox/driving/' + e +'?geometries=geojson&steps=true&&access_token=' + mapboxgl.accessToken;
+        var req = new XMLHttpRequest();
+        req.responseType = 'json';
+        req.open('GET', url, true);
+        req.onload  = function() {
+        var jsonResponse = req.response;
+        //console.log(jsonResponse);
+        var distance = jsonResponse.routes[0].distance*0.001; // convert to km
+        var duration = jsonResponse.routes[0].duration/60; // convert to minutes
+        // add results to info box
+        document.getElementById('calculated-line').innerHTML = document.getElementById('calculated-line').innerHTML + 'Distance: ' + distance.toFixed(2) + ' km<br>Duration: ' + duration.toFixed(2) + ' minutes';
+        var coords = jsonResponse.routes[0].geometry;
+        // add the route to the map
+        addRoute(coords);
+        };
+        req.send();
     }
 
+
+    //---------------------------------------------------------------------
+    // ADD ROUTE TO MAP USING CO-ORDINATES
+    //---------------------------------------------------------------------
+    // adds the route as a layer on the map
+    function addRoute (coords) {
+        // check if the route is already loaded
+        if (map.getSource('route')) {
+            map.removeLayer('route')
+            map.removeLayer('points')
+            map.removeSource('route')
+        } else {
+            map.addSource("route", 
+            {                
+                "type": "geojson",
+                "data": {
+                    "type": "Feature",
+                    "properties": {},
+                    "geometry": coords
+                }
+            });
+            map.addLayer({
+            "id": "route",
+            "type": "line",
+            "source":  "route",
+            // {
+            //     "type": "geojson",
+            //     "data": {
+            //     "type": "Feature",
+            //     "properties": {},
+            //     "geometry": coords
+            //     }
+            // },
+            "layout": {
+                "line-join": "round",
+                "line-cap": "round"
+            },
+            "paint": {
+                "line-color": "#3b9ddd",
+                "line-width": 8,
+                "line-opacity": 0.8
+            }
+            });
+            map.addLayer({
+                "id": "points",
+                "type": "symbol",
+                "source": "mapbox-gl-draw-cold",
+                "layout": {
+                    "text-field": ["get", "coord_path"],
+                    "text-anchor": "top",
+                    'text-font': [
+                        'Open Sans Semibold',
+                        'Arial Unicode MS Bold'
+                    ],
+                    
+                },
+                "paint": {
+                    "text-color": "#fff",
+                }
+            })
+        };
+    };
+
+    //---------------------------------------------------------------------
+    // SHOW AND HIDE THE MENU
+    //---------------------------------------------------------------------
+    document.getElementById('menu-icon').onclick = function(e) {
+                //and the form is visible then hide it
+                //console.log(e);
+                miEl = document.getElementById('menu-items')
+                mcEl = document.getElementById('menu-column')
+                mapEl = document.getElementById('map')
+                if (miEl.visible) {
+                    mcEl.style.width = "15%";
+                    mapEl.style.marginLeft = "0";
+                    miEl.classList.add("hide");
+                    miEl.visible = false;
+                }
+                // otherwise show it
+                else {
+                    mcEl.style.width = "15%";
+                    mapEl.style.marginLeft = "15%";
+                    miEl.visible = true;
+                    miEl.classList.remove("hide");
+                };
+    };
+    //---------------------------------------------------------------------
+    // SHOW AND HIDE THE ELEVATION
+    //---------------------------------------------------------------------
+    document.getElementById('showelevationbutton').onclick = function(e) {
+                //and the form is visible then hide it
+                //console.log(e);
+                el = document.getElementById('elevationChartDiv')
+                if (el.visible) {
+                    el.classList.add("hide");
+                    el.visible = false;
+                }
+                // otherwise show it
+                else {
+                    el.visible = true;
+                    el.classList.remove("hide");
+                };
+    };
+
+    //---------------------------------------------------------------------
+    // CALCULATE DIRECTIONS
+    //---------------------------------------------------------------------
+    document.getElementById('calcDirections').onclick = function(e) {
+        //If the control is already there remove it.  Works like a toggle
+        if (document.getElementsByClassName('mapboxgl-ctrl-directions').length) {
+            map.removeControl(directions);
+        }
+        else {
+            map.addControl(directions, 'bottom-right');
+        };
+    };
+
+    //---------------------------------------------------------------------
+    // ADD ROUTE TO MAP FROM FILE ROUTINES
+    //---------------------------------------------------------------------
+    document.getElementById('import').onclick = function(e) {
+        var element = uploadClick();
+        element.addEventListener('change', handleUpload)
+        //document.body.removeChild(element);
+    };
+
+    function processUploadFile(data) {
+        var geoJsonData
+        var filestart = decodeURIComponent(data.split(',')[0]);
+        if (filestart == '{"type":"FeatureCollection"') { 
+            geoJsonData = JSON.parse(data)
+        }
+        else {
+            geoJsonData = JSON.parse(decodeURIComponent(data.split(',')[1]));
+        }
+        //console.log(geoJsonData)
+        plotTheUploadFile (geoJsonData)
+        // var bbox = turf.bbox(geoJsonData);
+        // // uses name of map, the geojson elements to use and the padding (px)
+        // fitMapToBounds(map, bbox, 20);
+        // alert("The route " + geoJsonData.features[0].properties.name + " has been plotted on the map!");
+
+    }
+    function plotTheUploadFile (geoJsonData) {
+        draw.add(geoJsonData);
+        var bbox = turf.bbox(geoJsonData);
+        // uses name of map, the geojson elements to use and the padding (px)
+        fitMapToBounds(map, bbox, 20);
+        alert("The route " + geoJsonData.features[0].properties.name + " has been plotted on the map!");
+
+    }
+
+    const handleUpload = async (e) => {
+        var files = e.target.files;
+        if (files.length < 1) {
+            alert('select a file...');
+            return;
+        }
+        var file = files[0];
+        if (file.name.match(/\.(txt|json|geojson)$/)) {
+            const fileContentDiv = document.querySelector('div#file-content')
+            try {
+                const fileContents = await readUploadedFileAsText(file)
+                //console.log(fileContents);
+                processUploadFile(fileContents);
+            }
+            catch (e) {
+                console.warn(e.message);
+            }
+        } else {
+            alert("File not supported, .txt, .geojson or .json files only");
+        };
+    };
+
+    const readUploadedFileAsText = (file) => {
+        var reader = new FileReader();
+            return new Promise((resolve, reject) => {
+                reader.onerror = () => {
+                    reader.abort();
+                    reject (new DOMException("Problem pasring the file selected."));
+                };
+                reader.onload = () => {
+                    resolve(reader.result);
+                };
+                reader.readAsText(file);
+            });
+    };
+
+
+    //---------------------------------------------------------------------
+    // ????????????
+    //---------------------------------------------------------------------
+    directions.on('route', function(ev) {
+        var styleSpec = ev.route;
+        var styleSpecText = JSON.stringify(styleSpec, null, 2);
+        //console.log(styleSpecText);
+    });
+
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------            
     document.getElementById('export').onclick = function(e) {
         // Extract GeoJson from featureGroup
         var data = draw.getAll();
+        //console.log('map: ',map, 'msl: ',map.getStyle().layers,'data: ', data, 'data f:', data.features);
+        var features = map.getSource('directions');
+        if (features) {
+            //console.log("directions: ", features._data);
+            data.features.push(features._data)
+            };
+        var routesource = map.getSource('route');
+        if (routesource) {
+            //console.log('route: ', routesource._data);
+            data.features.push(routesource._data)};
         var savename;
+        //console.log('Data: ', data)
         if (data.features.length > 0) {
-            savename = getFileName(data);
+            saveName = getFileName(data);
             if (saveName != 'cancelled') {
                 // Stringify the GeoJson
                 var convertedData = 'text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
-
                 // Create export
-                document.getElementById('export').setAttribute('href', 'data:' + convertedData);
-                document.getElementById('export').setAttribute('download', savename + '.geojson');
-                alert("The file " + savename + '.geojson' + " has been saved in your browser downloads folder" );
+                downloadClick(saveName, convertedData);
+                alert("The file " + saveName + '.geojson' + " has been saved in your browser downloads folder" );
             } else {
                 alert("Wouldn't you like to draw some data?");
             };
         };
-        
     }
+
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
+    function downloadClick(filename, text) {
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', filename + '.geojson');
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    };
+
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
+    function uploadClick(e) {
+        var element = document.createElement('input');
+        element.setAttribute('type', 'file');
+        element.setAttribute('id', 'file-input');
+        element.style.display = 'none';
+        document.body.appendChild(element);    
+        element.click();
+        return element;
+    };
+
+
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
     document.getElementById('updateDataset').onclick = function(e) {
         e.preventDefault();
         uploadFeatures();
-    }
-    document.getElementById('calcRoute').onclick = function(e) {
-        getMatch(routeCoords);
-    }
+    };
 
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
+    document.getElementById('calcRoute').onclick = function(e) {
+        //and the form is visible then hide it
+        //console.log(e);
+        el = document.getElementById('select-routing-set')
+        if (el.visible) {
+            // el.classList.add("hide");
+            // el.visible = false;
+        }
+        // otherwise show it
+        else {
+            el.visible = true;
+            el.classList.remove("hide");
+        };
+        el = document.getElementById('select-mapping-options')
+        if (el.visible) {
+            // el.classList.add("hide");
+            // el.visible = false;
+        }
+        // otherwise show it
+        else {
+            el.visible = true;
+            el.classList.remove("hide");
+        };     
+        getLineMatchings();
+    };
+
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
+    document.getElementById('calcMappingButton').onclick = function(e) {
+        //and the form is visible then hide it
+        doingCalcMapping = document.getElementById('calcMappingButton').checked
+        if (document.getElementById('calcMappingButton').checked == false) {
+            draw.changeMode('simple_select')
+        }
+        else {
+            draw.changeMode('lots_of_points', {count:50});
+            canvas.style.cursor = 'crosshair';
+        }
+        el = document.getElementById('select-routing-set')
+        if (el.visible) {
+            el.classList.add("hide");
+            el.visible = false;
+        }
+        // otherwise show it
+        else {
+            el.visible = true;
+            el.classList.remove("hide");
+        };  
+        el = document.getElementById('select-mapping-options')
+        if (el.visible) {
+            el.classList.add("hide");
+            el.visible = false;
+        }
+        // otherwise show it
+        else {
+            el.visible = true;
+            el.classList.remove("hide");
+        }; 
+        
+};
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
+    document.getElementById('inspectmap').onclick = function(e) {
+        // map.addControl(new MapboxInspect({
+        //     showInspectButton: false,
+        //     showMapPopup: true
+        // }));
+    };
+    
+
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
     function setFeatureId(){
         return getData(datasetId);
-    }   
+    };
 
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
     function getRouteNames() {
         var geturl = "{% url 'sitemaps:ajax_get_route_names' %}"
         $.ajax({
@@ -329,9 +1610,13 @@
             async: false
         })
         .done(function(getdata){
-            console.log(getdata);
+            //console.log(getdata);
         })
-    }
+    };
+
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
     function getData(datasetId) {
         $.ajax({
             url: datasetId,
@@ -343,8 +1628,11 @@
             geoJsonFeatures = oldData;
             return geoJsonFeatures;
         });
-    }
+    };
 
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
     function getFileName(drawdata) {
         ddFeatures = drawdata.features
         fId = ddFeatures[0].id;
@@ -371,10 +1659,14 @@
         }
     };
 
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
     function uploadFeatures(){
         var drawnData = draw.getAll();
         var i;
         var saveName;
+        //console.log(map.queryRenderedFeatures())
         if (drawnData.features.length > 0) {
             var url = "{% url 'sitemaps:ajax_save_route' %}"
             saveName = getFileName(drawnData);
@@ -400,6 +1692,10 @@
             alert("Wouldn't you like to draw some data?");
         }
     }
+
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------      
     function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -410,11 +1706,15 @@
             if (cookie.substring(0, name.length + 1) === (name + '=')) {
                 cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                 break;
-            }
-        }
-    }
+            };
+        };
+    };
     return cookieValue;
-    }
+    };
+
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
     function formAddModalFooterButton (type, url) {
         var footer = document.getElementById('form-modal-footer');
         var createRouteButton = document.getElementById('create-route')
@@ -427,6 +1727,9 @@
         };
     };
 
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
     function formAjaxSubmit (form, formtype, modal, action) {
         
         var footer = $(modal).find('.modal-footer');
@@ -473,7 +1776,7 @@
                         $(modal).find('.modal-body').html(xhr);
                         formAjaxSubmit(form, formtype, modal);
                     } else {
-                        console.log(xhr);
+                        //console.log(xhr);
                         $(modal).modal('hide');
                         formsubmitbtn.disabled = false;
                     }
@@ -489,39 +1792,11 @@
         });
     };
 
-    async function loadModalForm (parentElementId, filePath) {
-            const csrftoken = getCookie('csrftoken');
-            const init = {
-                method : "GET",
-                headers : { "Content-Type" : "text/html", "X-CSRFToken": csrftoken, "Call-From" : "fetch"},
-                mode : "cors",
-                cache : "default"
-            };
-            const req = new Request(filePath, init);
-            await fetch(req)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    } else {
-                        return response.text();
-                    }
-                })
-                .then(myText => {
-                    var popupModalBody = document.getElementById('form-modal-body');
-                    popupModalBody.innerHTML = myText;
-                })
-                .then (load => {
-                    updateTableHeaders(parentElementId);
-                    updateTablePagination(parentElementId);
-                    formAddModalFooterButton ('create', filePath);
-                    addModalPopupClicks();
-                })
-                .catch(e => {
-                        console.log('There has been a problem with your fetch operation: ' + e.message);
-                });
+   
 
-    };
-
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
     async function loadPopupModalForm (filePath) {
         const csrftoken = getCookie('csrftoken');
         const init = {
@@ -531,7 +1806,7 @@
             cache : "default"
         };
         const req = new Request(filePath, init);
-        console.log(req, filePath);
+        //console.log(req, filePath);
         await fetch(req)
             .then(response => {
                 if (!response.ok) {
@@ -549,6 +1824,9 @@
             });
     };
 
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
     async function processPopupModal(event) {
         target = event.target;
         if (target.getAttribute('id') == 'create-route') {
@@ -566,36 +1844,42 @@
         $(modal).modal('show');
     };
 
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
     function addModalPopupClicks() {
         document.querySelectorAll('.update-route').forEach(item => {
-        item.addEventListener('click',event => {
+        item.addEventListener('click', (event) => {
             processPopupModal(event)
         })});
         document.querySelectorAll('.plot-route').forEach(item => {
-        item.addEventListener('click',event => {
-            recordKey = event.target.parentNode.getAttribute('record-pk');
-            plotRoute(recordKey);
+        item.addEventListener('click', (event) => {
+            precordKey = event.target.parentNode.getAttribute('record-pk')
+            plotRoute(event, precordKey);
         })});
         document.querySelectorAll('.delete-route').forEach(item => {
-        item.addEventListener('click',event => {
+        item.addEventListener('click', (event) => {
             processPopupModal(event)
         })});  
         document.querySelectorAll('.create-route').forEach(item => {
-        item.addEventListener('click',event => {
+        item.addEventListener('click', (event) => {
             processPopupModal(event)
         })});   
         document.querySelectorAll('.view-route').forEach(item => {
-        item.addEventListener('click',event => {
-            recordKey = event.target.parentNode.getAttribute('record-pk');
-            showRoute(recordKey, event);
+        item.addEventListener('click', (event) => {
+            srecordKey = event.target.parentNode.getAttribute('record-pk');
+            showRoute(event, srecordKey);
         })});            
     };
 
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
     function addPopupModalClicks(modalBody, formtype, modal, popup_url) {
         var modal = document.getElementById('form-modal-popup-body');
         for (var input of 
             modal.querySelectorAll('input[type="submit"]')) {
-                input.addEventListener('click',event => {
+                input.addEventListener('click', (event) => {
                     formAjaxSubmit(modalBody, formtype, modal, popup_url);
                 });
             };
@@ -607,14 +1891,18 @@
         //     });
         // };
     };
-    
+
+
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
 $('#form-modal-popup').on('hide.bs.modal', function (event) {
     var button = $(event.relatedTarget) // Button that triggered the modal
     //var recipient = button.data('whatever') // Extract info from data-* attributes
     // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
     // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
     var modal = $(this)
-    console.log('Popup', event, button, modal);
+    //('Popup', event, button, modal);
     //modal.find('.modal-title').text('New message to ' + recipient)
     //modal.find('.modal-body input').val(recipient)
 });
@@ -624,7 +1912,7 @@ $('#form-modal-popup').on('show.bs.modal', function (event) {
     // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
     // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
     var modal = $(this)
-    console.log('Popup', event, button, modal);
+    //console.log('Popup', event, button, modal);
     //modal.find('.modal-title').text('New message to ' + recipient)
     //modal.find('.modal-body input').val(recipient)
 });
@@ -634,7 +1922,7 @@ $('#form-modal').on('hide.bs.modal', function (event) {
     // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
     // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
     var modal = $(this)
-    console.log('Modal',event, button, modal);
+    //console.log('Modal',event, button, modal);
     //modal.find('.modal-title').text('New message to ' + recipient)
     //modal.find('.modal-body input').val(recipient)
 });
@@ -644,24 +1932,31 @@ $('#form-modal').on('show.bs.modal', function (event) {
     // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
     // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
     var modal = $(this)
-    console.log('Modal',event, button, modal);
+    //console.log('Modal',event, button, modal);
     //modal.find('.modal-title').text('New message to ' + recipient)
     //modal.find('.modal-body input').val(recipient)
 });
 
-function clearPopupModalBodyandHide() {
-    var modal = document.getElementById('form-modal-popup-body');
-    for (var input of 
-        modal.querySelectorAll('input[type="submit"]')) {
-            input.removeEventListener('click',event => {
-                formAjaxSubmit(modalBody, formtype, modal, popup_url);
-            });
-            };
-    modal.innerHTML = "";
-        $(document.getElementById('form-modal-popup')).modal('hide');
-    
-};
 
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
+    function clearPopupModalBodyandHide() {
+        var modal = document.getElementById('form-modal-popup-body');
+        for (var input of 
+            modal.querySelectorAll('input[type="submit"]')) {
+                input.removeEventListener('click',event => {
+                    formAjaxSubmit(modalBody, formtype, modal, popup_url);
+                });
+            };
+        modal.innerHTML = "";
+            $(document.getElementById('form-modal-popup')).modal('hide');
+        
+    };
+
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
     async function popupModalForm (event, target, url, type) {
             event.preventDefault();
             await loadPopupModalForm(url)
@@ -669,6 +1964,9 @@ function clearPopupModalBodyandHide() {
             document.querySelector('#form-modal-popup-footer').style.display = 'none';  
     };
 
+    //---------------------------------------------------------------------
+    // 
+    //--------------------------------------------------------------------- 
     function updateTableHeaders(parentElementId) {
         var tableheaders = document.getElementById(parentElementId).getElementsByClassName('orderable');
         filePath = '/maps/routetable/';
@@ -683,6 +1981,9 @@ function clearPopupModalBodyandHide() {
         };
     };
     
+    //---------------------------------------------------------------------
+    // 
+    //--------------------------------------------------------------------- 
     function updateTablePagination(parentElementId) {
         var tablepagination = document.getElementById(parentElementId).getElementsByClassName('page-link');
         filePath = '/maps/routetable/';
@@ -697,6 +1998,9 @@ function clearPopupModalBodyandHide() {
         }
     };
 
+    //---------------------------------------------------------------------
+    // 
+    //--------------------------------------------------------------------- 
     async function reloadModal (path, hrefAtt){
         var modalBody = document.getElementById('form-modal-body');
         // Clear the modal body
@@ -706,7 +2010,12 @@ function clearPopupModalBodyandHide() {
         fadeOut(document.getElementById('django-messages'));
     };
 
-    async function showRoute (primaryKey, event) {
+
+
+    //---------------------------------------------------------------------
+    // 
+    //--------------------------------------------------------------------- 
+    async function showRoute (event, primaryKey) {
         // 1) reads a predefined dataset
         // 2) copies to to a variable geoJsonFeatures
         // 3) loads a new source
@@ -753,7 +2062,7 @@ function clearPopupModalBodyandHide() {
                     'line-color': '#8B0000',
                     'line-width': 3,
                 },
-                'filter': ['==', '$type', 'LineString']
+                // 'filter': ['==', '$type', 'LineString']
             });
         });
         var modal = document.getElementById('map-modal-popup');
@@ -769,29 +2078,36 @@ function clearPopupModalBodyandHide() {
             var bbox = turf.bbox(geoJsonFeatures);
             // uses name of map, the geojson elements to use and the padding (px)
             fitMapToBounds(popupmap, bbox, 20);
-  
         });
         // Clear the 
         $(modal).on('hidden.bs.modal', function () {
             popupmap.remove();
             modalBody.innerHTML='';
         });
-
-
     };
 
+    //---------------------------------------------------------------------
+    // 
+    //--------------------------------------------------------------------- 
     function fitMapToBounds(map, bbox ,pad) {
         map.fitBounds(bbox, {padding: pad});
     }
 
-    async function plotRoute (primaryKey) {
+    //---------------------------------------------------------------------
+    // 
+    //--------------------------------------------------------------------- 
+    async function plotRoute (event, primaryKey) {
         // 1) reads a predefined dataset
         // 2) copies to to a variable geoJsonFeatures
         // 3) loads a new source
-
-        await getRouteData(primaryKey);
-        console.log(geoJsonFeatures);
+        
+        await getRouteData(primaryKey)
         draw.add(geoJsonFeatures);
+        //console.log(geoJsonFeatures)
+        var bbox = turf.bbox(geoJsonFeatures);
+        // uses name of map, the geojson elements to use and the padding (px)
+        fitMapToBounds(map, bbox, 20);
+        alert("The route " + geoJsonFeatures.features[0].properties.name + " has been plotted on the map!");
 
         // var sourceName = 'source' + primaryKey
         // var layerName = 'layer' + primaryKey
@@ -812,17 +2128,20 @@ function clearPopupModalBodyandHide() {
         // });
     };
 
+    //---------------------------------------------------------------------
+    // 
+    //--------------------------------------------------------------------- 
     async function getRouteData(record_key) {
         const url = "{% url 'sitemaps:ajax_get_route_data' %}"+"?record_key="+record_key;
         const csrftoken = getCookie('csrftoken');
         const init = {
             method : "GET",
-            headers : { "Content-Type" : "text/html", "X-CSRFToken": csrftoken, "Call-From" : "fetch"},
+            headers : { "Content-Type": "text/html", "X-CSRFToken": csrftoken, "Call-From": "fetch"},
             mode : "cors",
             cache : "default"
         };
         const req = new Request(url, init);
-        await fetch(req)
+        var response = await fetch(req)
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -837,7 +2156,9 @@ function clearPopupModalBodyandHide() {
                     console.log('There has been a problem with your fetch operation: ' + e.message);
             });
     };
-
+    //---------------------------------------------------------------------
+    // 
+    //--------------------------------------------------------------------- 
     // Hide message
     function fadeOut(el) {
         el.style.opacity = 1;
@@ -848,5 +2169,60 @@ function clearPopupModalBodyandHide() {
                 requestAnimationFrame(fade);
             }
         })();
+    };
+
+    //---------------------------------------------------------------------
+    // 
+    //--------------------------------------------------------------------- 
+    //start of added for maptype selection
+    function selectStyle () {
+        if (document.getElementsByClassName('mapboxgl-ctrl-directions').length) {
+                map.removeControl(directions);
+            }
+        var layerId = document.getElementById('select-type').value;
+        map.setStyle('mapbox://styles/mapbox/' + layerId);
+    };
+
+    function dragElement(elmnt) {
+        var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+        if (document.getElementById(elmnt.id + "Header")) {
+            // if present, the header is where you move the DIV from:
+            document.getElementById(elmnt.id + "Header").onmousedown = dragMouseDown;
+        } else {
+            // otherwise, move the DIV from anywhere inside the DIV: 
+            elmnt.onmousedown = dragMouseDown;
+        }
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        console.log(e.clientX, e.clientY)
+        // get the mouse cursor position at startup:
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        // call a function whenever the cursor moves:
+        document.onmousemove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // calculate the new cursor position:
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        // set the element's new position:
+        console.log(pos1,pos2,pos3,pos4,elmnt.offsetTop,elmnt.offsetLeft)
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+        // stop moving when mouse button is released:
+        document.onmouseup = null;
+        document.onmousemove = null;
+    }
     };
 </script>
