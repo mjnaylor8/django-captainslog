@@ -41,7 +41,7 @@ urlpatterns += [
 ]
 
 #if 'rosetta' in settings.INSTALLED_APPS:
-urlpatterns += [
-    path('rosetta/', include('rosetta.urls'))
-]
+#urlpatterns += [
+#    path('rosetta/', include('rosetta.urls'))
+#]
 

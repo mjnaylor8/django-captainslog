@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'sitemaps',
     'djgeojson',
     'crispy_forms',
+    'crispy_bootstrap4',
     'bootstrap4',
     'mapbox_location_field',
     'widget_tweaks',
@@ -195,4 +196,4 @@ LOGIN_REDIRECT_URL = '/triplog/'
 LOGIN_URL = 'accounts/login'
 
 DJANGO_TABLES2_TEMPLATE = "django_tables2/bootstrap4.html"
-
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

@@ -103,7 +103,8 @@ def load_tripsites(request):
 
 def save_route(request):
     """ Defines an ajax PUT for trip route """
-    if request.is_ajax():
+    #if request.is_ajax():
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         if request.method == 'PUT':
             # Get user and check if logged in
             if request.user.is_anonymous:
@@ -168,7 +169,8 @@ class AjaxTemplateMixin(object):
             split[-1] = '_inner'
             split.append('.html')
             self.ajax_template_name = ''.join(split)
-        if request.is_ajax() or (called_byfetch and request.headers['Call-From'] == 'fetch'):
+            #if request.is_ajax() etc
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest' or (called_byfetch and request.headers['Call-From'] == 'fetch'):
             self.template_name = self.ajax_template_name
             # self.table_pagination = False
         return super(AjaxTemplateMixin, self).dispatch(request, *args, **kwargs)
@@ -196,7 +198,8 @@ class DeleteGeoJSONRouteView(SuccessMessageMixin, AjaxTemplateMixin, DeleteView)
     def delete(self, request, *args, **kwargs):
         obj = self.get_object()
         messages.success(self.request, self.success_message % obj.__dict__)
-        if self.request.is_ajax():
+        #if self.request.is_ajax():
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
             data = {
                 'message': "Successfully deleted route."
             }
@@ -215,14 +218,16 @@ class CreateGeoJSONRouteView(SuccessMessageMixin, AjaxTemplateMixin, CreateView)
 
     def form_invalid(self, form):
         response = super().form_invalid(form)
-        if self.request.is_ajax():
+        #if self.request.is_ajax():
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse(form.errors, status=400)
         else:
             return response
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        if self.request.is_ajax():
+        #if self.request.is_ajax():
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
             print(form.cleaned_data)
             data = {
                 'message': "Successfully created route."
@@ -253,14 +258,16 @@ class UpdateGeoJSONRouteView(SuccessMessageMixin, AjaxTemplateMixin, UpdateView)
 
     def form_invalid(self, form):
         response = super().form_invalid(form)
-        if self.request.is_ajax():
+        #if self.request.is_ajax():
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
             return JsonResponse(form.errors, status=400)
         else:
             return response
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        if self.request.is_ajax():
+        #if self.request.is_ajax():
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
             print(form.cleaned_data)
             data = {
                 'message': "Successfully submitted updated route."

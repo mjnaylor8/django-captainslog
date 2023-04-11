@@ -8,7 +8,7 @@
     <meta charset='utf-8' />
     <title>Create a route using the Mapbox Directions API</title>
 
-    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, minimum-scale=1.0,  maximum-scale=1.0, user-scalable=no'>
 
     <link rel='stylesheet' href='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.css' type="text/css">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.1/css/all.css" type="text/css">
@@ -19,12 +19,13 @@
     <link rel="stylesheet" href="{% static 'sitemaps/css/feature-info.css' %}"  type="text/css">
     <link rel="stylesheet" href="{% static 'sitemaps/css/drawroute.css' %}" type="text/css">
 </head>
+
 <body id=drawroute-body class=drawroute-body>
     <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v1.13.0/mapbox-gl.js'></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.0.2/chart.min.js"></script>
     <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.2.0/mapbox-gl-draw.js"></script>
     <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-directions/v4.1.0/mapbox-gl-directions.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/immutable/3.8.2/immutable.min.js"></script>
@@ -34,61 +35,100 @@
     <script src="{% static 'sitemaps/js/feature-modes.js' %}"></script>
     <script src="{% static 'sitemaps/js/lotsofpoints-mode.js' %}"></script>
     <script src="{% static 'sitemaps/js/commander.js' %}"></script>
+    <script src="{% static 'sitemaps/js/togeojson.js' %}"></script>
+    <script src="{% static 'sitemaps/js/togpx.js' %}"></script>
     {% include 'sitemaps/messages.html' %}
-    <div id='map-container'>
-        <div id='map' class='map'></div>
-        <div id='menu-column' class='menu-column'>
-            <div id='menu-icon' class='menu-icon'><i class="fas fa-bars fa-lg"></i>
-                <span class='menu-icontip'>Show/Hide Controls</span>
-            </div>
-            <div id='menu-items' class='menu-items hide'>
+    <div id="map-container" class="map-wrapper map-theme toggled">
+        <div id='menu-dropdown' class='menu-icon menudropdown'>
+            <input type="checkbox" id="menuIconButton">
+            <label for="menuIconButton" class="fas fa-bars fa-lg"></label>
+            <span class='triangle-left right'></span>
+            <span class='menu-icontip right'>Show/Hide Controls</span>
+            <div class="dropdown-background"></div>
+        </div>
+        <div id='menu-column' class='menu-column hide'>
+            <div id='menu-items' class='menu-items'>
+                <div class="menu-brand">Drawroute Menu
+                    <div id="close-menu">
+                    <i class="fas fa-times"></i>
+                    </div>
+                </div>
                 <div id='info-box' class='info-box'>
-                    <div id=info-instructions>Draw your route using the draw tools (25 points max)</div>
+                    <div id=info-instructions>Hover over the buttons to show tips on how to interact with the map!</div>
+                    <div id='duration-distance'></div>
+                    <div id='trip-directions' class='trip-directions'>
+                        <div id='trip-directions-content' class='trip-directions-content'>
+                            <input type="button" class="btn btn-secondary btn-sm" value="Print" onclick="printDiv('Directions', 'trip-directions-content')"> 
+                        </div>
+                    </div>
                     <div id='calculated-line'></div>
                 </div>
-                <div id='export' class='menu-icon export'><i class="fas fa-file-export fa-lg"></i>
-                    <a id='exportfile'></a>
-                    <span class='menu-icontip exporttip'>Export the route</span>
-                </div>
-                <div id='updateDataset' class='menu-icon update'><i class="fas fa-save fa-lg"></i>
-                    <span class='menu-icontip updatetip'>Save/Update the line</span>
-                </div>
-                <span>
-                    <div id='calcRoute' class='menu-icon calc-route'><i class="fas fa-route fa-lg"></i>
-                        <span class='menu-icontip routetip'>Calculate the route</span>   
+                <div class=horiz-icons>
+                    <div id='export' class='menu-icon export'><i class="fas fa-file-export fa-lg"></i>
+                        <a id='exportfile'></a>
+                        <span class='triangle-left right'></span>
+                        <span class='menu-icontip right exporttip'>Export the route</span>
                     </div>
-                    <div id='calcDirections' class='menu-icon calc-directions'><i class="fas fa-directions fa-lg"></i>
-                        <span class='menu-icontip directionstip'>Get Directions</span>   
+                    <div id='updateDataset' class='menu-icon update'><i class="fas fa-save fa-lg"></i>
+                        <span class='triangle-left right'></span>
+                        <span class='menu-icontip right updatetip'>Save/Update the line</span>
                     </div>
-                    <div id='calcMapping' class='menu-icon calc-mapping'>
+                    <div id='exportToGPX' class='menu-icon exporttogpx'><i class="fas fa-globe-europe fa-lg"></i>
+                        <a id='exportgpxfile'></a>
+                        <span class='triangle-left right'></span>
+                        <span class='menu-icontip right exporttogpxtip'>Save GPX file</span>
+                    </div>
+                </div>
+                <div class=horiz-icons>
+                    <div id='import' class='menu-icon import'><i class="fas fa-file-import fa-lg"></i>
+                        <span class='triangle-left right'></span>
+                        <span class='menu-icontip right importtip'>Import a route</span>
+                    </div>
+                    <div id='openroutes' class='menu-icon openroutes'><i class="fas fa-folder-open fa-lg"></i>
+                        <span class='triangle-left right'></span>
+                        <span class='menu-icontip right openroutestip'>Open and edit routes</span>
+                    </div>
+                </div>
+                <div class=horiz-icons>
+                    <div id="calcMapping" class="menu-icon calc-mapping">
                         <input type="checkbox" id="calcMappingButton">
                         <label for="calcMappingButton" class="fas fa-draw-polygon fa-lg"></label>
-                        <span class='menu-icontip mappingtip'>Start Mapping Route</span> 
+                        <div class='triangle-left right'></div>
+                        <span class="menu-icontip right mappingtip">Start Mapping Route</span> 
                         <div class="update-background"></div>  
                     </div>
-                </span>
-                <div id='import' class='menu-icon import'><i class="fas fa-file-import fa-lg"></i>
-                        <span class='menu-icontip importtip'>Import a route</span>
+                    <div id='calcRoute' class='menu-icon calc-route'><i class="fas fa-route fa-lg"></i>
+                        <div class='triangle-left right'></div>
+                        <span class='menu-icontip right routetip'>Calculate the route</span>   
+                    </div>
+                    <div id='calcDirections' class='menu-icon calc-directions'><i class="fas fa-directions fa-lg"></i>
+                        <div class='triangle-left right'></div>
+                        <span class='menu-icontip right directionstip'>Get Directions</span>   
+                    </div>
                 </div>
-                <div id='openroutes' class='menu-icon openroutes'><i class="fas fa-folder-open fa-lg"></i>
-                        <span class='menu-icontip openroutestip'>Open and edit routes</span>
-                </div>
-                <div id='inspectmap' class='menu-icon inspectmap'>
-                    <input type="checkbox" id="inspectmapbutton">
-                    <label for="inspectmapbutton" class="fas fa-search-location fa-lg"></label>
-                    <span class='menu-icontip inspectmaptip'>Inspect the map objects</span>
-                    <div class="update-background"></div>
-                </div>                    
+                <div class=horiz-icons>
+                    <div id="inspectmap" class="menu-icon inspectmap">
+                        <input type="checkbox" id="inspectmapbutton">
+                        <label for="inspectmapbutton" class="fas fa-search-location fa-lg"></label>
+                        <span class='triangle-left right'></span>
+                        <span class="menu-icontip right inspectmaptip">Inspect the map objects</span>
+                        <div class="update-background"></div>
+                    </div>
+                    <div id="deleteEverything" class="menu-icon deleteEverything"><i class="fas fa-trash-alt fa-lg"></i>
+                        <div class='triangle-left right'></div>
+                        <span class='menu-icontip right deletetip'>Delete Everyhting</span>  
+                    </div>
+                </div>                
                 <fieldset id="select-type-set">
-                <legend>Select a map style</legend>
-                <select id="select-type" class="selectmenu form-select form-select-sm" onchange="selectStyle()" aria-label=".form-select-sm">
-                    <option value="streets-v11">streets</option>
-                    <option value="light-v10">light</option> 
-                    <option value="dark-v10">dark</option>
-                    <option value="outdoors-v11" selected>outdoors</option>
-                    <option value="satellite-v9">satellite</option>
-                    <option value="satellite-streets-v11">satellite streets</option>
-                </select>
+                    <legend>Select a map style</legend>
+                    <select id="select-type" class="selectmenu form-select form-select-sm" onchange="selectStyle()" aria-label=".form-select-sm">
+                        <option value="streets-v11">streets</option>
+                        <option value="light-v10">light</option> 
+                        <option value="dark-v10">dark</option>
+                        <option value="outdoors-v11" selected>outdoors</option>
+                        <option value="satellite-v9">satellite</option>
+                        <option value="satellite-streets-v11">satellite streets</option>
+                    </select>
                 </fieldset>
                 <fieldset id="select-routing-set" class="hide">
                     <legend>Select routing method</legend>
@@ -96,12 +136,12 @@
                         <input id="radio-traffic" type="radio" name="routetype" value="driving-traffic">
                         <label for="radio-trafic">Traffic</label>
                         <input id="radio-driving" type="radio" name="routetype" value="driving">
-                        <label for="radio-driving">Driving</label>
+                        <label for="radio-driving">Driving</label><br/>
                         <input id="radio-cycling" type="radio" name="routetype" value="cycling" checked>
                         <label for="radio-cycling">Cycling</label>
                         <input if="radio-walking" type="radio" name="routetype" value="walking">
                         <label for="radio-walking">Walking</label>
-                </div>
+                    </div>
                 </fieldset>
                 <fieldset id="select-mapping-options" class="hide select-mapping-options">
                     <legend>Mapping Options</legend>
@@ -109,24 +149,34 @@
                             <div id='showelevation' class='menu-icon showelevation'>
                                 <input type="checkbox" id="showelevationbutton">
                                 <label for="showelevationbutton" class="fas fa-mountain fa-sm"></label>
-                                <span class='menu-icontip showelevationtip'>Show the elevation chart</span>
+                                <span class='triangle-left rightsmall'></span>
+                                <span class='menu-icontip rightsmall showelevationtip'>Show the elevation chart</span>
                                 <div class="update-background"></div>
                             </div>
                             <button id='undopoint' class='menu-icon undopoint'><i class="fas fa-undo-alt fa-sm"></i>
-                                <span class='menu-icontip undopointtip'>Delete / Undo last point</span>
+                                <span class='triangle-left rightsmall'></span>
+                                <span class='menu-icontip rightsmall undopointtip'>Undo last point</span>
                             </button>
                             <button id='redopoint' class='menu-icon redopoint'><i class="fas fa-redo-alt fa-sm"></i>
-                                <span class='menu-icontip redopointtip'>Redo last point</span>
+                                <span class='triangle-left rightsmall'></span>
+                                <span class='menu-icontip rightsmall redopointtip'>Redo last point</span>
+                            </button>
+                            <button id='deletepoint' class='menu-icon deletepoint'><i class="far fa-trash-alt fa-sm"></i>
+                                <span class='triangle-left rightsmall'></span>
+                                <span class='menu-icontip rightsmall deletepointtip'>Delete selected point</span>
                             </button>
                         </span>
                 </fieldset>
             </div>
         </div>
+        <main id='map' class='map'>
+        </main>
         <div id='elevationChartDiv' class="elevChartContainer hide">
             <div id="elevationChartDivHeader" class="elevChartContainerHeader">Elevation Chart</div>
             <canvas id="elevationChart"></canvas>
         </div>
-        <div hidden id="spinner"></div>
+        <div hidden id="spinner">
+        </div>
     </div>
 
     <!-- <pre id="features"></pre> -->
@@ -141,23 +191,20 @@
     // (function(d) {
     //     "use strict"
     // })(document);
-// Make the elevation chart element draggable:
+    // Make the elevation chart element draggable:
     dragElement(document.getElementById("elevationChartDiv"));
     //---------------------------------------------------------------------
     // SET UP MAP
     //---------------------------------------------------------------------
     const spinner = document.getElementById("spinner");
     var mbat = "{{mapbox_access_token}}"
-
     mapboxgl.accessToken=mbat;
     // mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JhZmEiLCJhIjoiY2oydGJoajI5MDA1bjJxbzZzZjd5MXl3NSJ9.vNVFm6NsFzeX0AGSjFHpqg';
     var MapboxElevation = window.MapboxElevation;
     var getElevation = MapboxElevation(mbat);
-
     // getElevation([86.925313, 27.988730], function(err, elevation) {
     //   console.log('elevation at the summit of mt everest', elevation);
     // });
-
     var map = new mapboxgl.Map({
             container: 'map',
             style: 'mapbox://styles/mapbox/outdoors-v11',
@@ -165,7 +212,6 @@
             zoom: 14
         });
     var datasetId = "test.geojson";
-
     // GeoJSON object to hold our measurement features
     var geojson = {
         'type': 'FeatureCollection',
@@ -174,12 +220,26 @@
     var geoJsonFeatures;
     var routeCoords;
     var doingCalcMapping; //holds boolean for when calcMapping checkbox is selected
+    var hoveredPoint;
+    var selectedPoint;
+    var coordString;
+    var elevationChart;
+    var radiusesString = [];
+    var totalDuration = [];
+    var totalDistance = [];
+    var totalSumDistance
+    var totalDirections = [];
+    var totalElevation = [];
+    var totalDistanceDiff = [];
+    var totalGradient = [];
+    var totalPlotGeometry = [];
+    const zeroPad = (num, places) => String(num).padStart(places, '0'); //function to pad point with leading zeros allows up to 999 points
+    
 
     //---------------------------------------------------------------------
     // SHOW NAME PROMPT FOR BESPOKE LINE TOOL
     //---------------------------------------------------------------------
     DrawNamedLineMode.showNamePrompt = true;
-    
     var draw = new MapboxDraw({
         displayControlsDefault: false,
         // userProperties: true,
@@ -194,33 +254,15 @@
         }, MapboxDraw.modes, {
             draw_line_string: DrawNamedLineMode,
         }),
-        // styles : [
-        //     //     {
-        //     //     'id': 'gl-draw-polygon-and-line-vertex-inactive',
-        //     //     'type': 'circle',
-        //     //     'filter': ['all', ['==', 'meta', 'vertex'],
-        //     //         ['==', '$type', 'Point'],
-        //     //         ['!=', 'mode', 'static']
-        //     //     ],
-        //     //     'paint': {
-        //     //         'circle-radius': 5,
-        //     //         'circle-color': '#0f0'
-        //     //     },
-        //     //     // 'layout': {
-        //     //     //     'text-field': ['get', 'coord_path']
-        //     //     // }
-        //     // },
-        //         ],
     });
-
+    var popupdraw = new MapboxDraw({
+    });
     var scale = new mapboxgl.ScaleControl({
         maxWidth: 200,
         unit: 'metric'
     });
-
     var navigation = new mapboxgl.NavigationControl({
     });
-
     var linestringcontrol = new LineStringInfoControl ({
         distanceUnits: 'kilometers',
             drawControl: draw,
@@ -232,7 +274,6 @@
         ],
         defaultTitle: 'Line'
     });
-
     var multilinecontrol = new MultiLineInfoControl ({
         distanceUnits: 'kilometers',
             drawControl: draw,
@@ -244,7 +285,6 @@
         ],
         defaultTitle: 'Line'
     });
-
     var pointcontrol = new PointInfoControl({
         drawControl: draw,
         editProperties: [
@@ -255,7 +295,6 @@
         ],
         defaultTitle: 'Point'
         });
-
     var directions = new MapboxDirections({
         accessToken: mapboxgl.accessToken,
         controls: [{
@@ -264,9 +303,7 @@
             profileSwitcher: true
         }]
     });
-
     // add the draw tool to the map
-    
     map.on('load', function(e) {
         map.addControl(navigation);
         map.addControl(scale);
@@ -280,27 +317,236 @@
     map.resize();
     var canvas = map.getCanvasContainer();
     canvas.style.cursor = 'grab';
-    
+
+
     //---------------------------------------------------------------------
     // CHECK ITEMS LOADED THEN
     //  1) SET UP THE EVENT LISTENER FOR THE MAIN MODAL FORM
     //  2) MAKE SURE THE CONTROL FOR THE MAP INSPECTION IS NOT CHECKED
     //---------------------------------------------------------------------
-
     window.addEventListener('DOMContentLoaded', function() {
             popupForm();
             document.getElementById('inspectmapbutton').checked = false;
             document.getElementById('showelevationbutton').checked = false;
             document.getElementById('calcMappingButton').checked = false;
+            document.getElementById('menuIconButton').checked = false;
+            document.getElementById('undopoint').checked = false;
+            document.getElementById('redopoint').checked = false;
+            document.getElementById('deletepoint').checked = false;
     });
-    
+    map.dragPan.enable();
+    map.scrollZoom.enable();
+    map.dragRotate.enable();
+    map.boxZoom.enable();
+    map.touchZoomRotate.enable();
     map.on('click', function (e) {
     });
 
+
+    //highlights points drawn if the calcMapping is selected for both mouse and touch
+    map.on('mouseenter', 'gl-draw-point-point-stroke-inactive.cold', function(e) {
+        if (document.getElementById('calcMappingButton').checked && !selectedPoint) {
+            map.setPaintProperty (
+                e.features[0].layer.id, 
+                'circle-color',
+                ['match', ['get', 'id'], e.features[0].properties.id, '#00ff00', '#fff']
+            )
+            map.setPaintProperty (
+                'gl-draw-point-inactive.cold',
+                'circle-color',
+                ['match', ['get', 'id'], e.features[0].properties.id, '#ff0000', '#3bb2d0']
+            )
+            map.setPaintProperty (
+                e.features[0].layer.id, 
+            'circle-radius',
+            ['match', ['get', 'id'], e.features[0].properties.id, 7, 5]
+            )
+            map.setPaintProperty (
+                'gl-draw-point-inactive.cold',
+                'circle-radius',
+                ['match', ['get', 'id'], e.features[0].properties.id, 5, 3]
+            )
+            hoveredPoint = e.features[0]
+        }
+    })
+    map.on('touchstart', 'gl-draw-point-point-stroke-inactive.cold', function(e) {
+        if (document.getElementById('calcMappingButton').checked && !selectedPoint) {
+            map.setPaintProperty (
+                e.features[0].layer.id, 
+                'circle-color',
+                ['match', ['get', 'id'], e.features[0].properties.id, '#00ff00', '#fff']
+            )
+            map.setPaintProperty (
+                'gl-draw-point-inactive.cold',
+                'circle-color',
+                ['match', ['get', 'id'], e.features[0].properties.id, '#ff0000', '#3bb2d0']
+            )
+            map.setPaintProperty (
+                e.features[0].layer.id, 
+            'circle-radius',
+            ['match', ['get', 'id'], e.features[0].properties.id, 7, 5]
+            )
+            map.setPaintProperty (
+                'gl-draw-point-inactive.cold',
+                'circle-radius',
+                ['match', ['get', 'id'], e.features[0].properties.id, 5, 3]
+            )
+            hoveredPoint = e.features[0]
+        }
+    })    
+    map.on('mouseenter', 'gl-draw-point-point-stroke-inactive.hot', function(e) {
+        if (document.getElementById('calcMappingButton').checked && !selectedPoint) {
+            map.setPaintProperty (
+                e.features[0].layer.id, 
+                'circle-color',
+                ['match', ['get', 'id'], e.features[0].properties.id, '#00ff00', '#fff']
+            )
+            map.setPaintProperty (
+                'gl-draw-point-inactive.hot',
+                'circle-color',
+                ['match', ['get', 'id'], e.features[0].properties.id, '#ff0000', '#3bb2d0']
+            )
+            map.setPaintProperty (
+                e.features[0].layer.id, 
+                'circle-radius',
+                ['match', ['get', 'id'], e.features[0].properties.id, 7, 5]
+            )
+            map.setPaintProperty (
+                'gl-draw-point-inactive.hot',
+                'circle-radius',
+                ['match', ['get', 'id'], e.features[0].properties.id, 5, 3]
+            )
+            hoveredPoint = e.features[0]
+        }
+    })
+    map.on('touchstart', 'gl-draw-point-point-stroke-inactive.hot', function(e) {
+        if (document.getElementById('calcMappingButton').checked && !selectedPoint) {
+            map.setPaintProperty (
+                e.features[0].layer.id, 
+                'circle-color',
+                ['match', ['get', 'id'], e.features[0].properties.id, '#00ff00', '#fff']
+            )
+            map.setPaintProperty (
+                'gl-draw-point-inactive.hot',
+                'circle-color',
+                ['match', ['get', 'id'], e.features[0].properties.id, '#ff0000', '#3bb2d0']
+            )
+            map.setPaintProperty (
+                e.features[0].layer.id, 
+                'circle-radius',
+                ['match', ['get', 'id'], e.features[0].properties.id, 7, 5]
+            )
+            map.setPaintProperty (
+                'gl-draw-point-inactive.hot',
+                'circle-radius',
+                ['match', ['get', 'id'], e.features[0].properties.id, 5, 3]
+            )
+            hoveredPoint = e.features[0]
+        }
+    })
+    map.on('mouseleave', 'gl-draw-point-point-stroke-inactive.cold' , function(e) {
+        if (document.getElementById('calcMappingButton').checked && !selectedPoint) {
+            map.setPaintProperty (
+                hoveredPoint.layer.id, 
+                'circle-color',
+                ['match', ['get', 'id'], hoveredPoint.properties.id, '#fff', '#fff']
+            )
+            map.setPaintProperty (
+                'gl-draw-point-inactive.cold',
+                'circle-color',
+                ['match', ['get', 'id'], hoveredPoint.properties.id, '#3bb2d0', '#3bb2d0']
+            )
+            map.setPaintProperty (
+                hoveredPoint.layer.id, 
+                'circle-radius',
+                ['match', ['get', 'id'], hoveredPoint.properties.id, 5, 5]
+            )
+            map.setPaintProperty (
+                'gl-draw-point-inactive.cold',
+                'circle-radius',
+                ['match', ['get', 'id'], hoveredPoint.properties.id, 3, 3]
+            )
+            canvas.style.cursor = 'crosshair';
+        }
+    })
+    map.on('touchend', 'gl-draw-point-point-stroke-inactive.cold' , function(e) {
+        if (document.getElementById('calcMappingButton').checked && !selectedPoint) {
+            map.setPaintProperty (
+                hoveredPoint.layer.id, 
+                'circle-color',
+                ['match', ['get', 'id'], hoveredPoint.properties.id, '#fff', '#fff']
+            )
+            map.setPaintProperty (
+                'gl-draw-point-inactive.cold',
+                'circle-color',
+                ['match', ['get', 'id'], hoveredPoint.properties.id, '#3bb2d0', '#3bb2d0']
+            )
+            map.setPaintProperty (
+                hoveredPoint.layer.id, 
+                'circle-radius',
+                ['match', ['get', 'id'], hoveredPoint.properties.id, 5, 5]
+            )
+            map.setPaintProperty (
+                'gl-draw-point-inactive.cold',
+                'circle-radius',
+                ['match', ['get', 'id'], hoveredPoint.properties.id, 3, 3]
+            )
+            canvas.style.cursor = 'crosshair';
+        }
+    })
+    map.on('mouseleave', 'gl-draw-point-point-stroke-inactive.hot' , function(e) {
+        if (document.getElementById('calcMappingButton').checked && !selectedPoint) {
+            map.setPaintProperty (
+                hoveredPoint.layer.id, 
+                'circle-color',
+                ['match', ['get', 'id'], hoveredPoint.properties.id, '#fff', '#fff']
+            )
+            map.setPaintProperty (
+                'gl-draw-point-inactive.hot',
+                'circle-color',
+                ['match', ['get', 'id'], hoveredPoint.properties.id, '#3bb2d0', '#3bb2d0']
+            )
+            map.setPaintProperty (
+                hoveredPoint.layer.id, 
+                'circle-radius',
+                ['match', ['get', 'id'], hoveredPoint.properties.id, 5, 5]
+            )
+            map.setPaintProperty (
+                'gl-draw-point-inactive.hot',
+                'circle-radius',
+                ['match', ['get', 'id'], hoveredPoint.properties.id, 3, 3]
+            )
+            canvas.style.cursor = 'crosshair';
+        }
+    })
+    map.on('touchend', 'gl-draw-point-point-stroke-inactive.hot' , function(e) {
+        if (document.getElementById('calcMappingButton').checked && !selectedPoint) {
+            map.setPaintProperty (
+                hoveredPoint.layer.id, 
+                'circle-color',
+                ['match', ['get', 'id'], hoveredPoint.properties.id, '#fff', '#fff']
+            )
+            map.setPaintProperty (
+                'gl-draw-point-inactive.hot',
+                'circle-color',
+                ['match', ['get', 'id'], hoveredPoint.properties.id, '#3bb2d0', '#3bb2d0']
+            )
+            map.setPaintProperty (
+                hoveredPoint.layer.id, 
+                'circle-radius',
+                ['match', ['get', 'id'], hoveredPoint.properties.id, 5, 5]
+            )
+            map.setPaintProperty (
+                'gl-draw-point-inactive.hot',
+                'circle-radius',
+                ['match', ['get', 'id'], hoveredPoint.properties.id, 3, 3]
+            )
+            canvas.style.cursor = 'crosshair';
+        }
+    })
     //---------------------------------------------------------------------
     // ALLOW VIEWING OF FEATURES IF CONTROL SELECTED
     //---------------------------------------------------------------------
-
     map.on('mousemove', function(e){
         if (document.getElementById('inspectmapbutton').checked) {
             var features = map.queryRenderedFeatures(e.point);
@@ -322,13 +568,14 @@
                 displayProperties.forEach(function (prop) {
                     displayFeat[prop] = feat[prop];
                 });
+
                 return displayFeat;
             });
 
             if(displayFeatures.length) {
                 var popUps = document.getElementsByClassName('mapboxgl-popup');
                 if (popUps[0]) popUps[0].remove();
-                var popup = new mapboxgl.Popup({closeOnClick: false, offset: [0,0] })
+                var popup = new mapboxgl.Popup({closeOnClick: false, offset: [0,0], className: "mbgl-features-popup" })
                 .setLngLat(e.lngLat)
                 .setHTML(JSON.stringify(
                     displayFeatures,
@@ -342,55 +589,24 @@
             var popUps = document.getElementsByClassName('mapboxgl-popup');
             if (popUps[0]) popUps[0].remove();
         }
-        // if (doingCalcMapping) {
-        //     map.on('mouseenter', 'gl-draw-point-inactive.hot', function() {
-        //     //console.log('entered hot')
-        //     map.setPaintProperty('gl-draw-point-inactive.hot', 'circle-color', '#ff0000');
-        //     canvas.style.cursor = 'crosshair';
-        //     });
-        //     map.on('mouseenter', 'gl-draw-point-inactive.cold', function() {
-        //     //console.log('entered cold')
-        //     map.setPaintProperty('gl-draw-point-inactive.cold', 'circle-color', '#ff0000');
-        //     canvas.style.cursor = 'crosshair';
-        //     });
-        //     map.on('mouseleave', 'gl-draw-point-inactive.hot', function() {
-        //     //console.log('left hot')
-        //     map.setPaintProperty('gl-draw-point-inactive.hot', 'circle-color', '#00ffff');
-        //     canvas.style.cursor = 'crosshair';
-        //     });
-        //     map.on('mouseleave', 'gl-draw-point-inactive.cold', function() {
-        //     //console.log('left cold')
-        //     map.setPaintProperty('gl-draw-point-inactive.cold', 'circle-color', '#00ffff');
-        //     canvas.style.cursor = 'crosshair';
-        //     });
-        //     }
-            // else {}
-    });
 
+    });
     //---------------------------------------------------------------------
     // SET UP DRAW BEHAVIOURS
     //---------------------------------------------------------------------
-
     // add create, update, or delete actions
     map.on('draw.create', updateRoute);
     map.on('draw.update', updateRoute);
     map.on('draw.delete', removeRoute);
     map.on('draw.selectionchange', changeRoute);
-
-
-
-
     //---------------------------------------------------------------------
     // SET UP DRAW ROUTINES
     //---------------------------------------------------------------------
-
     function changeRoute (){
-       console.log("change", draw.getMode(), draw.getAll());
+       //console.log("change", draw.getMode(), draw.getAll());
     }
-
-
     function updateRoute(e) {
-        console.log("update", draw.getMode(), draw.getAll());
+        //console.log("update", draw.getMode(), draw.getAll());
         //var data = draw.getAll().features;
         var data = e.features;
         //console.log(map.queryRenderedFeatures())
@@ -408,9 +624,8 @@
             document.getElementById('calculated-line').innerHTML = '';
         };
     };
-
-    // remove the layer if it exists
     function removeRoute () {
+        // remove the layer if it exists
         if (map.getSource('route')) {
             map.removeLayer('route');
             map.removeLayer('points');
@@ -428,32 +643,12 @@
             return;
         };
     };
-
     //---------------------------------------------------------------------
     // SET UP MODAL
     //---------------------------------------------------------------------
-
     function popupForm() {
         document.getElementById('openroutes').addEventListener('click', loadTheModal);
-        // document.getElementById('openroutes').addEventListener('click', () => {
-        //     var modal_url = '/maps/routetable/'
-        //     var modal = document.getElementById('form-modal');
-        //     var modalBody = document.getElementById('form-modal-body')
-        //     loadModal(modal_url);
-        //     $(modal).modal('show');
-            
-        //     var formheader = document.querySelector('#form-modal-header');
-        //     var closeheader = formheader.querySelector('.close');
-        //     var isHeaderText = formheader.querySelector("h4");
-        //     if (!isHeaderText) {
-        //         var headerText = document.createElement("h4");
-        //         var textnode = document.createTextNode("Routes:");
-        //         headerText.appendChild(textnode);
-        //         document.querySelector('#form-modal-header').insertBefore(headerText, closeheader);
-        //     };            
-        // });
     };
-
     const loadTheModal = async () => {
         var modal_url = '/maps/routetable/'
         var modal = document.getElementById('form-modal');
@@ -483,7 +678,6 @@
         // wait for the form to load so all buttons have right links etc
         await loadModalForm ('form-modal-body', path);
     };
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
@@ -519,15 +713,15 @@
                 });
 
     };
-
-
     //---------------------------------------------------------------------
     // SET UP MAPBOX LINE MATCHINGS
     //---------------------------------------------------------------------
 
     // make a matching request
     async function getLineMatchings() {
+
         var data = draw.getAll();
+        console.log(data);
         if (!data.features.length) {alert('Please draw a line to calculate routing'); 
             //console.log(data.features.length); 
             return;}
@@ -540,18 +734,25 @@
                 break;
             }
         };
+
+
         //console.log(profile);
         //console.log(data);
         //if (feature.type = "LineString"){
-            console.log(data.features)
+            //console.log(data.features)
         var coords = [];
-        data.features.slice().reverse().forEach(element => {
-            if(element.geometry.type = 'LineString'){
-                coords = element.geometry.coordinates;
-                
+        data.features.slice().forEach(element => {
+            console.log(element, element.geometry.coordinates, element.geometry.coordinates.length)
+            if(element.geometry.type == 'LineString' || element.geometry.type == 'Point') {
+                if (element.geometry.coordinates.length > 2) {
+                    coords = coords.concat(element.geometry.coordinates)
+                }
+                else {
+                    coords.push(element.geometry.coordinates);
+                }
             };
-            })
-            console.log(coords);
+        });
+        //console.log(coords);
         //var lastFeature = data.features.length - 1;
         //var coords = data.features[lastFeature].geometry.coordinates;
         //var profile = "driving";
@@ -559,9 +760,10 @@
         coords.forEach(element => {
             radius.push(50);
             });
+
         var radiuses = radius.join(';')
         var newCoords = coords.join(';');
-            console.log(newCoords);
+        console.log('newCoords - ', newCoords);
         var url = 'https://api.mapbox.com/matching/v5/mapbox/' + profile + '/' + newCoords + '?geometries=geojson&overview=full&tidy=true&radiuses=' + radiuses + '&steps=true&&access_token=' + mapboxgl.accessToken;
         
         // const loadTheModal = async () => {
@@ -596,73 +798,279 @@
                 };
             };
 
-        plotGeometry = jsonResponse.matchings[0].geometry
+        var plotGeometry = jsonResponse.matchings[0].geometry
         plotGeometry.coordinates = plotCoords
         
         removeRoute(plotGeometry);
         addRoute(plotGeometry);
-        if (jsonResponse.matchings.length == 1) {
-            var distance = jsonResponse.matchings[0].distance*0.001; // convert to km
-            var duration = jsonResponse.matchings[0].duration/60; // convert to minutes
-            
-            // add results to info box
-            document.getElementById('calculated-line').innerHTML = 'Distance: ' + distance.toFixed(2) + ' km<br>Duration: ' + duration.toFixed(2) + ' minutes';
-        } else {
-            document.getElementById('calculated-line').innerHTML = "There are " + jsonResponse.matchings.length + " segments on the route. There should be one.  Look at the points off the route"; 
-            //document.getElementById('calculated-line').innerHTML = jsonResponse.matchings.length;
-         };
-        document.getElementById('info-instructions').textContent = '';
+        processJsonResponseDistanceDuration(jsonResponse, 1, 2);    
+        processJsonResponseDirections(jsonResponse, 1, 2);
         spinner.setAttribute('hidden', '');
 
-        var legs = jsonResponse.matchings[0].legs;
-        var directions = document.getElementById('info-instructions');
-        var tripDirections = [];
-          // Output the instructions for each step of each leg in the response object
-        for (var i = 0; i < legs.length; i++) {
-            var steps = legs[i].steps;
-            for (var j = 0; j < steps.length; j++) {
-            tripDirections.push('<br><li>' + steps[j].maneuver.instruction) + '</li>';
-            }
-        }
-        directions.innerHTML = '<br>Trip duration: ' + Math.floor(jsonResponse.matchings[0].duration / 60) + ' min.' + tripDirections;
+        };
+    /**
+     * 
+     * NEW POINT BY POINT SET UP MAPBOX LINE MATCHINGS
+     * 
+     */
+    var undo = document.getElementById('undopoint');
+    var redo = document.getElementById('redopoint');
+    var deletept = document.getElementById('deletepoint');
+    var myHistory = [Immutable.List([])];
+    var historyIndex = 0;
+    undo.disabled = (historyIndex != 0) ? '' : 'disabled';
+    redo.disabled = (historyIndex !== myHistory.length - 1) ? '' : 'disabled';
+    deletept.disabled = (selectedPoint) ? '' : 'disabled';
+    /**
+     * This function replots routes when a point is deleted, moved or added
+     * It is called after the historyIndex has been updated for the change
+     * i.e. showing the state we are now and historyIndex-1 is where we were
+     * @param selectedPointId - point deleted
+     */
+    async function redrawRoutes(selectedPointId, type) {
+        //console.log('entering redraw route', myHistory[historyIndex].size, historyIndex,myHistory.length - 1 )
+        if (myHistory[historyIndex].size == 0) {
+            //console.log('no points')
+            return;
         };
 
-//---------------------------------------------------------------------
-// NEW POINT BY POINT SET UP MAPBOX LINE MATCHINGS
-//---------------------------------------------------------------------
-var undo = document.getElementById('undopoint');
-var redo = document.getElementById('redopoint');
-var myHistory = [Immutable.List([])];
-var historyIndex = 0;
-undo.disabled = (historyIndex != 0) ? '' : 'disabled';
-redo.disabled = (historyIndex !== myHistory.length - 1) ? '' : 'disabled';
+        var routeSource; // holds routeSource name in format 00f00t where t is from point and t is to point with leading zeroes
+        
+
+        var deletePoint = false;
+        var movePoint = false;
+        var addPoint = false;
+        var nowPointArray = [];
+        var pastPointArray = [];
+        var futurePointArray = [];
+        var useThisPointArray = [];
+        var pointArray = [];
+        var newPointArray = [];
+
+        function deleteRouteSourceDistanceDuration(routeSource) {
+            totalDistance = removeKey(totalDistance, 'routeSource', routeSource);
+            totalDuration = removeKey(totalDuration, 'routeSource', routeSource);
+            totalDirections = removeKey(totalDirections, 'routeSource', routeSource);
+            totalPlotGeometry = removeKey(totalPlotGeometry, 'routeSource', routeSource);
+            updateDurationDistance();
+        };
+
+        function deleteRouteSourceDistanceElevation (routeSource) {
+            totalElevation = removeKey(totalElevation, 'routeSource', routeSource);
+            totalDistanceDiff = removeKey(totalDistanceDiff, 'routeSource', routeSource);
+            processDistanceElevationChart();
+        }
+        
+        switch (type) {
+            case 'move':
+                movePoint = true;
+                //use where we are to make move changes
+                // myHistory[historyIndex].forEach(index => {
+                //     useThisPointArray.push(index.get("id"))
+                // });
+                myHistory[historyIndex-1].forEach(index => {
+                    newPointArray.push(index.get("id"))
+                });
+                myHistory[historyIndex].forEach(index => {
+                    pointArray.push(index.get("id"))
+                });
+                break;
+            case 'undo':
+                //work out what we are undo-ing
+                myHistory[historyIndex+1].forEach(index => {
+                    newPointArray.push(index.get("id"))
+                });
+                myHistory[historyIndex].forEach(index => {
+                    pointArray.push(index.get("id"))
+                });
+                break;
+            case 'redo':
+                //work out what we are redo-ing
+                myHistory[historyIndex-1].forEach(index => {
+                    newPointArray.push(index.get("id"))
+                });
+                myHistory[historyIndex].forEach(index => {
+                    pointArray.push(index.get("id"))
+                });
+                break;
+            case 'delete':
+                //work out what we are deleting
+                myHistory[historyIndex-1].forEach(index => {
+                    newPointArray.push(index.get("id"))
+                });
+                myHistory[historyIndex].forEach(index => {
+                    pointArray.push(index.get("id"))
+                });
+                break;
+        }
+        //create and populate pointArrays to work with - just easier - this is history!
 
 
-// clicking undo goes back in time, unless
-// there is no history left.
-undo.addEventListener('click', function() {
+        //work out what happended
+        if (pointArray.length == newPointArray.length) {
+            //there must have been a move and the point moved is the one the function is called with
+            movePoint = true;
+            //find out the index of the point moved
+            for( var i = 0; i < pointArray.length; i++){ 
+                if (pointArray[i] === selectedPointId) {
+                    var pointArrayIndex = i;
+                    break;
+                };
+            };
+            useThisPointArray = pointArray;
+        }
+        else if (pointArray.length > newPointArray.length) {
+            //the point was added
+            addPoint = true;
+            for( var i = 0; i < pointArray.length; i++){ 
+                if (pointArray[i] === selectedPointId) {
+                    var pointArrayIndex = i;
+                    break;
+                };
+            };
+            useThisPointArray = pointArray;
+        }
+        else if (pointArray.length < newPointArray.length) {
+            //the point was deleted
+            deletePoint = true;
+            for( var i = 0; i < newPointArray.length; i++){ 
+                if (newPointArray[i] === selectedPointId) {
+                    var pointArrayIndex = i;
+                    break;
+                };
+            };
+            useThisPointArray = newPointArray;            
+        }
+        //console.log('useThisPointArray',useThisPointArray, 'myHistory', myHistory, 'historyIndex', historyIndex)
+        //console.log(selectedPointId, pointArray, newPointArray, useThisPointArray, pointArrayIndex, deletePoint, addPoint, movePoint)
+        //do the deletes of route layers and sources
 
+        if (pointArrayIndex == useThisPointArray.length - 1) {        
+            //we are at the end so just one route to deal with
+            
+            if (deletePoint || movePoint) {
+                routeSource = 'route' + zeroPad(useThisPointArray[pointArrayIndex-1], 3) + zeroPad(selectedPointId, 3)
+                //console.log('rs1', deletePoint, movePoint, pointArrayIndex, useThisPointArray[pointArrayIndex], routeSource, map.getLayer(routeSource),map.getSource(routeSource))
+                if (map.getLayer(routeSource)) {map.removeLayer(routeSource)}
+                if (map.getSource(routeSource)) {map.removeSource(routeSource)}}
+                deleteRouteSourceDistanceDuration(routeSource)
+                deleteRouteSourceDistanceElevation(routeSource)
+            if ((addPoint || movePoint) && myHistory[historyIndex].size > 1) {
+                //console.log('end add route', useThisPointArray[pointArrayIndex-1], useThisPointArray[pointArrayIndex])
+                await getRouteBetweenTwoPoints(5, useThisPointArray[pointArrayIndex-1], useThisPointArray[pointArrayIndex]);
+            }
+
+        }
+        else if (pointArrayIndex == 0) {
+            // we are at the start so just one route to deal with
+            if (deletePoint || movePoint) {
+                routeSource = 'route' + zeroPad(selectedPointId, 3) + zeroPad(useThisPointArray[pointArrayIndex+1], 3)
+                //console.log('rs2', deletePoint, movePoint, pointArrayIndex, useThisPointArray[pointArrayIndex],routeSource, map.getLayer(routeSource),map.getSource(routeSource))
+                if (map.getLayer(routeSource)) {map.removeLayer(routeSource)}
+                if (map.getSource(routeSource)) {map.removeSource(routeSource)}
+                deleteRouteSourceDistanceDuration(routeSource)
+                deleteRouteSourceDistanceElevation(routeSource)
+            }
+            if (addPoint || movePoint) {
+                await getRouteBetweenTwoPoints(5, useThisPointArray[pointArrayIndex], useThisPointArray[pointArrayIndex+1]);
+            }
+        }
+        else  {
+            //we are a middle point
+            //console.log('middle point', useThisPointArray[pointArrayIndex-1], useThisPointArray[pointArrayIndex], useThisPointArray[pointArrayIndex+1])
+            if (deletePoint || movePoint) {
+                routeSource = 'route' + zeroPad(useThisPointArray[pointArrayIndex-1], 3) + zeroPad(selectedPointId, 3)
+                //console.log('rs3', deletePoint, movePoint, pointArrayIndex, useThisPointArray[pointArrayIndex], routeSource, map.getSource(routeSource), map.getLayer(routeSource))
+                if (map.getLayer(routeSource)) {map.removeLayer(routeSource)}
+                if (map.getSource(routeSource)) {map.removeSource(routeSource)}
+                deleteRouteSourceDistanceDuration(routeSource)
+                deleteRouteSourceDistanceElevation(routeSource)
+            
+                routeSource = 'route' + zeroPad(selectedPointId, 3) + zeroPad(useThisPointArray[pointArrayIndex+1], 3)
+                //console.log('rs4', routeSource, map.getSource(routeSource), map.getLayer(routeSource))
+                if (map.getLayer(routeSource)) {map.removeLayer(routeSource)}
+                if (map.getSource(routeSource)) {map.removeSource(routeSource)}
+                deleteRouteSourceDistanceDuration(routeSource)
+                deleteRouteSourceDistanceElevation(routeSource)
+            }
+            if (addPoint) {
+                routeSource = 'route' + zeroPad(useThisPointArray[pointArrayIndex-1], 3) + zeroPad(useThisPointArray[pointArrayIndex+1], 3)
+                //console.log('rs5', deletePoint, movePoint, pointArrayIndex, useThisPointArray[pointArrayIndex], routeSource, map.getSource(routeSource), map.getLayer(routeSource))
+                if (map.getLayer(routeSource)) {map.removeLayer(routeSource)}
+                if (map.getSource(routeSource)) {map.removeSource(routeSource)}
+                deleteRouteSourceDistanceDuration(routeSource)
+                deleteRouteSourceDistanceElevation(routeSource)
+                //console.log('removed - ',routeSource)
+            }
+            
+            if (deletePoint) {
+                //console.log('delete',useThisPointArray[pointArrayIndex-1], useThisPointArray[pointArrayIndex], useThisPointArray[pointArrayIndex+1])
+                await getRouteBetweenTwoPoints(5, useThisPointArray[pointArrayIndex-1], useThisPointArray[pointArrayIndex+1]);
+            }
+            if (addPoint || movePoint) {
+                console.log('replot', useThisPointArray[pointArrayIndex-1], useThisPointArray[pointArrayIndex], useThisPointArray[pointArrayIndex+1])
+                await getRouteBetweenTwoPoints(5, useThisPointArray[pointArrayIndex], useThisPointArray[pointArrayIndex+1]);
+                await getRouteBetweenTwoPoints(5, useThisPointArray[pointArrayIndex-1], useThisPointArray[pointArrayIndex]);
+            }
+            return;
+        };
+    };
+    /**
+     * Listen for the delete button to be pressed
+     */
+    deletept.addEventListener('click', function (e) {
+        //If a point has been selected the button is enabled
+        if (selectedPoint) {
+            //remove point from Immutable array
+            removePoint(selectedPointId)
+            //delete point from map
+            draw.delete(selectedPointId)
+            //redraw the routes
+            redrawRoutes(selectedPointId, 'delete')
+            //clear the selected point and disbale the button
+            selectedPointId = null;
+            selectedPoint = null;
+            deletept.disabled = (selectedPoint) ? '' : 'disabled';
+        };
+    });
+    /**
+     * Listen for the undo button to be pressed
+     */
+    // clicking undo goes back in time, unless
+    // there is no history left.
+    undo.addEventListener('click', function() {
+        //console.log('undo start', myHistory, historyIndex)
     if (historyIndex > 0) {
         //get differences in current and prior point states
-        //if the sizes are different then a point was added and we want the new point details
+        //if the current size is greater than prior size then a point was added and we want the new point details
         //for removal
         if (myHistory[historyIndex].size > myHistory[historyIndex-1].size) {
             var pointUndoDiff = pointDifferences(myHistory[historyIndex], myHistory[historyIndex-1]);
+            //delete the latest point plotted
+            draw.delete(pointUndoDiff.id);
+            pointcount--;
+        }
+        //if the current size is less than prior size then a point was deleted and we want the new point details
+        //for addition
+        else if (myHistory[historyIndex].size < myHistory[historyIndex-1].size) {
+            var pointUndoDiff = pointDifferences(myHistory[historyIndex-1], myHistory[historyIndex]);
         }
         //if they are the same then a point was changed and the comparison is the opposite way around to get
         //the coordinates of the old point so we can move the point back where it was
         else if (myHistory[historyIndex].size == myHistory[historyIndex-1].size) {
             var pointUndoDiff = pointDifferences(myHistory[historyIndex-1], myHistory[historyIndex]);
-        }
-
-        //delete the latest point plotted
-        draw.delete(pointUndoDiff.id)
+            //delete the point moved
+            draw.delete(pointUndoDiff.id)
+            pointcount--;
+        };
+        
         //workout whether we have a new point or it was there before but moved
         //pointUndoDiff has the id of the point changed if this is the same as the existing
         //history point then it was moved and we need to plot it again otherwise we can just
         //delete it 
-        if (myHistory[historyIndex].size == myHistory[historyIndex-1].size || pointUndoDiff.id < pointcount) {
-
+        //console.log('add check - ', myHistory[historyIndex].size, myHistory[historyIndex-1].size, pointUndoDiff.id, myHistory[historyIndex].size)
+        //if (myHistory[historyIndex].size == myHistory[historyIndex-1].size || pointUndoDiff.id < myHistory[historyIndex-1].size) {
+        if (myHistory[historyIndex].size == myHistory[historyIndex-1].size || myHistory[historyIndex].size < myHistory[historyIndex-1].size) {
             const coords = [pointUndoDiff.x, pointUndoDiff.y];
             var point = {
             type: 'Feature',
@@ -678,58 +1086,91 @@ undo.addEventListener('click', function() {
             };
 
             draw.add(point);
+            pointcount++;
         }
+        
         historyIndex--;
-        pointcount--;
+        redrawRoutes(pointUndoDiff.id, 'undo');
+        //console.log('undo end', historyIndex)
         undo.disabled = (historyIndex != 0) ? '' : 'disabled';
         redo.disabled = (historyIndex !== myHistory.length - 1) ? '' : 'disabled';
     }
 });
-
-// clicking redo goes forward in time, unless
-// there is no future left.
-redo.addEventListener('click', function() {
-
+    // clicking redo goes forward in time, unless
+    // there is no future left.
+    redo.addEventListener('click', function() {
+        //console.log('redo start', myHistory, historyIndex)
     if (historyIndex < myHistory.length -1) {
         //increase the index to get the future state we want to return to
         historyIndex++;
-        pointcount++;
-        var pointRedoDiff = pointDifferences(myHistory[historyIndex], myHistory[historyIndex-1]);
+        //if the future size is less we are going to delete a point
+        if (myHistory[historyIndex].size < myHistory[historyIndex-1].size) {
+            pointcount--
+            var pointRedoDiff = pointDifferences(myHistory[historyIndex-1], myHistory[historyIndex]);
+        }
+        //if the future is bigger we are going to add a point
+        else if (myHistory[historyIndex].size > myHistory[historyIndex-1].size) {
+            pointcount++
+            var pointRedoDiff = pointDifferences(myHistory[historyIndex], myHistory[historyIndex-1]);
+        }
+        //we are moving a point
+        else if (myHistory[historyIndex].size == myHistory[historyIndex-1].size) {
+            var pointRedoDiff = pointDifferences(myHistory[historyIndex], myHistory[historyIndex-1]);
+        }
 
         const coords = [pointRedoDiff.x, pointRedoDiff.y];
         var point = {
-        type: 'Feature',
-        id: pointRedoDiff.id,
-        properties: {
-            count: 50,
+            type: 'Feature',
             id: pointRedoDiff.id,
-        },
-        geometry: {
-            type: 'Point',
-            coordinates: coords
-        }
+            properties: {
+                count: 50,
+                id: pointRedoDiff.id,
+            },
+            geometry: {
+                type: 'Point',
+                coordinates: coords
+            }
         };
         //if the future point is on the map delete it before we add it again with the new coordinates
+        //as it must have been moved
         //if it not on the map it must be new and we add it
-        if (draw.get(pointRedoDiff.id)) {
-            draw.delete(pointRedoDiff.id)
+        if (myHistory[historyIndex].size == myHistory[historyIndex-1].size) {
+            if (draw.get(pointRedoDiff.id)) {
+                draw.delete(pointRedoDiff.id);
+                draw.add(point);
+                redrawRoutes(pointRedoDiff.id, 'redo');
+            }
         }
-        draw.add(point);
+        if (myHistory[historyIndex].size < myHistory[historyIndex-1].size) {
+            if (draw.get(pointRedoDiff.id)) {
+                draw.delete(pointRedoDiff.id);
+                redrawRoutes(pointRedoDiff.id, 'redo');
+            }
+        }
+        if (myHistory[historyIndex].size > myHistory[historyIndex-1].size) {
+            draw.add(point); 
+            redrawRoutes(pointRedoDiff.id, 'redo');
+        }      
+        //console.log('redo end', historyIndex)  
         undo.disabled = (historyIndex != 0) ? '' : 'disabled';
         redo.disabled = (historyIndex !== myHistory.length - 1) ? '' : 'disabled';
     }
 });
-
-function pointDifferences(Index1, Index2) {
-   var difference = Index1.filter(x => !Index2.includes(x));
-   var id = difference.get(0).get("id")
-   var x = difference.get(0).get("x")
-   var y = difference.get(0).get("y")
-   var pointObject= {id: id, x: x, y: y }
-   return pointObject
-}
-
-function operation(fn) {
+    /**
+     * Calculates and returns the difference in 2 history entries
+     */
+    function pointDifferences(Index1, Index2) {
+    var difference = Index1.filter(x => !Index2.includes(x));
+    var id = difference.get(0).get("id")
+    var x = difference.get(0).get("x")
+    var y = difference.get(0).get("y")
+    var pointObject= {id: id, x: x, y: y }
+    return pointObject
+    }
+    /**
+     * This stores the history
+     */
+    function operation(fn) {
     // first, make sure that there is no future
     // in the history list. for instance, if the user
     // draws something, clicks undo, and then
@@ -745,9 +1186,12 @@ function operation(fn) {
     // the index to match
     myHistory.push(newVersion);
     historyIndex++;
-};
-
-function addPoint(x, y, id) {
+    //console.log('point.count: ', myHistory[historyIndex].size)
+    };
+    /**
+     * Adds point to history
+     */
+    function addPoint(x, y, id) {
     operation(function(data) {
         return data.push(
             Immutable.Map({
@@ -757,43 +1201,345 @@ function addPoint(x, y, id) {
             })
         );  
     });
-};
-
-
-function removePoint(id) {
-    operation(function(data) {
-        return data.filter(function(dot) {
-            return dot.get('id') !== id;
+    };
+    /**
+     * Removes point from history
+     */
+    function removePoint(id) {
+        operation(function(data) {
+            return data.filter(function(dot) {
+                return dot.get('id') !== id;
+            });
         });
-    });
-};
-function movePoint(x,y,id) {
-    console.log('move')
-    operation(function(data) {
-        return data.update(
-        data.findIndex(function(item) { 
-            return item.get("id") === id; 
-        }),
-            function(item) {
-                return item.set("x",x).set("y", y);
-            }); 
-    });
-};
-
-function getPointbyPointMatchings(radiusNumber, lat, lng) {
+    };
+    /**
+     * Moves point adding new history
+     */
+    function movePoint(x,y,id) {
+        //console.log('move')
+        operation(function(data) {
+            return data.update(
+            data.findIndex(function(item) { 
+                return item.get("id") === id; 
+            }),
+                function(item) {
+                    return item.set("x",x).set("y", y);
+                }); 
+        });
+        redrawRoutes(id,'move');
+    };
+/**
+ * Draw route between 2 points
+ */
+    async function getRouteBetweenTwoPoints(radiusNumber, point1, point2) {
     undo.disabled = (historyIndex != 0) ? '' : 'disabled';
     redo.disabled = (historyIndex !== myHistory.length - 1) ? '' : 'disabled';
+    deletept.disabled = (selectedPoint) ? '' : 'disabled';
+
+    //Setup Points
+    coords=[];
+    //console.log('drawing route between - ', point1, point2)
+    var Point1 = draw.get(point1);
+    var Point2 = draw.get(point2);
+    //console.log('do we have points for route between - ', Point1, Point2)
+    coords.push(Point1.geometry.coordinates);
+    coords.push(Point2.geometry.coordinates);
+    
+
+    //Set up radius on points
+    var radius = [];
+    coords.forEach(element => {
+        radius.push(radiusNumber);
+        });
+
+    var radiuses = radius.join(';');
+    var newCoords = coords.join(';');
+
+    //Get routing profile
+    const rTypes = document.querySelectorAll('input[name="routetype"]');
+    let profile;
+    for (const rType of rTypes) {
+        if (rType.checked) {
+            profile = rType.value;
+            break;
+        };
+    };
+    //console.log('Prof, Coords & Rads etc', profile, newCoords, radiuses);
+    coordString = newCoords.slice(0);
+    radiusesString = radiuses.slice(0);
+    var jsonResponse = await callMapboxMatchings(profile, radiusNumber)
+    //console.log('get route between points response code', jsonResponse.code)
+    if (jsonResponse.code != "Ok") {
+        alert ("There has been an error ", jsonResponse.code, " . Please review last point!");
+        return;
+    }
+    plotCoords = [];  
+    for (var match of jsonResponse.matchings) 
+        { 
+            for (var geo of match.geometry.coordinates) {
+                plotCoords.push(geo)
+            };
+        };
+
+    var plotGeometry = jsonResponse.matchings[0].geometry
+    plotGeometry.coordinates = plotCoords
+    //console.log('point1',point1,'point2',point2)    
+    var routeSource = 'route' + zeroPad(point1, 3) + zeroPad(point2, 3)
+    totalPlotGeometry.push({routeSource: routeSource, coordinates: plotCoords})
+    addMappingRoute(plotGeometry, point1, point2);
+    processJsonResponseDistanceDuration(jsonResponse, point1, point2);
+    processJsonResponseDirections(jsonResponse, point1, point2);
+    spinner.setAttribute('hidden', '');
+    //get elevation for each point
+    var elevationReturned = await processJsonResponseElevation(plotGeometry, point1, point2);
+    //get distance between each point
+    var coordDistanceDiff = await processJsonResponseDistanceDiff(plotGeometry, point1, point2);
+    processDistanceElevationChart();
+}
+/**
+ * Calls MapBox matching API
+ */
+    async function callMapboxMatchings(routeProfile, startingRadius) {
+        //console.log('call matchings profile, coords, radius, st r',routeProfile, coordString, radiusesString, startingRadius);
+        var url = 'https://api.mapbox.com/matching/v5/mapbox/' + routeProfile + '/' + coordString + '?geometries=geojson&overview=full&tidy=true&radiuses=' + radiusesString + '&steps=true&&access_token=' + mapboxgl.accessToken;
+        
+        // const loadTheModal = async () => {
+        let response = await new Promise (resolve => {
+            var req = new XMLHttpRequest();
+            spinner.removeAttribute('hidden');
+            req.responseType = 'json';
+            req.open('GET', url, true);
+                req.onload  = function (e) {
+                    resolve(req.response);
+                };
+                req.onerror = function () {
+                    resolve(undefined);
+                    spinner.setAttribute('hidden', '');
+                    alert('An error has occurred reading getting the route!')
+                    return req.onerror;
+                };
+                req.send();
+        });
+
+        var jsonResponse = response;
+
+        if (jsonResponse.code == "Ok") {
+            spinner.setAttribute('hidden', '');
+            return jsonResponse;
+        }
+        if (jsonResponse.code == "InvalidInput") {
+            spinner.setAttribute('hidden', '');
+            alert('Using the routing method of '+ routeProfile + ' has resulted in an error .... ' + jsonResponse.message + ". Please move or redraw the point.");
+            return jsonResponse;
+        }
+        if (jsonResponse.code == "NoMatch") {
+            spinner.setAttribute('hidden', '');
+            alert('Using the routing method of '+ routeProfile + ' has resulted in an error .... ' + jsonResponse.message + ". Please move or redraw the point.");
+            return jsonResponse;
+        }
+        if (jsonResponse.code == "NoSegment") {
+
+            do {
+                startingRadius = startingRadius + 5;
+                var radius = [];
+                coordArray = coordString.split(";")
+                coordArray.forEach(element => {
+                    radius.push(startingRadius);
+                });
+                var routeRadiuses = radius.join(';');
+                //console.log('call matching loop to get match', coordArray, routeRadiuses)
+                var url = 'https://api.mapbox.com/matching/v5/mapbox/' + routeProfile + '/' + coordString + '?geometries=geojson&overview=full&tidy=true&radiuses=' + routeRadiuses + '&steps=true&&access_token=' + mapboxgl.accessToken;
+        
+                // const loadTheModal = async () => {
+                let response = await new Promise (resolve => {
+                    var req = new XMLHttpRequest();
+                    spinner.removeAttribute('hidden');
+                    req.responseType = 'json';
+                    req.open('GET', url, true);
+                        req.onload  = function (e) {
+                            resolve(req.response);
+                        };
+                        req.onerror = function () {
+                            resolve(undefined);
+                            spinner.setAttribute('hidden', '');
+                            alert('An error has occurred reading getting the route!');
+                            return req.onerror;
+                        };
+                        req.send();
+                });
+
+                jsonResponse = response;
+                if (jsonResponse.code == "Ok") { return jsonResponse}
+            }
+            while (startingRadius < 50)
+            if (jsonResponse.code !== "Ok") {
+                spinner.setAttribute('hidden', '');
+                alert('Using the routing method of '+ routeProfile + ' has resulted in an error .... ' + jsonResponse.message + ". Please move or redraw the point.");
+                return jsonResponse;
+            }
+        }
+}
+    async function getPointbyPointMatchings(radiusNumber, lat, lng) {
+        undo.disabled = (historyIndex != 0) ? '' : 'disabled';
+        redo.disabled = (historyIndex !== myHistory.length - 1) ? '' : 'disabled';
+        deletept.disabled = (selectedPoint) ? '' : 'disabled';
+        //Get all the points
+        let data = draw.getAll();
+        if (data.features.length == 1)  {
+            document.getElementById('calculated-line').innerHTML = 'Draw more than 1 point to start show calculated route line';
+            return;
+        }
+        //Get last two points
+        coords=[];
+        //console.log('get matching index', myHistory[historyIndex], myHistory[historyIndex].size, myHistory[historyIndex].get(myHistory[historyIndex].size -1).get("id"))
+        let lastPoint = draw.get(myHistory[historyIndex].get(myHistory[historyIndex].size -1).get("id"));
+        let lastButOnePoint = draw.get(myHistory[historyIndex].get(myHistory[historyIndex].size -2).get("id"));
+
+        //push last co-ord first - remember push adds to front so end up with starting point and then ending point
+        coords.push(lastButOnePoint.geometry.coordinates);
+        coords.push(lastPoint.geometry.coordinates);
+
+        //Set up radius on points
+        let radius = [];
+        coords.forEach(element => {
+            radius.push(radiusNumber);
+            });
+
+        let radiuses = radius.join(';');
+        let newCoords = coords.join(';');
+
+
+        //Get routing profile
+        const rTypes = document.querySelectorAll('input[name="routetype"]');
+        let profile;
+        for (const rType of rTypes) {
+            if (rType.checked) {
+                profile = rType.value;
+                break;
+            };
+        };
+        //console.log('Prof, Coords & Rads etc', profile, newCoords, radiuses, typeof(newCoords), typeof(radiuses));
+        coordString = newCoords.slice(0);
+        radiusesString = radiuses.slice(0);
+
+        var jsonResponse = await callMapboxMatchings(profile, radiusNumber);
+        
+        if (jsonResponse.code != "Ok") {
+            return
+        };
+        
+        plotCoords = [];  
+        for (var match of jsonResponse.matchings) 
+            { 
+                for (var geo of match.geometry.coordinates) {
+                    plotCoords.push(geo)
+                };
+            };
+
+        var plotGeometry = jsonResponse.matchings[0].geometry
+        plotGeometry.coordinates = plotCoords
+        var fromId = myHistory[historyIndex].get(myHistory[historyIndex].size -2).get("id")
+        var toId = myHistory[historyIndex].get(myHistory[historyIndex].size -1).get("id")
+        var routeSource = 'route' + zeroPad(fromId, 3) + zeroPad(toId, 3)
+        totalPlotGeometry.push({routeSource: routeSource, coordinates: plotCoords})
+        //console.log('fromId',fromId, 'toId',toId)
+        addMappingRoute(plotGeometry, fromId , toId);
+        
+
+        //Check we have matchings and set up array using values
+        //process distance and duration
+        processJsonResponseDistanceDuration(jsonResponse, fromId, toId);
+
+        //process directions
+        processJsonResponseDirections(jsonResponse, fromId, toId);
+
+        spinner.setAttribute('hidden', '');
+
+        //get elevation for each point
+        var elevationReturned = await processJsonResponseElevation(plotGeometry, fromId, toId);
+        //get distance between each point
+        var coordDistanceDiff = await processJsonResponseDistanceDiff(plotGeometry, fromId, toId);
+
+
+        var coordElevationDiff = elevationReturned.reduce(            
+            function(result, value, index, array) {
+            //if (index % 2 === 0)
+            if (elevationReturned.length > index + 1)
+                result.push(array[index+1] - array[index]);
+            return result;
+            }, []);
+
+        //console.log('elevation: ', elevationReturned, 'coordElevationDiff', coordElevationDiff, 'totalElevationDiff', totalElevationDiff)
+
+        //Now we also want to create a pair array as above but with distance vs gradient
+        //we have the elevation change from above
+        //gradient is rise divided by run in this case the change in elevation vs change in distance
+        //so we can use reduce again
+        //     
+        var coordGradient = coordDistanceDiff.reduce(
+            function(result, value, index, array) {
+                //We dont want to process the last distance diff as the last 
+                //gradient is from the last -1 to last points i.e. one less that the
+                //distance differences to which we added 0 at the start earlier
+                if (coordDistanceDiff.length > index + 1)
+                    result.push(coordElevationDiff[index]/array[index + 1])
+                return result;
+            },
+            []
+            );
+        totalGradient.push({routeSource: routeSource, gradient: coordGradient })
+        totalGradient.sort((a, b) => (a.routeSource > b.routeSource) ? 1 : -1)   
+     
+        //processChart(elevationReturned, distance);
+
+        processDistanceElevationChart();
 };
+    //---------------------------------------------------------------------
+    // SET UP MAPBOX POINT MATCHINGS
+    //---------------------------------------------------------------------
+    function processJsonResponseDistanceDuration(jsonResponse, fromId, toId) {
+        console.log(jsonResponse)
+        document.getElementById('info-instructions').textContent = '';
+        document.getElementById('calculated-line').innerHTML = '';
+        if (jsonResponse.matchings.length == 1) {
+            var distance = jsonResponse.matchings[0].distance*0.001; // convert to km
+            var duration = jsonResponse.matchings[0].duration/60; // convert to minutes
+            var routeSource = 'route' + zeroPad(fromId, 3) + zeroPad(toId, 3)
+            totalDistance.push({routeSource: routeSource, distance: distance })
+            totalDuration.push({routeSource: routeSource, duration: duration })
+            //console.log(totalDistance, totalDuration, sumDistance, sumDuration);
+            // add results to info box
 
+            if(jsonResponse.tracepoints.filter(x => x==null).length > 0) {
+                document.getElementById('calculated-line').innerHTML = 'There are ' + jsonResponse.tracepoints.filter(x => x==null).length + ' points plotted which cannot be used.\
+                For an accurate routing please move or delete these. <br>Distance: ' + sumDistance.toFixed(2) + ' km Duration: ' + sumDuration.toFixed(2) + ' minutes';
+            }
+            else {
+                updateDurationDistance()
+            };
+        } 
+        else {
+            document.getElementById('calculated-line').innerHTML = "There are " + jsonResponse.matchings.length + " segments on the route. There should be one.  Look at the points off the route"; 
+            //document.getElementById('calculated-line').innerHTML = jsonResponse.matchings.length;
+        };
 
-//---------------------------------------------------------------------
-// SET UP MAPBOX POINT MATCHINGS
-//---------------------------------------------------------------------
-
+    };
+    
+    function updateDurationDistance() {
+        var sumDistance = totalDistance.reduce(function(accumulator, currentValue) {
+            return accumulator + currentValue.distance;
+        }, 0);
+        totalSumDistance = sumDistance;
+        var sumDuration = totalDuration.reduce(function(accumulator, currentValue) {
+            return accumulator + currentValue.duration;
+        }, 0);
+        document.getElementById('duration-distance').innerHTML = 'Segments: ' + Object.keys(totalDistance).length + ', Distance: ' + sumDistance.toFixed(2) + ' km, Duration: ' + sumDuration.toFixed(2) + ' minutes.';
+    };
+    
     // make a matching request
     async function getPointMatchings(radiusNumber) {
         var data = draw.getAll(); 
-        console.log('draw data', data);
+        //console.log('draw data', data);
         if (!data.features.length) {
             document.getElementById('info-instructions').textContent = 'Click the map to add points on a route using routing profile e.g. Cycling.  Click the Esc key to stop plotting and reselect the control to calculate the route';
             return;
@@ -808,6 +1554,7 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
                 coords.push(feature.geometry.coordinates)
             };
         });
+
         //Get routing profile
         const rTypes = document.querySelectorAll('input[name="routetype"]')
         let profile;
@@ -822,6 +1569,7 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
         coords.forEach(element => {
             radius.push(radiusNumber);
             });
+
         var radiuses = radius.join(';')
         var newCoords = coords.join(';');
 
@@ -846,7 +1594,7 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
         });
 
         var jsonResponse = response;
-        console.log(jsonResponse);
+        //console.log(jsonResponse);
         if (jsonResponse.code == "InvalidInput") {
             spinner.setAttribute('hidden', '');
             alert('Using the routing method of '+ profile + ' has resulted in an error .... ' + jsonResponse.message + ". Please try again after replotting the line.");
@@ -871,40 +1619,12 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
         
         removeRoute(plotGeometry);
         addRoute(plotGeometry);
-
-        if (jsonResponse.matchings.length == 1) {
-            var distance = jsonResponse.matchings[0].distance*0.001; // convert to km
-            var duration = jsonResponse.matchings[0].duration/60; // convert to minutes
-            
-            // add results to info box
-
-            if(jsonResponse.tracepoints.filter(x => x==null).length > 0) {
-                document.getElementById('calculated-line').innerHTML = 'There are ' + jsonResponse.tracepoints.filter(x => x==null).length + ' points plotted which cannot be used.\
-                For an accurate routing please move or delete these. <br>Distance: ' + distance.toFixed(2) + ' km<br>Duration: ' + duration.toFixed(2) + ' minutes';
-            }
-            else {
-                document.getElementById('calculated-line').innerHTML = 'Distance: ' + distance.toFixed(2) + ' km<br>Duration: ' + duration.toFixed(2) + ' minutes';
-            }
-        } 
-        else {
-            document.getElementById('calculated-line').innerHTML = "There are " + jsonResponse.matchings.length + " segments on the route. There should be one.  Look at the points off the route"; 
-            //document.getElementById('calculated-line').innerHTML = jsonResponse.matchings.length;
-        };
-        document.getElementById('info-instructions').textContent = '';
+        
+        processJsonResponseDistanceDuration(jsonResponse, 1, 2);
+        processJsonResponseDirections(jsonResponse, 1, 2);
         spinner.setAttribute('hidden', '');
 
-        var legs = jsonResponse.matchings[0].legs;
-        var directions = document.getElementById('info-instructions');
-        var tripDirections = [];
-          // Output the instructions for each step of each leg in the response object
-        for (var i = 0; i < legs.length; i++) {
-            var steps = legs[i].steps;
-            for (var j = 0; j < steps.length; j++) {
-            if (!steps[j].maneuver.instruction.startsWith("You have arrived")) {
-                tripDirections.push('<br><li>' + steps[j].maneuver.instruction) + '</li>'};
-            }
-        }
-        directions.innerHTML = '<br>Trip duration: ' + Math.floor(jsonResponse.matchings[0].duration / 60) + ' min.' + tripDirections;
+
 
         // Loop through the co-ordinates
         const coordLoop = async(plotGeo) => {
@@ -1037,8 +1757,202 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
     };
     //---------------------------------------------------------------------
     // 
-    //---------------------------------------------------------------------
-    
+    //---------------------------------------------------------------------  
+    function processScatterChart(elevationData, gradientData) {
+        //console.log(chartData)
+        if (typeof(this.elevationChart) != "undefined") {
+            this.elevationChart.destroy();
+        }
+        var ctx = document.getElementById("elevationChart")
+        var labels=[];
+        var data = {
+            datasets: [
+                {
+                label: "Elevation",
+                data: elevationData,
+                borderColor: "#3e95cd",
+                backgroundColor: "rgb(51, 204, 255, 0.5)",
+                borderWidth:1,
+                showLine: true,
+                fill: false,
+                yAxisID: 'y',
+                },
+                {
+                label: "Gradient",
+                data: gradientData,
+                borderColor: "#ff66cc",
+                backgroundColor: "rgb(230, 0, 153, 0.5)",
+                borderWidth:1,
+                showLine: true,
+                fill: false,
+                yAxisID: 'y2',
+                },
+            ],
+        };
+        var options = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    // external: function(context) {
+                    //     console.log(context.tooltip.body[0].lines[0], context, elevationChart);
+                    //     var meta = elevationChart.getDatasetMeta(0)
+                    //     var rect = elevationChart.canvas.getBoundingClientRect()
+                    //     var point = meta.data[0]
+                    //     var evt = new MouseEvent('mousemove', {
+                    //         clientX: rect.left + point.x,
+                    //         clientY: rect.top + point.y,
+                    //     })
+                    //     var node = elevationChart.canvas;
+                    //     console.log(meta, rect, point, node)
+                    //     //node.dispatchEvent(evt);
+                    // }
+                }
+            },
+            onHover: (e) => {
+                const canvasPosition = Chart.helpers.getRelativePosition(e, elevationChart);
+                // Substitute the appropriate scale IDs
+                const dataX = elevationChart.scales.x.getValueForPixel(canvasPosition.x);
+                const dataY = elevationChart.scales.y.getValueForPixel(canvasPosition.y);
+                //console.log('dataX',dataX,'dataY',dataY)
+                var origin = [];
+                var segStartDist = 0
+                var stepDist = 0
+                var routePoint = {
+                    'type': 'FeatureCollection',
+                        'features': [
+                            {
+                                'type': 'Feature',
+                                'properties': {},
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': origin
+                                }
+                            }
+                        ]
+                    };
+                for (var i=0; i < totalDistance.length; i++) {
+                    
+                    if (dataX >= 0 && dataX <= totalSumDistance) {
+                        var neededPoint = 0;
+                        //console.log('dataX + dist',dataX, totalDistance[i].distance, i)
+                        if (i === 0) {
+                            segStartDist = 0
+                        }
+                        else {
+                            segStartDist += totalDistance[i-1].distance
+                        }
+                        //console.log('segStartDist', segStartDist)
+                        var arrDistDiff = totalDistanceDiff.find(o => o.routeSource === totalDistance[i].routeSource);
+                        //console.log('arrDistDiff', arrDistDiff)
+                        stepDist = 0
+                        for (var j=0; j < arrDistDiff.distance.length; j++) {
+                            var kmDist = arrDistDiff.distance[j]/1000
+                            stepDist = stepDist + kmDist
+                            var totDist = segStartDist + stepDist
+                            //console.log('stepDist', stepDist, arrDistDiff.distance[j], totDist, kmDist)
+                            if (totDist >= dataX) {
+                                if (dataX < totalSumDistance) {
+                                    neededPoint = {segment: totalDistance[i].routeSource, step: j-1}
+                                }
+                                else if (dataX >= totalSumDistance) {
+                                    neededPoint = {segment: totalDistance[i].routeSource, step: j}
+                                }
+                                //console.log('needed point', neededPoint)
+                                //console.log(totalPlotGeometry, totalDistance)
+                                var geoNeeded = totalPlotGeometry.find(g => g.routeSource === totalDistance[i].routeSource)
+                                //console.log('geoNeeded.coordinates', geoNeeded.coordinates[neededPoint.step])
+                                origin = geoNeeded.coordinates[neededPoint.step]
+                                if (!map.getSource('routePoint')) {
+                                    map.addSource('routePoint', {
+                                        'type': 'geojson',
+                                        'data': routePoint
+                                    });
+                                }
+                                marker.setLngLat(geoNeeded.coordinates[neededPoint.step]);
+                                marker.addTo(map);
+                                //console.log('got to break')
+                                
+                                break;
+                            };
+
+                        }
+                        
+                    if (neededPoint) {
+                        //console.log('got to break again');
+                        break;}
+                    };
+
+                }
+            },
+            layout: {
+                    padding: {
+                        left: 0,
+                        right: 10,
+                        top: 0,
+                        bottom: 15,
+                    },
+                },
+            tooltips: {
+                mode: 'index',
+                intersect: false,
+            },
+            scales: {
+                y: {
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'height (m)',
+                    },
+                },
+                y2: {
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Gradient (%)',
+                    },
+                    ticks: {
+                        max: 0.5,
+                        min: -0.5,
+                    },
+                    min: -0.3,
+                    max: 0.3,
+
+                    grid: {
+                        drawOnChartArea: false // only want the grid lines for one axis to show up
+                    },
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'distance (km)',
+                    },
+                    ticks: {
+                        beginAtZero:true
+                    },
+                },
+            },
+        };
+
+        var el = document.createElement('span');
+        var ej = document.createElement('i');
+        el.appendChild(ej);
+        ej.classList.add('fas', 'fa-bicycle');
+        ej.style.color = '#ff0000';
+        marker = new mapboxgl.Marker(el, {anchor: 'center', offset: [0, 0], element: ej})    
+
+
+        //console.log(data, options)
+        elevationChart = new Chart(ctx, {
+            type: 'scatter',
+            data: data,
+            options: options,
+            }
+        );
+
+
+    };
+
     function processChart(chartData, distance) {
         var ctx = document.getElementById("elevationChart")
             var labels=[];
@@ -1053,6 +1967,7 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
             };
             //console.log(data);
             var maxElevation = (Math.max(...chartData))
+
             var options = {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -1073,7 +1988,6 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
                         scaleLabel: {
                             display: true,
                             labelString: 'height (m)',
-
                         },
                         ticks: {
                             beginAtZero: true,
@@ -1099,15 +2013,13 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
                     }]
                 }
             };
-                //console.log(options);
-            var elevationChart = new Chart(ctx, {
+            //console.log(options);
+            elevationChart = new Chart(ctx, {
                 type: 'line',
                 data: data,
                 options: options
                 });
     };
-
-
     //---------------------------------------------------------------------
     // UNUSED FUNCTION - 200x SLOWER than that used above!
     //---------------------------------------------------------------------
@@ -1132,99 +2044,6 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
             }, Promise.resolve([])
         );
     };
-
-    //const getElevationData = async(plotGeo) => {
-    // async function getElevationData(plotGeo) {
-    //         var elevationData = [];
-    //         var elevationCoords = plotGeo.coordinates;
-    //         const gete = (c) => 
-    //             {getElevation(c, function(err, elevation) {
-    //                 if (err) {
-    //                     throw (err);
-    //                 }
-    //                 else {
-    //                     elevationData.push(elevation.toFixed(2));
-    //                     //console.log(elevation);
-    //                 }
-    //             })};
-    //         function fgete(coord, fn){
-    //             getElevation(coord, function(err, elevation) {
-    //                 fn(elevation); 
-    //         });};
-    // }
-
-            //fgete(coord, function(location){
-            //    console.log('fgete',location); // this is where you get the return value
-            // //});
-            // let eResult = async (elevationCoords) => {
-            //     //console.log('in result', elevationCoords)
-            //     let eCords = await Promise.all(elevationCoords.map (
-            //         async (coord) => {
-            //             let childPromise = await gete(coord);
-            //             await childPromise;
-            //             // await fgete(coord, function(location){
-            //             //     console.log('fgete',location); // this is where you get the return value
-            //             // });
-            //         }
-            //     ));
-            //     await Promise.all(eCords);
-            // };
-            //console.log('eCords+', elevationData); 
-        //console.log('eData', elevationData);
-        //await eResult(elevationCoords);
-
-
-        // const getResult = x => new Promise(resolve => {
-        //     return fgete(x, function(location){
-        //         //console.log(x, location);
-        //         resolve(location);
-        //     });
-        // });
-
-        // return await elevationCoords.reduce(async (previous, cod) => {
-        // const result = await previous;
-
-        // return [...result, await getResult(cod)];
-        
-        // }, Promise.resolve([]))
-        //.then(console.log);
-        //return elevationData;
-
-
-        // function eCall(coord){    
-        //     getElevation(coord,function(err, value){
-        //         if(err){
-        //             return false;
-        //         }else{
-        //             console.log(value);
-        //             return value;
-        //         }
-        //     })
-        // };
-
-        // const cResult = new Promise((resolve,reject) => {
-        //     let data = cCall();
-        //     if(data == false)
-        //         reject(data);
-        //     else
-        //         resolve(data);
-        // }
-
-
-    //     async function printFiles () {
-            
-
-    //         await elevationCoords.reduce(async (promise, file) => {
-    //             // This line will wait for the last async function to finish.
-    //             // The first iteration uses an already resolved Promise
-    //             // so, it will immediately continue.
-    //             await promise;
-    //             const contents = await fs.readFile(file, 'utf8');
-    //             console.log(contents);
-    //         }, Promise.resolve());
-    // }
-
-    //};
     //---------------------------------------------------------------------
     // SET UP MAPBOX DIRECTIONS
     //---------------------------------------------------------------------
@@ -1233,7 +2052,6 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
     function getDirections(e) {
         // https://www.mapbox.com/api-documentation/#directions
         var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + e +'?geometries=geojson&steps=true&&access_token=' + mapboxgl.accessToken;
-        //var url = 'https://api.mapbox.com/matching/v5/mapbox/driving/' + e +'?geometries=geojson&steps=true&&access_token=' + mapboxgl.accessToken;
         var req = new XMLHttpRequest();
         req.responseType = 'json';
         req.open('GET', url, true);
@@ -1250,8 +2068,44 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
         };
         req.send();
     }
-
-
+    //---------------------------------------------------------------------
+    // ADD MAPPING ROUTE TO MAP USING CO-ORDINATES
+    //---------------------------------------------------------------------
+    // adds the route as a layer on the map
+    function addMappingRoute (coords, point1, point2) {
+        // check if the route is already loaded
+        var routeSource = 'route' + zeroPad(point1, 3) + zeroPad(point2, 3)
+        //console.log('route source add mapping', routeSource)
+        if (map.getSource(routeSource)) {
+            map.removeLayer(routeSource)
+            map.removeLayer(routeSource)
+            map.removeSource(routeSource)
+        } else {
+            map.addSource(routeSource, 
+            {                
+                "type": "geojson",
+                "data": {
+                    "type": "Feature",
+                    "properties": {},
+                    "geometry": coords
+                }
+            });
+            map.addLayer({
+            "id": routeSource,
+            "type": "line",
+            "source":  routeSource,
+            "layout": {
+                "line-join": "round",
+                "line-cap": "round"
+            },
+            "paint": {
+                "line-color": "#3b9ddd",
+                "line-width": 8,
+                "line-opacity": 0.8
+            }
+            },'gl-draw-polygon-fill-inactive.cold');
+        };
+    };
     //---------------------------------------------------------------------
     // ADD ROUTE TO MAP USING CO-ORDINATES
     //---------------------------------------------------------------------
@@ -1313,30 +2167,25 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
             })
         };
     };
-
     //---------------------------------------------------------------------
     // SHOW AND HIDE THE MENU
     //---------------------------------------------------------------------
-    document.getElementById('menu-icon').onclick = function(e) {
-                //and the form is visible then hide it
-                //console.log(e);
-                miEl = document.getElementById('menu-items')
-                mcEl = document.getElementById('menu-column')
-                mapEl = document.getElementById('map')
-                if (miEl.visible) {
-                    mcEl.style.width = "15%";
-                    mapEl.style.marginLeft = "0";
-                    miEl.classList.add("hide");
-                    miEl.visible = false;
-                }
-                // otherwise show it
-                else {
-                    mcEl.style.width = "15%";
-                    mapEl.style.marginLeft = "15%";
-                    miEl.visible = true;
-                    miEl.classList.remove("hide");
-                };
+    document.getElementById('menuIconButton').onclick = function(e) {
+        //and the form is visible then hide it
+        //console.log(e);
+        mcEl = document.getElementById('menu-column')
+        mdEl = document.getElementById('menu-dropdown')
+        mcEl.classList.remove("hide");
+        mdEl.classList.add("hide");
     };
+    document.getElementById('close-menu').onclick = function(e) {
+        mcEl = document.getElementById('menu-column')
+        mdEl = document.getElementById('menu-dropdown')
+        mcEl.classList.add("hide");
+        mdEl.classList.remove("hide");
+        document.getElementById('menuIconButton').checked = false;
+    };
+    
     //---------------------------------------------------------------------
     // SHOW AND HIDE THE ELEVATION
     //---------------------------------------------------------------------
@@ -1344,17 +2193,13 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
                 //and the form is visible then hide it
                 //console.log(e);
                 el = document.getElementById('elevationChartDiv')
-                if (el.visible) {
+                if (!el.classList.contains("hide")) {
                     el.classList.add("hide");
-                    el.visible = false;
                 }
-                // otherwise show it
                 else {
-                    el.visible = true;
                     el.classList.remove("hide");
                 };
     };
-
     //---------------------------------------------------------------------
     // CALCULATE DIRECTIONS
     //---------------------------------------------------------------------
@@ -1367,7 +2212,6 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
             map.addControl(directions, 'bottom-right');
         };
     };
-
     //---------------------------------------------------------------------
     // ADD ROUTE TO MAP FROM FILE ROUTINES
     //---------------------------------------------------------------------
@@ -1376,23 +2220,20 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
         element.addEventListener('change', handleUpload)
         //document.body.removeChild(element);
     };
-
     function processUploadFile(data) {
-        var geoJsonData
+        var geoJsonData;
+        //Get the start of the file .... 
         var filestart = decodeURIComponent(data.split(',')[0]);
+        //Remove any spaces to help the test below ...
+        filestart = filestart.replace(/\s+/g, '');
+        //Get the data...
         if (filestart == '{"type":"FeatureCollection"') { 
             geoJsonData = JSON.parse(data)
         }
         else {
             geoJsonData = JSON.parse(decodeURIComponent(data.split(',')[1]));
         }
-        //console.log(geoJsonData)
         plotTheUploadFile (geoJsonData)
-        // var bbox = turf.bbox(geoJsonData);
-        // // uses name of map, the geojson elements to use and the padding (px)
-        // fitMapToBounds(map, bbox, 20);
-        // alert("The route " + geoJsonData.features[0].properties.name + " has been plotted on the map!");
-
     }
     function plotTheUploadFile (geoJsonData) {
         draw.add(geoJsonData);
@@ -1402,7 +2243,6 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
         alert("The route " + geoJsonData.features[0].properties.name + " has been plotted on the map!");
 
     }
-
     const handleUpload = async (e) => {
         var files = e.target.files;
         if (files.length < 1) {
@@ -1419,18 +2259,43 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
             }
             catch (e) {
                 console.warn(e.message);
+                alert("There has been an error reading the file. The error message is - "+ e.message)
             }
-        } else {
-            alert("File not supported, .txt, .geojson or .json files only");
+        } else if (file.name.match(/\.(gpx)$/)) {
+            const fileContentDiv = document.querySelector('div#file-content')
+            try {
+                const fileContents = await readUploadedFileAsText(file)
+                //console.log(fileContents);
+                
+                //console.log(JSON.stringify(toGeoJSON.gpx(new DOMParser().parseFromString(fileContents, "text/xml"))));
+                
+                processUploadFile(JSON.stringify(toGeoJSON.gpx(new DOMParser().parseFromString(fileContents, "text/xml"))));
+            }
+            catch (e) {
+                console.warn(e.message);
+                alert("There has been an error reading the file. The error message is - "+ e.message);
+            }
+        } else if (file.name.match(/\.(kml)$/)) {
+            const fileContentDiv = document.querySelector('div#file-content')
+            try {
+                const fileContents = await readUploadedFileAsText(file)
+                processUploadFile(JSON.stringify(toGeoJSON.kml(new DOMParser().parseFromString(fileContents, "text/xml"))));
+            }
+            catch (e) {
+                console.warn(e.message);
+                alert("There has been an error reading the file. The error message is - "+ e.message);
+            }
+        } 
+        else {
+            alert("File not supported, .txt, .gpx, , .kml, .geojson or .json files only");
         };
     };
-
     const readUploadedFileAsText = (file) => {
         var reader = new FileReader();
             return new Promise((resolve, reject) => {
                 reader.onerror = () => {
                     reader.abort();
-                    reject (new DOMException("Problem pasring the file selected."));
+                    reject (new DOMException("Problem parsing the file selected."));
                 };
                 reader.onload = () => {
                     resolve(reader.result);
@@ -1438,17 +2303,11 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
                 reader.readAsText(file);
             });
     };
-
-
-    //---------------------------------------------------------------------
-    // ????????????
-    //---------------------------------------------------------------------
     directions.on('route', function(ev) {
         var styleSpec = ev.route;
         var styleSpecText = JSON.stringify(styleSpec, null, 2);
         //console.log(styleSpecText);
     });
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------            
@@ -1472,28 +2331,62 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
             if (saveName != 'cancelled') {
                 // Stringify the GeoJson
                 var convertedData = 'text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
+                var fileType = '.geojson' 
                 // Create export
                 downloadClick(saveName, convertedData);
-                alert("The file " + saveName + '.geojson' + " has been saved in your browser downloads folder" );
+                alert("The file " + saveName + fileType + " has been saved in your browser downloads folder" );
             } else {
                 alert("Wouldn't you like to draw some data?");
             };
         };
     }
-
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------            
+    document.getElementById('exportToGPX').onclick = function(e) {
+        // Extract GeoJson from featureGroup
+        var data = draw.getAll();
+        //console.log('map: ',map, 'msl: ',map.getStyle().layers,'data: ', data, 'data f:', data.features);
+        var features = map.getSource('directions');
+        if (features) {
+            //console.log("directions: ", features._data);
+            data.features.push(features._data)
+            };
+        var routesource = map.getSource('route');
+        if (routesource) {
+            //console.log('route: ', routesource._data);
+            data.features.push(routesource._data)};
+        var savename;
+        //console.log('Data: ', data)
+        if (data.features.length > 0) {
+            saveName = getFileName(data);
+            if (saveName != 'cancelled') {
+                // Stringify the GeoJson
+                var convertedData = 'text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
+                var gpxFile = togpx(data);
+                console.log(gpxFile, convertedData, data)
+                var fileType = '.gpx'
+                var convertedGpx = 'text/xml;charset=utf-8,' + encodeURIComponent(gpxFile);
+                // Create export
+                downloadClick(saveName, gpxFile, fileType);
+                alert("The file " + saveName + fileType + " has been saved in your browser downloads folder" );
+            } else {
+                alert("Wouldn't you like to draw some data?");
+            };
+        };
+    }
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
-    function downloadClick(filename, text) {
+    function downloadClick(filename, text, fileType) {
         var element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-        element.setAttribute('download', filename + '.geojson');
+        element.setAttribute('download', filename + fileType);
         element.style.display = 'none';
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
     };
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
@@ -1506,8 +2399,6 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
         element.click();
         return element;
     };
-
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
@@ -1515,36 +2406,29 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
         e.preventDefault();
         uploadFeatures();
     };
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
     document.getElementById('calcRoute').onclick = function(e) {
         //and the form is visible then hide it
         //console.log(e);
-        el = document.getElementById('select-routing-set')
-        if (el.visible) {
-            // el.classList.add("hide");
-            // el.visible = false;
-        }
-        // otherwise show it
-        else {
-            el.visible = true;
-            el.classList.remove("hide");
-        };
-        el = document.getElementById('select-mapping-options')
-        if (el.visible) {
-            // el.classList.add("hide");
-            // el.visible = false;
-        }
-        // otherwise show it
-        else {
-            el.visible = true;
-            el.classList.remove("hide");
-        };     
+        // el = document.getElementById('select-routing-set')
+        // if (!el.classList.contains("hide")) {
+        //     // el.classList.add("hide");
+        //     // el.visible = false;
+        // }
+        // // otherwise show it
+        // else {
+        //     // el.visible = true;
+        //     el.classList.remove("hide");
+        // };
+        // el = document.getElementById('select-mapping-options')
+        // if (!el.classList.contains("hide")) {
+        //     el.classList.add("hide");
+        //     // el.visible = false;
+        // }
         getLineMatchings();
     };
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
@@ -1553,29 +2437,31 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
         doingCalcMapping = document.getElementById('calcMappingButton').checked
         if (document.getElementById('calcMappingButton').checked == false) {
             draw.changeMode('simple_select')
+            document.getElementById('info-instructions').textContent = 'Hover over the buttons to show tips on how to interact with the map!';
         }
         else {
+            document.getElementById('info-instructions').textContent = 'Click the map to add points on a route using routing profile e.g. Cycling.  Click the Esc key to stop plotting and reselect the control to calculate the route';
             draw.changeMode('lots_of_points', {count:50});
             canvas.style.cursor = 'crosshair';
         }
         el = document.getElementById('select-routing-set')
-        if (el.visible) {
+        if (!el.classList.contains("hide") & !doingCalcMapping) {
             el.classList.add("hide");
-            el.visible = false;
+            //el.visible = false;
         }
         // otherwise show it
         else {
-            el.visible = true;
+            // el.visible = true;
             el.classList.remove("hide");
         };  
         el = document.getElementById('select-mapping-options')
-        if (el.visible) {
+        if (!el.classList.contains("hide") & !doingCalcMapping) {
             el.classList.add("hide");
-            el.visible = false;
+            //el.visible = false;
         }
         // otherwise show it
         else {
-            el.visible = true;
+            // el.visible = true;
             el.classList.remove("hide");
         }; 
         
@@ -1589,15 +2475,64 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
         //     showMapPopup: true
         // }));
     };
-    
+    //---------------------------------------------------------------------
+    // 
+    //---------------------------------------------------------------------  
+    document.getElementById('deleteEverything').onclick = function(e) {
+        //Delete all drawn data
+        var data = draw.getAll();
+        var countofFeatures = data.features.length;
+        var delFeatures = [];
+        var i;
+        var deleteSource;
+        for (i=0; i < (countofFeatures); i++) {
+            delFeatures[i] = data.features[i].id;
+        }
+        draw.delete(delFeatures);
+        console.log(totalPlotGeometry.length);
+        for (i=0; i < (totalPlotGeometry.length); i++) {
+            deleteSource = totalPlotGeometry[i]['routeSource'];
+            console.log(i, deleteSource)
+            if (map.getLayer(deleteSource)) {map.removeLayer(deleteSource)};
+            if (map.getSource(deleteSource)) {map.removeSource(deleteSource)};
+            deleteRouteSourceDistanceDuration(deleteSource);
+            deleteRouteSourceDistanceElevation(deleteSource);
+        }
+        if (map.getLayer('route')) {map.removeLayer('route')};
+        if (map.getSource('route')) {map.removeSource('route')};
+        totalPlotGeometry = [];
+        //reset historyindex
+        var myHistory = [Immutable.List([])];
+        var historyIndex = 0;
+        undo.disabled = (historyIndex != 0) ? '' : 'disabled';
+        redo.disabled = (historyIndex !== myHistory.length - 1) ? '' : 'disabled';
+        deletept.disabled = (selectedPoint) ? '' : 'disabled';
 
+        document.getElementById('info-instructions').textContent = 'Click the map to add points on a route using routing profile e.g. Cycling.  Click the Esc key to stop plotting and reselect the control to calculate the route';
+        document.getElementById('calculated-line').textContent = '';
+        document.getElementById('duration-distance').textContent = '';
+        document.getElementById('trip-directions-content').innerHTML = '';
+        document.getElementById('trip-directions').textContent = '';
+
+        function deleteRouteSourceDistanceDuration(routeSource) {
+            totalDistance = removeKey(totalDistance, 'routeSource', routeSource);
+            totalDuration = removeKey(totalDuration, 'routeSource', routeSource);
+            totalDirections = removeKey(totalDirections, 'routeSource', routeSource);
+            updateDurationDistance();
+        };
+
+        function deleteRouteSourceDistanceElevation (routeSource) {
+            totalElevation = removeKey(totalElevation, 'routeSource', routeSource);
+            totalDistanceDiff = removeKey(totalDistanceDiff, 'routeSource', routeSource);
+            processDistanceElevationChart();
+        }
+    };
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
     function setFeatureId(){
         return getData(datasetId);
     };
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
@@ -1613,7 +2548,6 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
             //console.log(getdata);
         })
     };
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
@@ -1629,7 +2563,6 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
             return geoJsonFeatures;
         });
     };
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
@@ -1658,7 +2591,6 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
             
         }
     };
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
@@ -1692,7 +2624,6 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
             alert("Wouldn't you like to draw some data?");
         }
     }
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------      
@@ -1711,7 +2642,6 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
     };
     return cookieValue;
     };
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
@@ -1726,7 +2656,6 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
             button.setAttribute("data-form-url", "{% url 'sitemaps:createroute' %}");
         };
     };
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
@@ -1791,9 +2720,6 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
             });
         });
     };
-
-   
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
@@ -1823,7 +2749,6 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
                     console.log('There has been a problem with your fetch operation: ' + e.message);
             });
     };
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
@@ -1843,7 +2768,6 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
         addPopupModalClicks(modalBody, formId, modal, url);
         $(modal).modal('show');
     };
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
@@ -1871,7 +2795,6 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
             showRoute(event, srecordKey);
         })});            
     };
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
@@ -1891,32 +2814,37 @@ function getPointbyPointMatchings(radiusNumber, lat, lng) {
         //     });
         // };
     };
-
-
-    //---------------------------------------------------------------------
-    // 
-    //---------------------------------------------------------------------  
-$('#form-modal-popup').on('hide.bs.modal', function (event) {
-    var button = $(event.relatedTarget) // Button that triggered the modal
-    //var recipient = button.data('whatever') // Extract info from data-* attributes
-    // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-    // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-    var modal = $(this)
-    //('Popup', event, button, modal);
-    //modal.find('.modal-title').text('New message to ' + recipient)
-    //modal.find('.modal-body input').val(recipient)
-});
-$('#form-modal-popup').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget) // Button that triggered the modal
-    //var recipient = button.data('whatever') // Extract info from data-* attributes
-    // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-    // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-    var modal = $(this)
-    //console.log('Popup', event, button, modal);
-    //modal.find('.modal-title').text('New message to ' + recipient)
-    //modal.find('.modal-body input').val(recipient)
-});
-$('#form-modal').on('hide.bs.modal', function (event) {
+    $('#form-modal-popup').on('hide.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        //var recipient = button.data('whatever') // Extract info from data-* attributes
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        var modal = $(this)
+        //('Popup', event, button, modal);
+        //modal.find('.modal-title').text('New message to ' + recipient)
+        //modal.find('.modal-body input').val(recipient)
+    });
+    $('#form-modal-popup').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        //var recipient = button.data('whatever') // Extract info from data-* attributes
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        var modal = $(this)
+        //console.log('Popup', event, button, modal);
+        //modal.find('.modal-title').text('New message to ' + recipient)
+        //modal.find('.modal-body input').val(recipient)
+    });
+    $('#form-modal').on('hide.bs.modal', function (event) {
+        var button = $(event.relatedTarget) // Button that triggered the modal
+        //var recipient = button.data('whatever') // Extract info from data-* attributes
+        // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+        // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+        var modal = $(this)
+        //console.log('Modal',event, button, modal);
+        //modal.find('.modal-title').text('New message to ' + recipient)
+        //modal.find('.modal-body input').val(recipient)
+    });
+    $('#form-modal').on('show.bs.modal', function (event) {
     var button = $(event.relatedTarget) // Button that triggered the modal
     //var recipient = button.data('whatever') // Extract info from data-* attributes
     // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
@@ -1926,18 +2854,6 @@ $('#form-modal').on('hide.bs.modal', function (event) {
     //modal.find('.modal-title').text('New message to ' + recipient)
     //modal.find('.modal-body input').val(recipient)
 });
-$('#form-modal').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget) // Button that triggered the modal
-    //var recipient = button.data('whatever') // Extract info from data-* attributes
-    // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-    // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
-    var modal = $(this)
-    //console.log('Modal',event, button, modal);
-    //modal.find('.modal-title').text('New message to ' + recipient)
-    //modal.find('.modal-body input').val(recipient)
-});
-
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
@@ -1953,7 +2869,6 @@ $('#form-modal').on('show.bs.modal', function (event) {
             $(document.getElementById('form-modal-popup')).modal('hide');
         
     };
-
     //---------------------------------------------------------------------
     // 
     //---------------------------------------------------------------------  
@@ -1963,7 +2878,6 @@ $('#form-modal').on('show.bs.modal', function (event) {
             document.querySelector('#form-modal-popup-header').style.display = 'none';
             document.querySelector('#form-modal-popup-footer').style.display = 'none';  
     };
-
     //---------------------------------------------------------------------
     // 
     //--------------------------------------------------------------------- 
@@ -1980,7 +2894,6 @@ $('#form-modal').on('show.bs.modal', function (event) {
             tableheaders[i].getElementsByTagName('a')[0].setAttributeNode(newAtt);
         };
     };
-    
     //---------------------------------------------------------------------
     // 
     //--------------------------------------------------------------------- 
@@ -1997,7 +2910,6 @@ $('#form-modal').on('show.bs.modal', function (event) {
             tablepagination[i].setAttributeNode(newAtt);
         }
     };
-
     //---------------------------------------------------------------------
     // 
     //--------------------------------------------------------------------- 
@@ -2009,9 +2921,6 @@ $('#form-modal').on('show.bs.modal', function (event) {
         await loadModalForm ('form-modal-body', path);
         fadeOut(document.getElementById('django-messages'));
     };
-
-
-
     //---------------------------------------------------------------------
     // 
     //--------------------------------------------------------------------- 
@@ -2050,24 +2959,52 @@ $('#form-modal').on('show.bs.modal', function (event) {
             center: [-0.827610, 51.182250],
             zoom: 5
         });
+
+        var modal = document.getElementById('map-modal-popup');
+        var modalBody = document.getElementById('map-modal-popup-body');
+        $(modal).modal('show');
+
+
         popupmap.on('load', function(e) {
             popupmap.addControl(navigation);
             popupmap.addControl(scale);
             popupmap.addSource(sourceName, {type: 'geojson', data: geoJsonFeatures});
             popupmap.addLayer({
-                'id': layerName,
-                'type': 'line',
+            'id': layerName,
+            'type': 'line',
+            'source': sourceName,
+            'paint': {
+                'line-color': '#8B0000',
+                'line-width': 3,
+            },
+            'filter': ['==', '$type', 'LineString'],
+            });
+            popupmap.addLayer({
+            'id': 'circle-radius',
+            'type': 'circle',
+            'source': sourceName,
+            'paint': {
+                'circle-color': "#fff",
+                'circle-radius': 5,
+            },
+            'filter': ['==', '$type', 'Point'],
+            });
+            popupmap.addLayer({
+                'id': 'circle-color',
+                'type': 'circle',
                 'source': sourceName,
                 'paint': {
-                    'line-color': '#8B0000',
-                    'line-width': 3,
+                    'circle-color': "#3bb2d0",
+                    'circle-radius': 3,
                 },
-                // 'filter': ['==', '$type', 'LineString']
+                'filter': ['==', '$type', 'Point'],
             });
+            
         });
-        var modal = document.getElementById('map-modal-popup');
-        var modalBody = document.getElementById('map-modal-popup-body');
-        $(modal).modal('show');
+
+
+        
+
 
         // Given that modal has an id extracted above into modal
         // and the map is under the variable popupmap
@@ -2077,7 +3014,8 @@ $('#form-modal').on('show.bs.modal', function (event) {
             popupmap.resize();
             var bbox = turf.bbox(geoJsonFeatures);
             // uses name of map, the geojson elements to use and the padding (px)
-            fitMapToBounds(popupmap, bbox, 20);
+            fitMapToBounds(popupmap, bbox, 40);
+            //getLineMatchings();
         });
         // Clear the 
         $(modal).on('hidden.bs.modal', function () {
@@ -2085,14 +3023,12 @@ $('#form-modal').on('show.bs.modal', function (event) {
             modalBody.innerHTML='';
         });
     };
-
     //---------------------------------------------------------------------
     // 
     //--------------------------------------------------------------------- 
-    function fitMapToBounds(map, bbox ,pad) {
+    function fitMapToBounds(map, bbox, pad) {
         map.fitBounds(bbox, {padding: pad});
     }
-
     //---------------------------------------------------------------------
     // 
     //--------------------------------------------------------------------- 
@@ -2106,7 +3042,8 @@ $('#form-modal').on('show.bs.modal', function (event) {
         //console.log(geoJsonFeatures)
         var bbox = turf.bbox(geoJsonFeatures);
         // uses name of map, the geojson elements to use and the padding (px)
-        fitMapToBounds(map, bbox, 20);
+        fitMapToBounds(map, bbox, 40);
+        getLineMatchings();
         alert("The route " + geoJsonFeatures.features[0].properties.name + " has been plotted on the map!");
 
         // var sourceName = 'source' + primaryKey
@@ -2127,7 +3064,6 @@ $('#form-modal').on('show.bs.modal', function (event) {
         //     'filter': ['==', '$type', 'LineString']
         // });
     };
-
     //---------------------------------------------------------------------
     // 
     //--------------------------------------------------------------------- 
@@ -2170,7 +3106,6 @@ $('#form-modal').on('show.bs.modal', function (event) {
             }
         })();
     };
-
     //---------------------------------------------------------------------
     // 
     //--------------------------------------------------------------------- 
@@ -2192,37 +3127,235 @@ $('#form-modal').on('show.bs.modal', function (event) {
             // otherwise, move the DIV from anywhere inside the DIV: 
             elmnt.onmousedown = dragMouseDown;
         }
+    
 
-    function dragMouseDown(e) {
-        e = e || window.event;
-        e.preventDefault();
-        console.log(e.clientX, e.clientY)
-        // get the mouse cursor position at startup:
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        document.onmouseup = closeDragElement;
-        // call a function whenever the cursor moves:
-        document.onmousemove = elementDrag;
-    }
+        function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            //console.log(e.clientX, e.clientY)
+            // get the mouse cursor position at startup:
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            // call a function whenever the cursor moves:
+            document.onmousemove = elementDrag;
+        }
 
-    function elementDrag(e) {
-        e = e || window.event;
-        e.preventDefault();
-        // calculate the new cursor position:
-        pos1 = pos3 - e.clientX;
-        pos2 = pos4 - e.clientY;
-        pos3 = e.clientX;
-        pos4 = e.clientY;
-        // set the element's new position:
-        console.log(pos1,pos2,pos3,pos4,elmnt.offsetTop,elmnt.offsetLeft)
-        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
-        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
-    }
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // calculate the new cursor position:
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            
+            // set the element's new position:
+            //console.log(pos1,pos2,pos3,pos4,elmnt.offsetTop,elmnt.offsetLeft)
+            elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+            elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        }
 
-    function closeDragElement() {
-        // stop moving when mouse button is released:
-        document.onmouseup = null;
-        document.onmousemove = null;
-    }
+        function closeDragElement() {
+            // stop moving when mouse button is released:
+            document.onmouseup = null;
+            document.onmousemove = null;       
+        }
     };
-</script>
+
+    function removeKey(array, key, value) {
+    const index = array.findIndex(obj => obj[key] === value);
+    return index >= 0 ? [
+        ...array.slice(0, index),
+        ...array.slice(index + 1)
+    ] : array;
+    };
+
+    function updateDirections() {
+
+        var directions = document.getElementById('trip-directions-content');
+        totalDirections.sort((a, b) => (a.routeSource > b.routeSource) ? 1 : -1)
+        var joinedDirections = totalDirections.reduce(function(joined, currentValue) {
+            return joined += currentValue.directions;
+        }, '');
+
+        
+        if (directions.getElementsByTagName('span').length == 0){
+            var directionsSpan = document.createElement('span')
+            directions.prepend(directionsSpan);
+        }
+        else {
+            directionsSpan = directions.getElementsByTagName('span').item(0)
+        };
+
+        directionsSpan.innerHTML = joinedDirections;
+    };
+
+    function processJsonResponseDirections(jsonResponse, fromId, toId) {
+        var legs = jsonResponse.matchings[0].legs;
+        var directions = document.getElementById('trip-directions');
+        var routeSource = 'route' + zeroPad(fromId, 3) + zeroPad(toId, 3)
+
+        if (directions.getElementsByTagName('span').length == 0){
+            var directionsSpan = document.createElement('span')
+            directionsSpan.innerHTML = 'Trip Directions';
+            directions.prepend(directionsSpan);
+        };
+        var tripDirections = [];
+          // Output the instructions for each step of each leg in the response object
+        for (var i = 0; i < legs.length; i++) {
+            var steps = legs[i].steps;
+            for (var j = 0; j < steps.length; j++) {
+                if (!steps[j].maneuver.instruction.startsWith("You have arrived")) {
+                tripDirections.push('<li>' + steps[j].maneuver.instruction) + '</li><br>';
+                };
+            }
+        };
+        totalDirections.push({routeSource: routeSource, directions: tripDirections })
+        updateDirections();
+    };
+
+    function printDiv(description, name) {
+            var divContents = document.getElementById(name);
+            var a = window.open('', '', 'height=500, width=500');
+            a.document.write('<html>');
+            a.document.write('<body> <h1>' + description + '</h1><br>');
+            a.document.write('<h5>' + divContents.getElementsByTagName('span').item(0).innerHTML + '</h5>');
+            a.document.write('</body></html>');
+            a.document.close();
+            a.print();
+    };
+
+    async function processJsonResponseElevation (plotGeometry, fromId, toId) {
+        var routeSource = 'route' + zeroPad(fromId, 3) + zeroPad(toId, 3)
+        // Loop through the co-ordinates
+        const coordLoop = async(plotGeo) => {
+            var elevationCoords = plotGeo.coordinates;
+            // Get a series of promises from co-ordinates of elevation
+            const peCord = elevationCoords.map (async coord => {
+                //Get the promise and resolve it
+                const numElevation = geteData(coord).then(res => res)
+                //return the promise
+                return numElevation
+            })
+            //Resolve the promises
+            var peCords = await Promise.all(peCord)
+            //return elevation array promise
+            return peCords;
+        };
+        //Get each elevation requested
+        const geteData = (c) =>{
+            //Create a promise on the request and return this to requestor
+            return new Promise(
+                (resolve, reject) => {
+                    var eData;
+                    getElevation(c, function(err, elevation) {
+                        if (err) {
+                            throw (err);
+                        }
+                        else {
+                            eData = Math.round(elevation * 1e2) / 1e2;
+                            resolve(eData);
+                        }
+                    })
+                }
+            )
+        };
+        //Get the elevation data
+        var elevationReturned = await coordLoop(plotGeometry);
+        //update array of elevations for all routes
+        totalElevation.push({routeSource: routeSource, elevation: elevationReturned })
+        totalElevation.sort((a, b) => (a.routeSource > b.routeSource) ? 1 : -1)
+        //console.log('totalElevation',totalElevation, 'elevationReturned',elevationReturned, 'plotGeometry', plotGeometry)
+        return elevationReturned;
+    };
+    async function processJsonResponseDistanceDiff (plotGeometry, fromId, toId) {
+        //Now lets get the distance in meters between each point using turf
+        var routeSource = 'route' + zeroPad(fromId, 3) + zeroPad(toId, 3)
+        var coordPairs = plotGeometry.coordinates.reduce(
+        function(result, value, index, array) {
+            //if (index % 2 === 0)
+            if (plotGeometry.coordinates.length > index + 1)
+                result.push(array.slice(index, index + 2));
+            return result;
+            }, []
+        );
+
+        //console.log(plotGeometry.coordinates, 'coordPairs',coordPairs);
+        var coordDistanceDiff = coordPairs.map(coord =>  {
+            if (coord.length == 2) {
+                var point1 = turf.point(coord[0]);
+                var point2 = turf.point(coord[1]);
+                var options = {units: 'kilometers'};
+                //console.log(point1, point2, options);
+                distance = Math.round(turf.distance(point1, point2, options) *1000)/1000;
+            } 
+            else {
+                var point1 = turf.point(coord[0]);
+                var point2 = turf.point(coord[0]);
+                var options = {units: 'kilometers'};
+                //console.log(point1, point2, options);
+                distance = Math.round(turf.distance(point1, point2, options) *1000)/1000;
+            }
+            
+            //console.log('distance', distance)
+            return distance * 1000;
+            }
+        );
+        //add zero as starting distance
+        //1st segment start must be and is zero and last point of previous segment = 1st point current segment and so diff = 0
+        coordDistanceDiff.unshift(0);
+        // update array for distance differences for all routes
+        totalDistanceDiff.push({routeSource: routeSource, distance: coordDistanceDiff })
+        totalDistanceDiff.sort((a, b) => (a.routeSource > b.routeSource) ? 1 : -1)
+        //console.log('coordDistanceDiff',coordDistanceDiff, 'totalDistanceDiff', totalDistanceDiff)
+        return coordDistanceDiff;
+
+    };
+    function processDistanceElevationChart () {
+        console.log(myHistory[historyIndex], totalDistance, totalPlotGeometry);
+        //Get elevations
+        var joinedElevation = totalElevation.reduce(function(joined, currentValue) {
+            return joined.concat(currentValue.elevation);
+        }, []);
+        //Get distances
+        var joinedDistanceDiff = totalDistanceDiff.reduce(function(joined, currentValue) {
+            return joined.concat(currentValue.distance)
+        }, []);
+        //Get gradients
+        var joinedGradient = totalGradient.reduce(function(joined, currentValue) {
+            return joined.concat(currentValue.gradient);
+        }, []); 
+
+        //create x,y scatter array for plotting
+        //1) distance (x) vs elevation (y)
+        //use reduce twice firstly to create new array containing elapsed
+        //distance + elevation
+        //secondly to get the elapsed distance for the first reduce using the
+        //index to slice the array for a sum
+        //make sense?  
+        var coordScatterDstvsEle = joinedDistanceDiff.reduce(
+        function(result, value, index, array) {
+        var distance = array.slice(0, index + 1).reduce(
+                function(result, value, index, array) {
+                    return result + value
+                })
+            var pair = ({x: distance/1000, y: joinedElevation[index]})
+            result.push(pair);
+        return result;
+        }, []);
+        var coordScatterDstvsGrd = joinedDistanceDiff.reduce(
+        function(result, value, index, array) {
+        var distance = array.slice(0, index + 1).reduce(
+                function(result, value, index, array) {
+                    return result + value
+                })
+            var pair = ({x: distance/1000, y: joinedGradient[index]})
+            result.push(pair);
+        return result;
+        }, []);
+        
+        processScatterChart(coordScatterDstvsEle, coordScatterDstvsGrd);
+
+    };
+    </script>

@@ -124,7 +124,7 @@ class SiteInformation(models.Model):
     ]
 
     name = models.CharField(max_length=256)
-    address = AddressAutoHiddenField(map_id="map_1")
+    address = AddressAutoHiddenField(blank=True, null=True, map_id="map_1")
     addressline = AddressLineField(blank=True, null=True, map_id="map_1")
     locality = AddressLocalityField(blank=True, null=True, map_id="map_1")
     place = AddressPlaceField(blank=True, null=True, map_id="map_1")

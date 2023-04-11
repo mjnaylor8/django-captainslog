@@ -1,5 +1,5 @@
 if (!mapboxgl.supported()) {
-    alert('Your browser does not support Mapbox GL');
+    alert('Your browser does not support Mapbox GL hello');
 } else {
     $(document).ready(function () {
         var coordinatesGeocoder = function (query) {
@@ -146,6 +146,9 @@ if (!mapboxgl.supported()) {
                 localGeocoder: coordinatesGeocoder,
 
             });
+            if(map_attrs[id].language !== "auto")
+                geocoder.setLanguage(map_attrs[id].language);
+
             geocoders[id] = geocoder;
             map.getCanvas().style.cursor = map_attrs[id].cursor_style;
             if (!map_attrs[id].rotate) {
@@ -188,15 +191,16 @@ if (!mapboxgl.supported()) {
                 marker.setLngLat(e.lngLat)
                     .addTo(map);
 
-                var url = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + translate_to_string(e.lngLat) + ".json?access_token=" + mapboxgl.accessToken;
+                var url = "https://api.mapbox.com/geocoding/v5/mapbox.places/" + translate_to_string(e.lngLat) + ".json?access_token=" + mapboxgl.accessToken  + "&language=" + geocoder.getLanguage();
                 $.get(url, function (data) {
                     try {
                         reverse_name = data.features[0].place_name;
                     }
                     catch
                         (e) {
-                        reverse_name = "undefined address";
+                        reverse_name = map_attrs[id].message_404;
                     }
+
                         //make sure there is some context to look at
                         if (data.features[0].context){
                             //get 1st address line
@@ -240,7 +244,9 @@ if (!mapboxgl.supported()) {
                                 }
                             });
                         }
+
                     // now save all the bits of address we have found
+
                     if (country !== null){
                         $(document).trigger("reverse-geocode-country", [id, country,])
                     };
@@ -263,6 +269,7 @@ if (!mapboxgl.supported()) {
                         $(document).trigger("reverse-geocode-line", [id, address_line,])
                     };
                     //set the geocoder contents to the address found
+
                     geocoder.setInput(reverse_name);
                     $(document).trigger("reverse-geocode", [id, reverse_name,]);
                 });
@@ -275,6 +282,5 @@ if (!mapboxgl.supported()) {
                 geocoders[addressinput.attr("id")].setInput(addressinput.val());
             }
         });
-        
     });
 }

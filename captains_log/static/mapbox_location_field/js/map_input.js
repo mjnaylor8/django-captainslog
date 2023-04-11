@@ -1,5 +1,5 @@
 if (!mapboxgl.supported()) {
-    alert('Your browser does not support Mapbox GL');
+    alert('Your browser does not support Mapbox GL helolo');
 } else {
     $(document).ready(function () {
         var coordinatesGeocoder = function (query) {

@@ -14,6 +14,7 @@ from crispy_forms.layout import Layout, Submit, Row, Column, Field, Div, HTML
 from crispy_forms.bootstrap import TabHolder, Tab, InlineRadios, PrependedText
 from triplog.models import SiteInformation, JourneyDetail, TripDetail
 
+
 STANDARD_COLUMN_CLASS = 'col-md-2 mb-0'
 STANDARD_COLUMN_CLASS_WIDER = 'col-md-4 mb-0'
 STANDARD_COLUMN_CLASS_ABITWIDER = 'col-md-6 mb-0'
@@ -23,6 +24,7 @@ CSS_CLASS_FORMROW = 'form-row'
 ENTER_STARTING_LOCATION = 'Please enter the starting location'
 
 class SiteInformationForm(forms.ModelForm):
+    
     """ define the site information """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -52,15 +54,16 @@ class SiteInformationForm(forms.ModelForm):
                         Column('notes', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH)
                     ),
                     Row(
-                        Column('address', type="hidden"),
-                        Field('addressline', type="hidden"),
+                        #Column('address', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH),
+                        Field('address'),
+                        Field('addressline'),
                         Column('location', css_class=STANDARD_COLUMN_CLASS_FULLWIDTH),
-                        Field('place', type="hidden"),
-                        Field('district', type="hidden"),
-                        Field('region', type="hidden"),
-                        Field('locality', type="hidden"),
-                        Field('postcode', type="hidden"),
-                        Field('country', type="hidden")
+                        Field('place'),
+                        Field('district'),
+                        Field('region'),
+                        Field('locality'),
+                        Field('postcode'),
+                        Field('country')
                     ),
                     Row(HTML('<div id="menu"> \
                                     <input id="streets-v11" type="radio" name="rtoggle" value="streets" />\
@@ -188,10 +191,14 @@ class SiteInformationForm(forms.ModelForm):
 
 class JourneyDetailForm(forms.ModelForm):
     """ define the journey details """
+    travel_from = forms.ModelChoiceField(queryset = SiteInformation.objects.order_by('-id'))
+    travel_to = forms.ModelChoiceField(queryset = SiteInformation.objects.order_by('-id'))
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['travel_from'].queryset = SiteInformation.objects.order_by('name')
-        self.fields['travel_to'].queryset = SiteInformation.objects.order_by('name')
+        self.fields['travel_from']
+        self.fields['travel_to']
+        #self.fields['travel_from'].queryset = SiteInformation.objects.order_by('name')
+        #self.fields['travel_to'].queryset = SiteInformation.objects.order_by('name')
         self.helper = FormHelper(self)
         self.helper.form_id = 'id-journeydetailForm'
         self.helper.form_method = 'post' # get or post
